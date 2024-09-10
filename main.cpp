@@ -33,8 +33,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Créer un renderer
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    // Créer un renderer avec SDL_RENDERER_SOFTWARE
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
     if (renderer == nullptr) {
         std::cerr << "Erreur de création du renderer: " << SDL_GetError() << std::endl;
         SDL_DestroyWindow(window);
@@ -70,18 +70,26 @@ int main(int argc, char* argv[]) {
         if (offsetY > ENV_HEIGHT - WINDOW_HEIGHT) offsetY = ENV_HEIGHT - WINDOW_HEIGHT;
 
         // Effacer l'écran
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderClear(renderer);
+        if (SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255) != 0) {
+            std::cerr << "Erreur de SDL_SetRenderDrawColor: " << SDL_GetError() << std::endl;
+        }
+        if (SDL_RenderClear(renderer) != 0) {
+            std::cerr << "Erreur de SDL_RenderClear: " << SDL_GetError() << std::endl;
+        }
 
         // Définir la zone de découpage
         SDL_Rect viewport = { offsetX, offsetY, WINDOW_WIDTH, WINDOW_HEIGHT };
-        SDL_RenderSetClipRect(renderer, &viewport);
+        if (SDL_RenderSetClipRect(renderer, &viewport) != 0) {
+            std::cerr << "Erreur de SDL_RenderSetClipRect: " << SDL_GetError() << std::endl;
+        }
 
         // Dessiner le fond en dégradé
         drawGradientBackground(renderer);
 
         // Réinitialiser la zone de découpage
-        SDL_RenderSetClipRect(renderer, nullptr);
+        if (SDL_RenderSetClipRect(renderer, nullptr) != 0) {
+            std::cerr << "Erreur de SDL_RenderSetClipRect: " << SDL_GetError() << std::endl;
+        }
 
         // Présenter le rendu
         SDL_RenderPresent(renderer);
