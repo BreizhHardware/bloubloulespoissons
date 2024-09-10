@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Créer une fenêtre
-    SDL_Window* window = SDL_CreateWindow("Fenêtre SDL2",
+    SDL_Window* window = SDL_CreateWindow("BloubBloub les poissons",
                                           SDL_WINDOWPOS_CENTERED,
                                           SDL_WINDOWPOS_CENTERED,
                                           800, 600,
