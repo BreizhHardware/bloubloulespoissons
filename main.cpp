@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Créer un renderer avec SDL_RENDERER_SOFTWARE
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr) {
         std::cerr << "Erreur de création du renderer: " << SDL_GetError() << std::endl;
         SDL_DestroyWindow(window);
