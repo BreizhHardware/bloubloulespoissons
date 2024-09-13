@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::vector<Fish> fishes;
-    for (int i = 0; i < 100000; ++i) {
+    for (int i = 0; i < 1000; ++i) {
         fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 10, 5); // Largeur 10, Hauteur 5
     }
 
