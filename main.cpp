@@ -3,6 +3,7 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+#include <string>
 
 #include "fish.h"
 
@@ -30,6 +31,56 @@ void updateFish(std::vector<Fish>& fishes) {
         for (auto& fish : fishes) {
             fish.move();
         }
+    }
+}
+
+// Fonction pour dessiner un chiffre
+void drawDigit(SDL_Renderer* renderer, int digit, int x, int y) {
+    const int size = 10;
+    SDL_Rect segments[7] = {
+        {x, y, size, 2}, // Top
+        {x + size - 2, y, 2, size}, // Top-right
+        {x + size - 2, y + size, 2, size}, // Bottom-right
+        {x, y + 2 * size - 2, size, 2}, // Bottom
+        {x, y + size, 2, size}, // Bottom-left
+        {x, y, 2, size}, // Top-left
+        {x, y + size - 1, size, 2} // Middle
+    };
+
+    bool on[10][7] = {
+        {true, true, true, true, true, true, false}, // 0
+        {false, true, true, false, false, false, false}, // 1
+        {true, true, false, true, true, false, true}, // 2
+        {true, true, true, true, false, false, true}, // 3
+        {false, true, true, false, false, true, true}, // 4
+        {true, false, true, true, false, true, true}, // 5
+        {true, false, true, true, true, true, true}, // 6
+        {true, true, true, false, false, false, false}, // 7
+        {true, true, true, true, true, true, true}, // 8
+        {true, true, true, true, false, true, true} // 9
+    };
+
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // Vert
+    for (int i = 0; i < 7; ++i) {
+        if (on[digit][i]) {
+            SDL_RenderFillRect(renderer, &segments[i]);
+        }
+    }
+}
+
+// Fonction pour afficher les FPS
+void displayFPS(SDL_Renderer* renderer, int fps) {
+    int x = WINDOW_WIDTH - 50;
+    int y = 10;
+    if (fps < 10) {
+        drawDigit(renderer, fps, x, y);
+    } else if (fps < 100) {
+        drawDigit(renderer, fps / 10, x, y);
+        drawDigit(renderer, fps % 10, x + 15, y);
+    } else {
+        drawDigit(renderer, fps / 100, x, y);
+        drawDigit(renderer, (fps / 10) % 10, x + 15, y);
+        drawDigit(renderer, fps % 10, x + 30, y);
     }
 }
 
@@ -74,6 +125,10 @@ int main(int argc, char* argv[]) {
     int playerX = WINDOW_WIDTH / 2;
     int playerY = WINDOW_HEIGHT / 2;
     const int playerSpeed = 5;
+
+    Uint32 startTime = SDL_GetTicks();
+    int frameCount = 0;
+    int fps = 0;
 
     while (running) {
         while (SDL_PollEvent(&event)) {
@@ -121,6 +176,16 @@ int main(int argc, char* argv[]) {
         SDL_Rect playerRect = { playerX - offsetX, playerY - offsetY, 20, 20 };
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Blanc
         SDL_RenderFillRect(renderer, &playerRect);
+
+        // Calculer et afficher les FPS
+        frameCount++;
+        Uint32 currentTime = SDL_GetTicks();
+        if (currentTime - startTime >= 1000) {
+            fps = frameCount;
+            frameCount = 0;
+            startTime = currentTime;
+        }
+        displayFPS(renderer, fps);
 
         SDL_RenderPresent(renderer);
     }
