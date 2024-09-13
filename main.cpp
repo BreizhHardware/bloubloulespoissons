@@ -5,11 +5,12 @@
 #include <mutex>
 
 #include "fish.h"
+#include "decors.h"
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
-const int ENV_WIDTH = 800;
-const int ENV_HEIGHT = 600;
+const int ENV_WIDTH = 1600;
+const int ENV_HEIGHT = 1200;
 
 std::mutex mtx;
 
@@ -62,11 +63,15 @@ int main(int argc, char* argv[]) {
     }
 
     std::vector<Fish> fishes;
-    for (int i = 0; i < 1000; ++i) {
-        fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 10, 5); // Largeur 10, Hauteur 5
+    for (int i = 0; i < 100; ++i) {
+        fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 10, 5);
     }
 
     std::thread fishThread(updateFish, std::ref(fishes));
+
+    Rock rock(100, 100, 50, 255, 0, 0);
+    Reef reef(300, 300);
+    Kelp kelp(500, 500, 100, 4, 87, 0);
 
     bool running = true;
     SDL_Event event;
@@ -74,10 +79,6 @@ int main(int argc, char* argv[]) {
     int playerX = WINDOW_WIDTH / 2;
     int playerY = WINDOW_HEIGHT / 2;
     const int playerSpeed = 5;
-
-    Uint32 startTime = SDL_GetTicks();
-    int frameCount = 0;
-    int fps = 0;
 
     while (running) {
         while (SDL_PollEvent(&event)) {
@@ -120,6 +121,10 @@ int main(int argc, char* argv[]) {
         for (auto& fish : fishes) {
             fish.draw(renderer);
         }
+
+        rock.draw(renderer);
+        reef.draw(renderer);
+        kelp.draw(renderer);
 
         // Dessiner le joueur
         SDL_Rect playerRect = { playerX - offsetX, playerY - offsetY, 20, 20 };

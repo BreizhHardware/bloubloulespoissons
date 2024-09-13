@@ -11,7 +11,9 @@ include_directories(${SDL2_INCLUDE_DIRS})
 
 add_executable(bloubloulespoissons main.cpp
         fish.cpp
-        fish.h)
+        fish.h
+        decors.cpp
+        decors.h)
 
 # Lier SDL2
 target_link_libraries(bloubloulespoissons ${SDL2_LIBRARIES})
