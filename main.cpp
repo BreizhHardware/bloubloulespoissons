@@ -8,8 +8,8 @@
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
-const int ENV_WIDTH = 1600;
-const int ENV_HEIGHT = 1200;
+const int ENV_WIDTH = 800;
+const int ENV_HEIGHT = 600;
 
 std::mutex mtx;
 
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::vector<Fish> fishes;
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 100000; ++i) {
         fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 10, 5); // Largeur 10, Hauteur 5
     }
 
