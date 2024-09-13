@@ -70,7 +70,7 @@ void drawDigit(SDL_Renderer* renderer, int digit, int x, int y) {
 
 // Fonction pour afficher les FPS
 void displayFPS(SDL_Renderer* renderer, int fps) {
-    int x = WINDOW_WIDTH - 50;
+    int x = WINDOW_WIDTH - 100;
     int y = 10;
     if (fps < 10) {
         drawDigit(renderer, fps, x, y);
@@ -78,9 +78,11 @@ void displayFPS(SDL_Renderer* renderer, int fps) {
         drawDigit(renderer, fps / 10, x, y);
         drawDigit(renderer, fps % 10, x + 15, y);
     } else {
-        drawDigit(renderer, fps / 100, x, y);
-        drawDigit(renderer, (fps / 10) % 10, x + 15, y);
-        drawDigit(renderer, fps % 10, x + 30, y);
+        drawDigit(renderer, fps / 10000, x, y);
+        drawDigit(renderer, fps / 1000, x + 15, y);
+        drawDigit(renderer, fps / 100, x + 30, y);
+        drawDigit(renderer, (fps / 10) % 10, x + 45, y);
+        drawDigit(renderer, fps % 10, x + 60, y);
     }
 }
 
