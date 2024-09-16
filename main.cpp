@@ -65,32 +65,15 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Charger l'image de la texture pour les poissons
-    SDL_Surface* fishSurface = IMG_Load("../img/mory.png");
-    if (fishSurface == nullptr) {
-        std::cerr << "Erreur de chargement de l'image: " << IMG_GetError() << std::endl;
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return 1;
-    }
-
-    SDL_Texture* fishTexture = SDL_CreateTextureFromSurface(renderer, fishSurface);
-    SDL_FreeSurface(fishSurface);
-    if (fishTexture == nullptr) {
-        std::cerr << "Erreur de création de la texture: " << SDL_GetError() << std::endl;
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return 1;
-    }
-
     std::vector<Fish> fishes;
-    for (int i = 0; i < 90; ++i) {
-        fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 10, 5, renderer, nullptr);
-    }
-    for (int i = 0; i < 10; ++i) {
-        fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 10, 5, renderer, "../img/mory.png");
+    SDL_Surface* fishesSurface = IMG_Load("../img/mory-min.png");
+    SDL_Texture* fishesTexture = SDL_CreateTextureFromSurface(renderer, fishesSurface);
+    SDL_FreeSurface(fishesSurface);
+    //for (int i = 0; i < 100; ++i) {
+    //    fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 10, 5, renderer, nullptr);
+    //}
+    for (int i = 0; i < 900; ++i) {
+        fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 10, 5, renderer, fishesTexture);
     }
 
     std::thread fishThread(updateFish, std::ref(fishes));
@@ -143,14 +126,14 @@ int main(int argc, char* argv[]) {
 
         drawGradientBackground(renderer, offsetX, offsetY);
 
+        rock.draw(renderer);
+        reef.draw(renderer);
+        kelp.draw(renderer);
+
         std::lock_guard<std::mutex> lock(mtx);
         for (auto& fish : fishes) {
             fish.draw(renderer);
         }
-
-        rock.draw(renderer);
-        reef.draw(renderer);
-        kelp.draw(renderer);
 
         // Dessiner le joueur
         SDL_Rect playerRect = { playerX - offsetX, playerY - offsetY, 20, 20 };
@@ -172,9 +155,11 @@ int main(int argc, char* argv[]) {
 
 
     fishThread.join();
-    SDL_DestroyTexture(fishTexture);
+    SDL_FreeSurface(fishesSurface);
+    SDL_DestroyTexture(fishesTexture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    IMG_Quit();
     SDL_Quit();
 
     return 0;

@@ -1,23 +1,11 @@
 #include "fish.h"
 
-Fish::Fish(int x, int y, int vx, int vy, int width, int height, SDL_Renderer* renderer, const char* imagePath)
-    : x(x), y(y), vx(vx), vy(vy), width(width), height(height), texture(nullptr) {
-    if(imagePath == nullptr) {
-        return;
-    }
-    SDL_Surface* surface = IMG_Load(imagePath);
-    if (surface) {
-        texture = SDL_CreateTextureFromSurface(renderer, surface);
-        SDL_FreeSurface(surface);
-    } else {
-        std::cerr << "Erreur de chargement de l'image: " << IMG_GetError() << std::endl;
-    }
+Fish::Fish(int x, int y, int vx, int vy, int width, int height, SDL_Renderer* renderer, SDL_Texture* texture)
+    : x(x), y(y), vx(vx), vy(vy), width(width), height(height), texture(texture) {
 }
 
 Fish::~Fish() {
-    if (texture) {
-        SDL_DestroyTexture(texture);
-    }
+    // On ne libère pas la texture ici car elle est partagée entre plusieurs poissons
 }
 
 void Fish::move() {

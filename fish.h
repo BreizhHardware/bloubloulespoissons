@@ -14,7 +14,7 @@ const int ENV_HEIGHT = 1200;
 
 class Fish {
 public:
-    Fish(int x, int y, int vx, int vy, int width, int height, SDL_Renderer* renderer, const char* imagePath);
+    Fish(int x, int y, int vx, int vy, int width, int height, SDL_Renderer* renderer, SDL_Texture* texture);
     ~Fish();
 
     void move();
