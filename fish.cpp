@@ -1,13 +1,24 @@
-//
-// Created by BreizhHardware on 13/09/2024.
-//
-
 #include "fish.h"
 
-constexpr int WINDOW_WIDTH = 800;
-constexpr int WINDOW_HEIGHT = 600;
-constexpr int ENV_WIDTH = 800;
-constexpr int ENV_HEIGHT = 600;
+Fish::Fish(int x, int y, int vx, int vy, int width, int height, SDL_Renderer* renderer, const char* imagePath)
+    : x(x), y(y), vx(vx), vy(vy), width(width), height(height), texture(nullptr) {
+    if(imagePath == nullptr) {
+        return;
+    }
+    SDL_Surface* surface = IMG_Load(imagePath);
+    if (surface) {
+        texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+    } else {
+        std::cerr << "Erreur de chargement de l'image: " << IMG_GetError() << std::endl;
+    }
+}
+
+Fish::~Fish() {
+    if (texture) {
+        SDL_DestroyTexture(texture);
+    }
+}
 
 void Fish::move() {
     x += vx;
@@ -37,11 +48,13 @@ void Fish::drawArrow(SDL_Renderer* renderer, int x, int y, int vx, int vy) {
     SDL_RenderDrawLines(renderer, points, 4);
 }
 
-
 void Fish::draw(SDL_Renderer* renderer) {
     SDL_Rect rect = { x, y, width, height };
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Rouge
-    SDL_RenderFillRect(renderer, &rect);
-
-    drawArrow(renderer, x + width / 2, y + height / 2, vx, vy);
+    if (texture) {
+        SDL_RenderCopy(renderer, texture, nullptr, &rect);
+    } else {
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Rouge
+        SDL_RenderFillRect(renderer, &rect);
+    }
+    drawArrow(renderer, x + width / 2, y + height / 2, vx, vy); // Dessiner la flèche
 }

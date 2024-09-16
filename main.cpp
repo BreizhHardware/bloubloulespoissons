@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <iostream>
 #include <vector>
 #include <thread>
@@ -6,11 +7,6 @@
 
 #include "fish.h"
 #include "decors.h"
-
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 600;
-const int ENV_WIDTH = 1600;
-const int ENV_HEIGHT = 1200;
 
 std::mutex mtx;
 
@@ -41,6 +37,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    // Initialiser SDL_image
+    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
+        std::cerr << "Erreur d'initialisation de SDL_image: " << IMG_GetError() << std::endl;
+        SDL_Quit();
+        return 1;
+    }
+
     // Créer une fenêtre
     SDL_Window* window = SDL_CreateWindow("BloubBloub les poissons",
                                           SDL_WINDOWPOS_CENTERED,
@@ -53,7 +56,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Créer un renderer avec SDL_RENDERER_SOFTWARE
+    // Créer un renderer
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr) {
         std::cerr << "Erreur de création du renderer: " << SDL_GetError() << std::endl;
@@ -62,9 +65,32 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    // Charger l'image de la texture pour les poissons
+    SDL_Surface* fishSurface = IMG_Load("../img/mory.png");
+    if (fishSurface == nullptr) {
+        std::cerr << "Erreur de chargement de l'image: " << IMG_GetError() << std::endl;
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+
+    SDL_Texture* fishTexture = SDL_CreateTextureFromSurface(renderer, fishSurface);
+    SDL_FreeSurface(fishSurface);
+    if (fishTexture == nullptr) {
+        std::cerr << "Erreur de création de la texture: " << SDL_GetError() << std::endl;
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+
     std::vector<Fish> fishes;
-    for (int i = 0; i < 100; ++i) {
-        fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 10, 5);
+    for (int i = 0; i < 90; ++i) {
+        fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 10, 5, renderer, nullptr);
+    }
+    for (int i = 0; i < 10; ++i) {
+        fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 10, 5, renderer, "../img/mory.png");
     }
 
     std::thread fishThread(updateFish, std::ref(fishes));
@@ -135,6 +161,7 @@ int main(int argc, char* argv[]) {
     }
 
     fishThread.join();
+    SDL_DestroyTexture(fishTexture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

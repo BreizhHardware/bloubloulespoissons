@@ -7,13 +7,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_PREFIX_PATH "C:/SDL2")
 
 find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIRS})
+find_package(SDL2_image REQUIRED)
 
-add_executable(bloubloulespoissons main.cpp
-        fish.cpp
-        fish.h
-        decors.cpp
-        decors.h)
+include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS})
 
-# Lier SDL2
-target_link_libraries(bloubloulespoissons ${SDL2_LIBRARIES})
+add_executable(bloubloulespoissons main.cpp fish.cpp decors.cpp)
+
+# Lier SDL2 et SDL2_image
+target_link_libraries(bloubloulespoissons ${SDL2_LIBRARIES} -lSDL2_image)
