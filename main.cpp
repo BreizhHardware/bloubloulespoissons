@@ -4,11 +4,13 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+#include <atomic>
 
 #include "fish.h"
 #include "decors.h"
 
 std::mutex mtx;
+std::atomic<bool> running(true);
 
 // Fonction pour dessiner un fond en dégradé
 void drawGradientBackground(SDL_Renderer* renderer, int offsetX, int offsetY) {
@@ -21,7 +23,7 @@ void drawGradientBackground(SDL_Renderer* renderer, int offsetX, int offsetY) {
 
 // Fonction pour mettre à jour la position des poissons
 void updateFish(std::vector<Fish>& fishes) {
-    while (true) {
+    while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
         std::lock_guard<std::mutex> lock(mtx);
         for (auto& fish : fishes) {
@@ -66,7 +68,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::vector<Fish> fishes;
-    SDL_Surface* fishesSurface = IMG_Load("../img/mory-min.png");
+    SDL_Surface* fishesSurface = IMG_Load("../img/poasson.png");
     SDL_Texture* fishesTexture = SDL_CreateTextureFromSurface(renderer, fishesSurface);
     SDL_FreeSurface(fishesSurface);
     //for (int i = 0; i < 100; ++i) {
@@ -142,10 +144,10 @@ int main(int argc, char* argv[]) {
 
         SDL_RenderPresent(renderer);
         SDL_Delay(10);
-        }
+    }
 
         
-        if(renderer != nullptr){
+    if(renderer != nullptr){
             SDL_DestroyRenderer(renderer);
         }
 
@@ -153,7 +155,7 @@ int main(int argc, char* argv[]) {
             SDL_DestroyWindow(window);
         }
 
-
+    running = false;
     fishThread.join();
     SDL_FreeSurface(fishesSurface);
     SDL_DestroyTexture(fishesTexture);
