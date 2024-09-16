@@ -158,7 +158,18 @@ int main(int argc, char* argv[]) {
         SDL_RenderFillRect(renderer, &playerRect);
 
         SDL_RenderPresent(renderer);
-    }
+        SDL_Delay(10);
+        }
+
+        
+        if(renderer != nullptr){
+            SDL_DestroyRenderer(renderer);
+        }
+
+        if(window != nullptr){
+            SDL_DestroyWindow(window);
+        }
+
 
     fishThread.join();
     SDL_DestroyTexture(fishTexture);
