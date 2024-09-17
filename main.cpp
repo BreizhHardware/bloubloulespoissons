@@ -18,6 +18,9 @@ SDL_Texture* schoolTexture = nullptr;
 SDL_Texture* playerTexture = nullptr;
 std::vector<Fish> school;
 
+int windowWidth = 1600;
+int windowHeight = 1000;
+
 Rock rock(100, 100, 50, 255, 0, 0);
 Reef reef(300, 300);
 Kelp kelp(500, 500, 100, 4, 87, 0);
@@ -61,8 +64,8 @@ int main(int argc, char* argv[]) {
         threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
     }
 
-    int playerX = WINDOW_WIDTH / 2;
-    int playerY = WINDOW_HEIGHT / 2;
+    int playerX = windowWidth / 2;
+    int playerY = windowHeight / 2;
     const int playerSpeed = 5;
 
     while (running) {
@@ -95,8 +98,8 @@ bool initSDL() {
     window = SDL_CreateWindow("BloubBloub les poissons",
                               SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED,
-                              WINDOW_WIDTH, WINDOW_HEIGHT,
-                              SDL_WINDOW_SHOWN);
+                              windowWidth, windowHeight,
+                              SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
     if (window == nullptr) {
         std::cerr << "Erreur de création de la fenêtre: " << SDL_GetError() << std::endl;
         SDL_Quit();
@@ -137,6 +140,11 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
             running = false;
+        } else if (event.type == SDL_WINDOWEVENT) {
+            if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                windowWidth = event.window.data1;
+                windowHeight = event.window.data2;
+            }
         }
     }
 
@@ -160,18 +168,28 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
         playerX -= playerSpeed;
     } else if (keystate[SDL_SCANCODE_D]) {
         playerX += playerSpeed;
+    } else if (keystate[SDL_SCANCODE_ESCAPE]) {
+        running = false;
+    } else if (keystate[SDL_SCANCODE_F11]) {
+        Uint32 flags = SDL_GetWindowFlags(window);
+        if (flags & SDL_WINDOW_FULLSCREEN) {
+            SDL_SetWindowFullscreen(window, 0);
+        } else {
+            SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+        }
     }
+
 
     
     if (playerX < 0) {
-        playerX = WINDOW_WIDTH;
-    } else if (playerX > WINDOW_WIDTH) {
+        playerX = windowWidth;
+    } else if (playerX > windowWidth) {
         playerX = 0;
     }
 
     if (playerY < 0) {
-        playerY = WINDOW_HEIGHT;
-    } else if (playerY > WINDOW_HEIGHT) {
+        playerY = windowHeight;
+    } else if (playerY > windowHeight) {
         playerY = 0;
     }
 }
@@ -182,8 +200,8 @@ void renderScene(int playerX, int playerY) {
 
     if (offsetX < 0) offsetX = 0;
     if (offsetY < 0) offsetY = 0;
-    if (offsetX > ENV_WIDTH - WINDOW_WIDTH) offsetX = ENV_WIDTH - WINDOW_WIDTH;
-    if (offsetY > ENV_HEIGHT - WINDOW_HEIGHT) offsetY = ENV_HEIGHT - WINDOW_HEIGHT;
+    if (offsetX > ENV_WIDTH - windowWidth) offsetX = ENV_WIDTH - windowWidth;
+    if (offsetY > ENV_HEIGHT - windowHeight) offsetY = ENV_HEIGHT - windowHeight;
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);

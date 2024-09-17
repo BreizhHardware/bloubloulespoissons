@@ -7,11 +7,8 @@
 #include <string>
 #include <vector>
 
-
-const int WINDOW_WIDTH = 1600;
-const int WINDOW_HEIGHT = 1000;
-const int ENV_WIDTH = 1600;
-const int ENV_HEIGHT = 1000;
+const int ENV_WIDTH = 1920;
+const int ENV_HEIGHT = 1080;
 
 
 
