@@ -60,7 +60,7 @@ public:
 
 
     void draw(SDL_Renderer* renderer);
-    void drawArrow(SDL_Renderer* renderer, int x, int y, int vx, int vy);
+    void drawArrow(SDL_Renderer* renderer, int x, int y, float vx, float vy);
     void move();
     void cycle();
 

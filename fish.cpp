@@ -11,7 +11,7 @@ void Fish::move() {
 }
 
 
-void Fish::drawArrow(SDL_Renderer *renderer, int x, int y, int vx, int vy) {
+void Fish::drawArrow(SDL_Renderer *renderer, int x, int y, float vx, float vy) {
     const int arrowLength = 30; // Augmenter la longueur de la flèche
     const int arrowWidth = 10; // Garder la largeur de la flèche constante
     SDL_Point points[4];
