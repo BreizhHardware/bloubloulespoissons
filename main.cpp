@@ -34,13 +34,13 @@ void drawGradientBackground(SDL_Renderer* renderer, int offsetX, int offsetY) {
     }
 }
 
-// Fonction pour mettre à jour la position des poissons
-void updateFish(std::vector<Fish>& school) {
+// Function to update a range of fish
+void updateFishRange(std::vector<Fish>& school, int start, int end) {
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
         std::lock_guard<std::mutex> lock(mtx);
-        for (auto& fish : school) {
-            fish.move();
+        for (int i = start; i < end; ++i) {
+            school[i].move();
         }
     }
 }
@@ -53,9 +53,12 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < 1000; ++i) {
         school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 50, 50, schoolTexture, renderer));
     }
-    std::thread fishThread(updateFish, std::ref(school));
 
-    
+    std::vector<std::thread> threads;
+    int fishPerThread = 10;
+    for (int i = 0; i < school.size(); i += fishPerThread) {
+        threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+    }
 
     int playerX = WINDOW_WIDTH / 2;
     int playerY = WINDOW_HEIGHT / 2;
@@ -68,7 +71,9 @@ int main(int argc, char* argv[]) {
     }
 
     running = false;
-    fishThread.join();
+    for (auto& thread : threads) {
+        thread.join();
+    }
     cleanup();
 
     return 0;
@@ -80,7 +85,6 @@ bool initSDL() {
         return false;
     }
 
-    // Initialiser SDL_image
     if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
         std::cerr << "Erreur d'initialisation de SDL_image: " << IMG_GetError() << std::endl;
         SDL_Quit();

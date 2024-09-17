@@ -5,31 +5,15 @@
 #include <math.h>
 #include <iostream>
 #include <string>
+#include <vector>
+
 
 const int WINDOW_WIDTH = 1600;
 const int WINDOW_HEIGHT = 1000;
 const int ENV_WIDTH = 1600;
 const int ENV_HEIGHT = 1000;
 
-#include <vector>
 
-/*
-class Fish {
-public:
-    Fish(int x, int y, int vx, int vy, int width, int height, SDL_Renderer* renderer, SDL_Texture* texture);
-    ~Fish();
-
-    void move();
-    void draw(SDL_Renderer* renderer);
-    void drawArrow(SDL_Renderer* renderer, int x, int y, int vx, int vy);
-
-private:
-    int x, y;
-    int vx, vy;
-    int width, height;
-
-};
-*/
 
 class Fish {
 private:
