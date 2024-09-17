@@ -38,8 +38,8 @@ private:
     const float AVOIDANCE_FORCE = 0.05;
     const float MATCHING_FACTOR = 0.05;
     const float CENTERING_FACTOR = 0.005;
-    const float MAX_SPEED = 0.13;
-    const float MIN_SPEED = 0.06;
+    const float MAX_SPEED = 13;
+    const float MIN_SPEED = 0.6;
     float x, y;
     float vx, vy;
     std::vector<Fish> &school;

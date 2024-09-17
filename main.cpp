@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    for (int i = 0; i < 100; ++i) {
+    for (int i = 0; i < 900; ++i) {
         school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 50, 50, schoolTexture, renderer));
     }
     std::thread fishThread(updateFish, std::ref(school));
