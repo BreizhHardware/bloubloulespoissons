@@ -7,8 +7,10 @@
 #include <string>
 #include <vector>
 
-const int ENV_WIDTH = 1920;
-const int ENV_HEIGHT = 1080;
+const int ENV_WIDTH = 800;
+const int ENV_HEIGHT = 800;
+const int MARGIN_WIDTH = 100;
+const int MARGIN_HEIGHT = 100;
 
 
 
@@ -19,8 +21,12 @@ private:
     const float AVOIDANCE_FORCE = 0.05;
     const float MATCHING_FACTOR = 0.05;
     const float CENTERING_FACTOR = 0.005;
+    const float TURN_FACTOR = 0.3;
     const float MAX_SPEED = 13;
     const float MIN_SPEED = 0.6;
+    const float BIASVALUE = 0.001;
+    //const float MAXBIAS = 0.01;
+
     float x, y;
     float vx, vy;
     std::vector<Fish> &school;
@@ -28,9 +34,11 @@ private:
     SDL_Texture* texture;
     int cycle_count = 0;
     int width, height;
+    int biasdir = 1;
 
+;
 public:
-    Fish(const int x, const int y, const float vx, const float vy,std::vector<Fish> &school, const int id,const int width,const int height, SDL_Texture* texture, SDL_Renderer* renderer): x(x), y(y), vx(vx), vy(vy), school(school), id(id), width(width),height(height), texture(texture) {}
+    Fish(const int x, const int y, const float vx, const float vy,std::vector<Fish> &school, const int id,const int width,const int height, SDL_Texture* texture, SDL_Renderer* renderer,int biasdir): x(x), y(y), vx(vx), vy(vy), school(school), id(id), width(width),height(height), texture(texture), biasdir(biasdir) {}
     ~Fish() = default;
 
     float getX() const { return x; };

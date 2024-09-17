@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
     }
 
     for (int i = 0; i < 1000; ++i) {
-        school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 50, 50, schoolTexture, renderer));
+        school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 50, 50, schoolTexture, renderer, rand() % 2 == 0 ? 1 : 0));
     }
 
     std::vector<std::thread> threads;

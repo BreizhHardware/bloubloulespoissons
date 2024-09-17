@@ -2,12 +2,14 @@
 
 void Fish::move() {
     Fish::cycle();
+    /*
     if (x < 0 || x >= ENV_WIDTH) {
         vx = -vx;
     }
     if (y < 0 || y >= ENV_HEIGHT) {
         vy = -vy;
     }
+    */
 }
 
 
@@ -48,9 +50,9 @@ void Fish::draw(SDL_Renderer *renderer) {
 }
 
 void Fish::cycle() {
-    std::cout << "Cycle " << cycle_count << " pour le poisson " << id << std::endl;
-    std::cout << "Position: (" << x << ", " << y << ")" << std::endl;
-    std::cout << "Vitesse: (" << vx << ", " << vy << ")" << std::endl;
+    //std::cout << "Cycle " << cycle_count << " pour le poisson " << id << std::endl;
+    //std::cout << "Position: (" << x << ", " << y << ")" << std::endl;
+    //std::cout << "Vitesse: (" << vx << ", " << vy << ")" << std::endl;
     int neighboring_boids = 0;
     float xvel_avg = 0, yvel_avg = 0, xpos_avg = 0, ypos_avg = 0, close_dx = 0, close_dy = 0;
     for (auto &schoolIt: school) {
@@ -85,6 +87,26 @@ void Fish::cycle() {
     }
     vx += close_dx * AVOIDANCE_FORCE;
     vy += close_dy * AVOIDANCE_FORCE;
+
+    if ( y <= 0) {
+        vy += TURN_FACTOR;
+    }
+    if ( y >= ENV_WIDTH - MARGIN_HEIGHT) {
+        vy -= TURN_FACTOR;
+    }
+    if ( x <= 0) {
+        vx += TURN_FACTOR;
+    }
+    if ( x >= ENV_WIDTH - MARGIN_WIDTH) {
+        vx -= TURN_FACTOR;
+    }
+
+    if (biasdir == 1) {
+        vx = (1 - BIASVALUE) * vx + (BIASVALUE * 1);
+    }else if (biasdir == 0){
+        vx = (1 - BIASVALUE) * vx + (BIASVALUE * -1);
+    }
+
     if (float speed = sqrt(vx * vx + vy * vy); speed > MAX_SPEED) {
         vx = vx * MAX_SPEED / speed;
         vy = vy * MAX_SPEED / speed;
@@ -95,6 +117,6 @@ void Fish::cycle() {
     x += vx;
     y += vy;
     cycle_count++;
-    std::cout << "Updated Position: (" << x << ", " << y << ")" << std::endl;
-    std::cout << "Updated Vitesse: (" << vx << ", " << vy << ")" << std::endl;
+    //std::cout << "Updated Position: (" << x << ", " << y << ")" << std::endl;
+    //std::cout << "Updated Vitesse: (" << vx << ", " << vy << ")" << std::endl;
 }
