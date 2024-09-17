@@ -49,7 +49,7 @@ private:
     int width, height;
 
 public:
-    Fish(const int x, const int y, const int vx, const int vy,std::vector<Fish> &school, const int id,const int width,const int height, SDL_Texture* texture, SDL_Renderer* renderer): x(x), y(y), vx(vx), vy(vy), school(school), id(id), width(width),height(height), texture(texture) {}
+    Fish(const int x, const int y, const float vx, const float vy,std::vector<Fish> &school, const int id,const int width,const int height, SDL_Texture* texture, SDL_Renderer* renderer): x(x), y(y), vx(vx), vy(vy), school(school), id(id), width(width),height(height), texture(texture) {}
     ~Fish() = default;
 
     int getX() const { return x; };

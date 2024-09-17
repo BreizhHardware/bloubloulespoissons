@@ -14,8 +14,8 @@ std::atomic<bool> running(true);
 
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
-SDL_Texture* fishesTexture = nullptr;
-std::vector<Fish> fishes;
+SDL_Texture* schoolTexture = nullptr;
+std::vector<Fish> school;
 
 bool initSDL();
 void handleEvents(int& playerX, int& playerY, const int playerSpeed);
@@ -35,7 +35,7 @@ void updateFish(std::vector<Fish>& school) {
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
         std::lock_guard<std::mutex> lock(mtx);
-        for (auto& fish : fishes) {
+        for (auto& fish : school) {
             fish.move();
         }
     }
@@ -47,10 +47,9 @@ int main(int argc, char* argv[]) {
     }
 
     for (int i = 0; i < 900; ++i) {
-        fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 50, 50, renderer, fishesTexture);
+        school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 50, 50, schoolTexture, renderer));
     }
-
-    std::thread fishThread(updateFish, std::ref(fishes));
+    std::thread fishThread(updateFish, std::ref(school));
 
     Rock rock(100, 100, 50, 255, 0, 0);
     Reef reef(300, 300);
@@ -105,9 +104,9 @@ bool initSDL() {
         return false;
     }
 
-    SDL_Surface* fishesSurface = IMG_Load("../img/poasson.png");
-    fishesTexture = SDL_CreateTextureFromSurface(renderer, fishesSurface);
-    SDL_FreeSurface(fishesSurface);
+    SDL_Surface* schoolSurface = IMG_Load("../img/poasson.png");
+    schoolTexture = SDL_CreateTextureFromSurface(renderer, schoolSurface);
+    SDL_FreeSurface(schoolSurface);
 
     return true;
 }
@@ -159,7 +158,7 @@ void renderScene(int playerX, int playerY) {
     kelp.draw(renderer);
 
     std::lock_guard<std::mutex> lock(mtx);
-    for (auto& fish : fishes) {
+    for (auto& fish : school) {
         fish.draw(renderer);
     }
 
@@ -171,7 +170,7 @@ void renderScene(int playerX, int playerY) {
 }
 
 void cleanup() {
-    SDL_DestroyTexture(fishesTexture);
+    SDL_DestroyTexture(schoolTexture);
     if (renderer != nullptr) {
         SDL_DestroyRenderer(renderer);
     }
