@@ -7,8 +7,8 @@
 #include <string>
 #include <vector>
 
-const int ENV_WIDTH = 3840;
-const int ENV_HEIGHT = 2160;
+const int ENV_WIDTH = 1920;
+const int ENV_HEIGHT = 1080;
 const int MARGIN_WIDTH = 100;
 const int MARGIN_HEIGHT = 100;
 

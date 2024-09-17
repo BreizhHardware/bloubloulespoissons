@@ -36,7 +36,7 @@ private:
 
 class Kelp {
 public:
-    Kelp(int x, int y, int height, int width, Uint8 r, Uint8 g) : x(x), y(y), size(height), r(r), g(g) {};
+    Kelp(int x, int y, int height, Uint8 r, Uint8 g, Uint8 b) : x(x), y(y), size(height), r(r), g(g), b(b) {};
     void draw(SDL_Renderer* renderer, int offsetX, int offsetY);
 
 private:
