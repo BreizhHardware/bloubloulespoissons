@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
     //    fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 10, 5, renderer, nullptr);
     //}
     for (int i = 0; i < 900; ++i) {
-        fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 10, 5, renderer, fishesTexture);
+        fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 50, 50, renderer, fishesTexture);
     }
 
     std::thread fishThread(updateFish, std::ref(fishes));
