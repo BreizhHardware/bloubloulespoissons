@@ -127,25 +127,34 @@ bool initSDL() {
 
 void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
     SDL_Event event;
+    const Uint8* keystate = SDL_GetKeyboardState(NULL);
+
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
             running = false;
-        } else if (event.type == SDL_KEYDOWN) {
-            switch (event.key.keysym.sym) {
-                case SDLK_z:
-                    playerY -= playerSpeed;
-                    break;
-                case SDLK_s:
-                    playerY += playerSpeed;
-                    break;
-                case SDLK_q:
-                    playerX -= playerSpeed;
-                    break;
-                case SDLK_d:
-                    playerX += playerSpeed;
-                    break;
-            }
         }
+    }
+
+    if (keystate[SDL_SCANCODE_W] && keystate[SDL_SCANCODE_A]) {
+        playerY -= playerSpeed;
+        playerX -= playerSpeed;
+    } else if (keystate[SDL_SCANCODE_W] && keystate[SDL_SCANCODE_D]) {
+        playerY -= playerSpeed;
+        playerX += playerSpeed;
+    } else if (keystate[SDL_SCANCODE_S] && keystate[SDL_SCANCODE_A]) {
+        playerY += playerSpeed;
+        playerX -= playerSpeed;
+    } else if (keystate[SDL_SCANCODE_S] && keystate[SDL_SCANCODE_D]) {
+        playerY += playerSpeed;
+        playerX += playerSpeed;
+    } else if (keystate[SDL_SCANCODE_W]) {
+        playerY -= playerSpeed;
+    } else if (keystate[SDL_SCANCODE_S]) {
+        playerY += playerSpeed;
+    } else if (keystate[SDL_SCANCODE_A]) {
+        playerX -= playerSpeed;
+    } else if (keystate[SDL_SCANCODE_D]) {
+        playerX += playerSpeed;
     }
 }
 
