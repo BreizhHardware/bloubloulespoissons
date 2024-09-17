@@ -98,6 +98,14 @@ bool initSDL() {
         return false;
     }
 
+    SDL_Surface* iconSurface = IMG_Load("../img/mory.png");
+    if(iconSurface == nullptr) {
+        std::cerr << "Erreur de chargement de l'icône: " << IMG_GetError() << std::endl;
+    } else {
+        SDL_SetWindowIcon(window, iconSurface);
+        SDL_FreeSurface(iconSurface);
+    }
+
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr) {
         std::cerr << "Erreur de création du renderer: " << SDL_GetError() << std::endl;
@@ -138,8 +146,8 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
 }
 
 void renderScene(int playerX, int playerY) {
-    int offsetX = playerX - WINDOW_WIDTH / 2;
-    int offsetY = playerY - WINDOW_HEIGHT / 2;
+    int offsetX = playerX;
+    int offsetY = playerY;
 
     if (offsetX < 0) offsetX = 0;
     if (offsetY < 0) offsetY = 0;
