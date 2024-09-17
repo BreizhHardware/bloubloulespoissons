@@ -17,6 +17,10 @@ SDL_Renderer* renderer = nullptr;
 SDL_Texture* schoolTexture = nullptr;
 std::vector<Fish> school;
 
+Rock rock(100, 100, 50, 255, 0, 0);
+Reef reef(300, 300);
+Kelp kelp(500, 500, 100, 4, 87, 0);
+
 bool initSDL();
 void handleEvents(int& playerX, int& playerY, const int playerSpeed);
 void renderScene(int playerX, int playerY);
@@ -51,9 +55,7 @@ int main(int argc, char* argv[]) {
     }
     std::thread fishThread(updateFish, std::ref(school));
 
-    Rock rock(100, 100, 50, 255, 0, 0);
-    Reef reef(300, 300);
-    Kelp kelp(500, 500, 100, 4, 87, 0);
+    
 
     int playerX = WINDOW_WIDTH / 2;
     int playerY = WINDOW_HEIGHT / 2;
@@ -148,10 +150,6 @@ void renderScene(int playerX, int playerY) {
     SDL_RenderClear(renderer);
 
     drawGradientBackground(renderer, offsetX, offsetY);
-
-    Rock rock(100, 100, 50, 255, 0, 0);
-    Reef reef(300, 300);
-    Kelp kelp(500, 500, 100, 4, 87, 0);
 
     rock.draw(renderer);
     reef.draw(renderer);
