@@ -156,6 +156,19 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
     } else if (keystate[SDL_SCANCODE_D]) {
         playerX += playerSpeed;
     }
+
+    
+    if (playerX < 0) {
+        playerX = WINDOW_WIDTH;
+    } else if (playerX > WINDOW_WIDTH) {
+        playerX = 0;
+    }
+
+    if (playerY < 0) {
+        playerY = WINDOW_HEIGHT;
+    } else if (playerY > WINDOW_HEIGHT) {
+        playerY = 0;
+    }
 }
 
 void renderScene(int playerX, int playerY) {
