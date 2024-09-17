@@ -22,11 +22,11 @@ void drawGradientBackground(SDL_Renderer* renderer, int offsetX, int offsetY) {
 }
 
 // Fonction pour mettre à jour la position des poissons
-void updateFish(std::vector<Fish>& fishes) {
+void updateFish(std::vector<Fish>& school) {
     while (running) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         std::lock_guard<std::mutex> lock(mtx);
-        for (auto& fish : fishes) {
+        for (auto& fish : school) {
             fish.move();
         }
     }
@@ -67,18 +67,18 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::vector<Fish> fishes;
-    SDL_Surface* fishesSurface = IMG_Load("../img/poasson.png");
-    SDL_Texture* fishesTexture = SDL_CreateTextureFromSurface(renderer, fishesSurface);
-    SDL_FreeSurface(fishesSurface);
+    std::vector<Fish> school;
+    SDL_Surface* schoolSurface = IMG_Load("../img/poasson.png");
+    SDL_Texture* schoolTexture = SDL_CreateTextureFromSurface(renderer, schoolSurface);
+    SDL_FreeSurface(schoolSurface);
     //for (int i = 0; i < 100; ++i) {
-    //    fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 10, 5, renderer, nullptr);
+    //    school.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 10, 5, renderer, nullptr);
     //}
     for (int i = 0; i < 900; ++i) {
-        fishes.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, 50, 50, renderer, fishesTexture);
+        school.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, rand() % 3 - 1, rand() % 3 - 1, school, i, 10, 5, schoolTexture, renderer);
     }
 
-    std::thread fishThread(updateFish, std::ref(fishes));
+    std::thread fishThread(updateFish, std::ref(school));
 
     Rock rock(100, 100, 50, 255, 0, 0);
     Reef reef(300, 300);
@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
         kelp.draw(renderer);
 
         std::lock_guard<std::mutex> lock(mtx);
-        for (auto& fish : fishes) {
+        for (auto& fish : school) {
             fish.draw(renderer);
         }
 
@@ -157,8 +157,8 @@ int main(int argc, char* argv[]) {
 
     running = false;
     fishThread.join();
-    SDL_FreeSurface(fishesSurface);
-    SDL_DestroyTexture(fishesTexture);
+    SDL_FreeSurface(schoolSurface);
+    SDL_DestroyTexture(schoolTexture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
