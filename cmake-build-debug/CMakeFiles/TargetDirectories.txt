@@ -1,3 +1,0 @@
-/mnt/c/Users/BreizhHardware/Nextcloud/Programation/C++/bloubloulespoissons/cmake-build-debug/CMakeFiles/bloubloulespoissons.dir
-/mnt/c/Users/BreizhHardware/Nextcloud/Programation/C++/bloubloulespoissons/cmake-build-debug/CMakeFiles/edit_cache.dir
-/mnt/c/Users/BreizhHardware/Nextcloud/Programation/C++/bloubloulespoissons/cmake-build-debug/CMakeFiles/rebuild_cache.dir
