@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    for (int i = 0; i < 900; ++i) {
+    for (int i = 0; i < 1000; ++i) {
         school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 50, 50, schoolTexture, renderer));
     }
     std::thread fishThread(updateFish, std::ref(school));
@@ -106,7 +106,7 @@ bool initSDL() {
         SDL_FreeSurface(iconSurface);
     }
 
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (renderer == nullptr) {
         std::cerr << "Erreur de création du renderer: " << SDL_GetError() << std::endl;
         SDL_DestroyWindow(window);
