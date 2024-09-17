@@ -15,6 +15,7 @@ std::atomic<bool> running(true);
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
 SDL_Texture* schoolTexture = nullptr;
+SDL_Texture* playerTexture = nullptr;
 std::vector<Fish> school;
 
 Rock rock(100, 100, 50, 255, 0, 0);
@@ -122,6 +123,10 @@ bool initSDL() {
     schoolTexture = SDL_CreateTextureFromSurface(renderer, schoolSurface);
     SDL_FreeSurface(schoolSurface);
 
+    SDL_Surface* playerSurface = IMG_Load("../img/player.png");
+    playerTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
+    SDL_FreeSurface(playerSurface);
+
     return true;
 }
 
@@ -194,9 +199,8 @@ void renderScene(int playerX, int playerY) {
         fish.draw(renderer);
     }
 
-    SDL_Rect playerRect = { playerX - offsetX, playerY - offsetY, 20, 20 };
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderFillRect(renderer, &playerRect);
+    SDL_Rect playerRect = { playerX - offsetX, playerY - offsetY, 75, 75 };
+    SDL_RenderCopy(renderer, playerTexture, nullptr, &playerRect);
 
     SDL_RenderPresent(renderer);
 }
