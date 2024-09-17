@@ -6,10 +6,10 @@
 #include <iostream>
 #include <string>
 
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 600;
-const int ENV_WIDTH = 800;
-const int ENV_HEIGHT = 600;
+const int WINDOW_WIDTH = 1600;
+const int WINDOW_HEIGHT = 1000;
+const int ENV_WIDTH = 1600;
+const int ENV_HEIGHT = 1000;
 
 #include <vector>
 
