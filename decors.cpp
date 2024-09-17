@@ -4,15 +4,14 @@
 
 #include "decors.h"
 
-void Rock::draw(SDL_Renderer* renderer) {
+void Rock::draw(SDL_Renderer* renderer, int offsetX, int offsetY) {
     SDL_SetRenderDrawColor(renderer, r, g, b, 255);
-
     for (int w = 0; w < size * 2; w++) {
         for (int h = 0; h < size * 2; h++) {
             int dx = size - w;
             int dy = size - h;
             if ((dx * dx + dy * dy) <= (size * size)) {
-                SDL_RenderDrawPoint(renderer, x + dx, y + dy);
+                SDL_RenderDrawPoint(renderer, x + dx - offsetX, y + dy - offsetY);
             }
         }
     }
@@ -30,15 +29,14 @@ Reef::Reef(int x, int y) : x(x), y(y) {
     }
 }
 
-void Reef::draw(SDL_Renderer* renderer) {
+void Reef::draw(SDL_Renderer* renderer, int offsetX, int offsetY) {
     for (auto& rock : rocks) {
-        rock.draw(renderer);
+        rock.draw(renderer, offsetX, offsetY);
     }
 }
 
-void Kelp::draw(SDL_Renderer* renderer) {
+void Kelp::draw(SDL_Renderer* renderer, int offsetX, int offsetY) {
     SDL_SetRenderDrawColor(renderer, r, g, b, 255);
-
-    SDL_Rect kelpRect = { x, y, size / 3, size };
+    SDL_Rect kelpRect = { x - offsetX, y - offsetY, size / 3, size };
     SDL_RenderFillRect(renderer, &kelpRect);
 }

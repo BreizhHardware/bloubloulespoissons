@@ -11,8 +11,8 @@
 
 class Rock {
 public:
-    Rock(int x, int y, int size, int r, int g, int b) : x(x), y(y), size(size), r(r), g(g), b(b) {}
-    void draw(SDL_Renderer* renderer);
+    Rock(int x, int y, int size, Uint8 r, Uint8 g, Uint8 b) : x(x), y(y), size(size), r(r), g(g), b(b) {};
+    void draw(SDL_Renderer* renderer, int offsetX, int offsetY);
 private:
     int x;
     int y;
@@ -25,7 +25,7 @@ private:
 class Reef {
 public:
     Reef(int x, int y);
-    void draw(SDL_Renderer* renderer);
+    void draw(SDL_Renderer* renderer, int offsetX, int offsetY);
 
 private:
     int x;
@@ -36,8 +36,8 @@ private:
 
 class Kelp {
 public:
-    Kelp(int x, int y, int size, int r, int g, int b) : x(x), y(y), size(size), r(r), g(g), b(b) {}
-    void draw(SDL_Renderer* renderer);
+    Kelp(int x, int y, int height, int width, Uint8 r, Uint8 g) : x(x), y(y), size(height), r(r), g(g) {};
+    void draw(SDL_Renderer* renderer, int offsetX, int offsetY);
 
 private:
     int x;

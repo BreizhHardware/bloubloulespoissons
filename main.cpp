@@ -18,8 +18,8 @@ SDL_Texture* schoolTexture = nullptr;
 SDL_Texture* playerTexture = nullptr;
 std::vector<Fish> school;
 
-int windowWidth = 1600;
-int windowHeight = 1000;
+int windowWidth = 800;
+int windowHeight = 600;
 
 Rock rock(100, 100, 50, 255, 0, 0);
 Reef reef(300, 300);
@@ -195,8 +195,8 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
 }
 
 void renderScene(int playerX, int playerY) {
-    int offsetX = playerX;
-    int offsetY = playerY;
+    int offsetX = playerX - windowWidth / 2;
+    int offsetY = playerY - windowHeight / 2;
 
     if (offsetX < 0) offsetX = 0;
     if (offsetY < 0) offsetY = 0;
@@ -208,9 +208,9 @@ void renderScene(int playerX, int playerY) {
 
     drawGradientBackground(renderer, offsetX, offsetY);
 
-    rock.draw(renderer);
-    reef.draw(renderer);
-    kelp.draw(renderer);
+    rock.draw(renderer, offsetX, offsetY);
+    reef.draw(renderer, offsetX, offsetY);
+    kelp.draw(renderer, offsetX, offsetY);
 
     std::lock_guard<std::mutex> lock(mtx);
     for (auto& fish : school) {
