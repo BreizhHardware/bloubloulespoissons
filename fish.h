@@ -40,7 +40,7 @@ private:
     const float CENTERING_FACTOR = 0.005;
     const float MAX_SPEED = 0.13;
     const float MIN_SPEED = 0.06;
-    int x, y;
+    float x, y;
     float vx, vy;
     std::vector<Fish> &school;
     int id;
@@ -52,8 +52,8 @@ public:
     Fish(const int x, const int y, const float vx, const float vy,std::vector<Fish> &school, const int id,const int width,const int height, SDL_Texture* texture, SDL_Renderer* renderer): x(x), y(y), vx(vx), vy(vy), school(school), id(id), width(width),height(height), texture(texture) {}
     ~Fish() = default;
 
-    int getX() const { return x; };
-    int getY() const { return y; };
+    float getX() const { return x; };
+    float getY() const { return y; };
     float getVx() const { return vx; };
     float getVy() const { return vy; };
     int getId() const { return id; };

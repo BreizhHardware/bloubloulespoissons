@@ -50,16 +50,16 @@ void Fish::cycle() {
     std::cout << "Cycle " << cycle_count << " pour le poisson " << id << std::endl;
     std::cout << "Position: (" << x << ", " << y << ")" << std::endl;
     std::cout << "Vitesse: (" << vx << ", " << vy << ")" << std::endl;
-    int xpos_avg = 0, ypos_avg = 0, neighboring_boids = 0, close_dx = 0, close_dy = 0;
-    float xvel_avg = 0, yvel_avg = 0;
+    int neighboring_boids = 0;
+    float xvel_avg = 0, yvel_avg = 0, xpos_avg = 0, ypos_avg = 0, close_dx = 0, close_dy = 0;
     for (auto &schoolIt: school) {
-        const int other_x = schoolIt.getX();
-        const int other_y = schoolIt.getY();
+        const float other_x = schoolIt.getX();
+        const float other_y = schoolIt.getY();
         const float other_vx = schoolIt.getVx();
         const float other_vy = schoolIt.getVy();
         if (schoolIt.getId() != id) {
-            int dx = x - other_x;
-            int dy = y - other_y;
+            float dx = x - other_x;
+            float dy = y - other_y;
             if (abs(dx) < VISUAL_RANGE && abs(dy) < VISUAL_RANGE) {
                 if ((dx * dx + dy * dy) < PROTECTED_RANGE * PROTECTED_RANGE) {
                     close_dx += x - other_x;
