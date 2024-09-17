@@ -35,16 +35,17 @@ void Fish::drawArrow(SDL_Renderer *renderer, int x, int y, float vx, float vy) {
 }
 
 void Fish::draw(SDL_Renderer *renderer) {
-    SDL_Rect rect = {x, y, width, height};
+    SDL_Rect rect = {static_cast<int>(x), static_cast<int>(y), width, height};
+    float angle = atan2(vy, vx) * 180 / M_PI; // Convert angle to degrees
+
     if (texture) {
-        SDL_RenderCopy(renderer, texture, nullptr, &rect);
+        SDL_RenderCopyEx(renderer, texture, nullptr, &rect, angle, nullptr, SDL_FLIP_NONE);
     } else {
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Rouge
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red
         SDL_RenderFillRect(renderer, &rect);
     }
-    drawArrow(renderer, x + width / 2, y + height / 2, vx, vy); // Dessiner la flèche
+    //drawArrow(renderer, x + width / 2, y + height / 2, vx, vy);
 }
-
 
 void Fish::cycle() {
     std::cout << "Cycle " << cycle_count << " pour le poisson " << id << std::endl;

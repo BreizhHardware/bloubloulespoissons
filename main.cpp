@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::vector<std::thread> threads;
-    int fishPerThread = 10;
+    int fishPerThread = 100;
     for (int i = 0; i < school.size(); i += fishPerThread) {
         threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
     }
