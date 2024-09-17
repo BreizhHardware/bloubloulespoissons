@@ -84,7 +84,6 @@ int main(int argc, char* argv[]) {
     Reef reef(300, 300);
     Kelp kelp(500, 500, 100, 4, 87, 0);
 
-    bool running = true;
     SDL_Event event;
 
     int playerX = WINDOW_WIDTH / 2;
@@ -146,7 +145,6 @@ int main(int argc, char* argv[]) {
         SDL_Delay(10);
     }
 
-        
     if(renderer != nullptr){
             SDL_DestroyRenderer(renderer);
         }
@@ -157,8 +155,11 @@ int main(int argc, char* argv[]) {
 
     running = false;
     fishThread.join();
-    SDL_FreeSurface(fishesSurface);
+
     SDL_DestroyTexture(fishesTexture);
+    if (fishesSurface != nullptr) {
+        SDL_FreeSurface(fishesSurface);
+    }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
