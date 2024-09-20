@@ -86,6 +86,17 @@ void updateFishRange(std::vector<Fish>& school, int start, int end){
     }
 }
 
+void displayFPS(SDL_Renderer* renderer, TTF_Font* font, int fps) {
+    std::string fpsText = "FPS: " + std::to_string(fps);
+    SDL_Color color = {0, 255, 0}; // Vert
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, fpsText.c_str(), color);
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_Rect textRect = {windowWidth - textSurface->w - 10, 10, textSurface->w, textSurface->h};
+    SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+}
+
 int main(int argc, char* argv[]) {
     if (!initSDL()) {
         return 1;
@@ -274,10 +285,21 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
 }
 
 void renderScene(int playerX, int playerY) {
+    static Uint32 lastTime = 0;
+    static int frameCount = 0;
+    static int fps = 0;
+
+    Uint32 currentTime = SDL_GetTicks();
+    frameCount++;
+    if (currentTime - lastTime >= 1000) {
+        fps = frameCount;
+        frameCount = 0;
+        lastTime = currentTime;
+    }
+
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    //drawGradientBackground(renderer);
     drawGridBackground(renderer);
 
     rock.draw(renderer);
@@ -291,6 +313,8 @@ void renderScene(int playerX, int playerY) {
 
     SDL_Rect playerRect = { playerX, playerY, 75, 75 };
     SDL_RenderCopy(renderer, playerTexture, nullptr, &playerRect);
+
+    displayFPS(renderer, font, fps);
 
     SDL_RenderPresent(renderer);
 }
