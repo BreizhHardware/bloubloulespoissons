@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <iostream>
 #include <vector>
 #include <thread>
@@ -17,6 +18,7 @@ SDL_Renderer* renderer = nullptr;
 SDL_Texture* schoolTexture = nullptr;
 SDL_Texture* playerTexture = nullptr;
 std::vector<Fish> school;
+TTF_Font* font = nullptr;
 
 int windowWidth = 800;
 int windowHeight = 600;
@@ -30,11 +32,46 @@ void handleEvents(int& playerX, int& playerY, int playerSpeed);
 void renderScene(int playerX, int playerY);
 void cleanup();
 
-void drawGradientBackground(SDL_Renderer* renderer, int offsetX, int offsetY) {
+void drawGradientBackground(SDL_Renderer* renderer) {
     for (int y = 0; y < ENV_HEIGHT; y++) {
         Uint8 blue = static_cast<Uint8>(255 * (1.0 - static_cast<float>(y) / ENV_HEIGHT));
         SDL_SetRenderDrawColor(renderer, 0, 0, blue, 255);
-        SDL_RenderDrawLine(renderer, -offsetX, y - offsetY, ENV_WIDTH - offsetX, y - offsetY);
+        SDL_RenderDrawLine(renderer, 0, y, ENV_WIDTH, y);
+    }
+}
+
+void drawGridBackground(SDL_Renderer* renderer) {
+    // Dessiner le fond bleu
+    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+    SDL_RenderClear(renderer);
+
+    // Couleur des lignes de la grille
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+
+    // Dessiner les lignes horizontales et les coordonnées y
+    for (int y = 0; y < ENV_HEIGHT; y += 50) {
+        SDL_RenderDrawLine(renderer, 0, y, ENV_WIDTH, y);
+        // Afficher les coordonnées y
+        std::string yText = std::to_string(y);
+        SDL_Surface* textSurface = TTF_RenderText_Solid(font, yText.c_str(), {255, 255, 255});
+        SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_Rect textRect = {0, y, textSurface->w, textSurface->h};
+        SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+        SDL_FreeSurface(textSurface);
+        SDL_DestroyTexture(textTexture);
+    }
+
+    // Dessiner les lignes verticales et les coordonnées x
+    for (int x = 0; x < ENV_WIDTH; x += 50) {
+        SDL_RenderDrawLine(renderer, x, 0, x, ENV_HEIGHT);
+        // Afficher les coordonnées x
+        std::string xText = std::to_string(x);
+        SDL_Surface* textSurface = TTF_RenderText_Solid(font, xText.c_str(), {255, 255, 255});
+        SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_Rect textRect = {x, 0, textSurface->w, textSurface->h};
+        SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+        SDL_FreeSurface(textSurface);
+        SDL_DestroyTexture(textTexture);
     }
 }
 
@@ -95,6 +132,20 @@ bool initSDL() {
         return false;
     }
 
+    if (TTF_Init() == -1) {
+        std::cerr << "Erreur d'initialisation de SDL_ttf: " << TTF_GetError() << std::endl;
+        SDL_Quit();
+        return false;
+    }
+
+    font = TTF_OpenFont("../fonts/arial.ttf", 16);
+    if (font == nullptr) {
+        std::cerr << "Erreur de chargement de la police: " << TTF_GetError() << std::endl;
+        TTF_Quit();
+        SDL_Quit();
+        return false;
+    }
+
     window = SDL_CreateWindow("BloubBloub les poissons",
                               SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED,
@@ -148,29 +199,22 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
         }
     }
 
-    if (keystate[SDL_SCANCODE_W] && keystate[SDL_SCANCODE_A]) {
+    if (keystate[SDL_SCANCODE_W]) {
         playerY -= playerSpeed;
-        playerX -= playerSpeed;
-    } else if (keystate[SDL_SCANCODE_W] && keystate[SDL_SCANCODE_D]) {
-        playerY -= playerSpeed;
-        playerX += playerSpeed;
-    } else if (keystate[SDL_SCANCODE_S] && keystate[SDL_SCANCODE_A]) {
+    }
+    if (keystate[SDL_SCANCODE_S]) {
         playerY += playerSpeed;
+    }
+    if (keystate[SDL_SCANCODE_A]) {
         playerX -= playerSpeed;
-    } else if (keystate[SDL_SCANCODE_S] && keystate[SDL_SCANCODE_D]) {
-        playerY += playerSpeed;
+    }
+    if (keystate[SDL_SCANCODE_D]) {
         playerX += playerSpeed;
-    } else if (keystate[SDL_SCANCODE_W]) {
-        playerY -= playerSpeed;
-    } else if (keystate[SDL_SCANCODE_S]) {
-        playerY += playerSpeed;
-    } else if (keystate[SDL_SCANCODE_A]) {
-        playerX -= playerSpeed;
-    } else if (keystate[SDL_SCANCODE_D]) {
-        playerX += playerSpeed;
-    } else if (keystate[SDL_SCANCODE_ESCAPE]) {
+    }
+    if (keystate[SDL_SCANCODE_ESCAPE]) {
         running = false;
-    } else if (keystate[SDL_SCANCODE_F11]) {
+    }
+    if (keystate[SDL_SCANCODE_F11]) {
         Uint32 flags = SDL_GetWindowFlags(window);
         if (flags & SDL_WINDOW_FULLSCREEN) {
             SDL_SetWindowFullscreen(window, 0);
@@ -178,52 +222,82 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
             SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
         }
     }
+    if (keystate[SDL_SCANCODE_UP]) {
+        playerY -= playerSpeed;
+        for (auto& fish : school) {
+            fish.y -= playerSpeed;
+        }
+        rock.y -= playerSpeed;
+        reef.y -= playerSpeed;
+        kelp.y -= playerSpeed;
+    }
+    if (keystate[SDL_SCANCODE_DOWN]) {
+        playerY += playerSpeed;
+        for (auto& fish : school) {
+            fish.y += playerSpeed;
+        }
+        rock.y += playerSpeed;
+        reef.y += playerSpeed;
+        kelp.y += playerSpeed;
+    }
+    if (keystate[SDL_SCANCODE_LEFT]) {
+        playerX -= playerSpeed;
+        for (auto& fish : school) {
+            fish.x -= playerSpeed;
+        }
+        rock.x -= playerSpeed;
+        reef.x -= playerSpeed;
+        kelp.x -= playerSpeed;
+    }
+    if (keystate[SDL_SCANCODE_RIGHT]) {
+        playerX += playerSpeed;
+        for (auto& fish : school) {
+            fish.x += playerSpeed;
+        }
+        rock.x += playerSpeed;
+        reef.x += playerSpeed;
+        kelp.x += playerSpeed;
+    }
 
-
-    
+    // Ensure player stays within environment bounds
     if (playerX < 0) {
-        playerX = windowWidth;
-    } else if (playerX > windowWidth) {
         playerX = 0;
+    } else if (playerX > ENV_WIDTH) {
+        playerX = ENV_WIDTH;
     }
 
     if (playerY < 0) {
-        playerY = windowHeight;
-    } else if (playerY > windowHeight) {
         playerY = 0;
+    } else if (playerY > ENV_HEIGHT) {
+        playerY = ENV_HEIGHT;
     }
 }
 
 void renderScene(int playerX, int playerY) {
-    int offsetX = playerX - windowWidth / 2;
-    int offsetY = playerY - windowHeight / 2;
-
-    if (offsetX < 0) offsetX = 0;
-    if (offsetY < 0) offsetY = 0;
-    if (offsetX > ENV_WIDTH - windowWidth) offsetX = ENV_WIDTH - windowWidth;
-    if (offsetY > ENV_HEIGHT - windowHeight) offsetY = ENV_HEIGHT - windowHeight;
-
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    drawGradientBackground(renderer, offsetX, offsetY);
+    //drawGradientBackground(renderer);
+    drawGridBackground(renderer);
 
-    rock.draw(renderer, offsetX, offsetY);
-    reef.draw(renderer, offsetX, offsetY);
-    kelp.draw(renderer, offsetX, offsetY);
+    rock.draw(renderer);
+    reef.draw(renderer);
+    kelp.draw(renderer);
 
     std::lock_guard<std::mutex> lock(mtx);
     for (auto& fish : school) {
         fish.draw(renderer);
     }
 
-    SDL_Rect playerRect = { playerX - offsetX, playerY - offsetY, 75, 75 };
+    SDL_Rect playerRect = { playerX, playerY, 75, 75 };
     SDL_RenderCopy(renderer, playerTexture, nullptr, &playerRect);
 
     SDL_RenderPresent(renderer);
 }
 
 void cleanup() {
+    TTF_CloseFont(font);
+    TTF_Quit();
     SDL_DestroyTexture(schoolTexture);
     if (renderer != nullptr) {
         SDL_DestroyRenderer(renderer);

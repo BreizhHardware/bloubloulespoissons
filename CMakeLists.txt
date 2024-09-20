@@ -8,10 +8,11 @@ set(CMAKE_PREFIX_PATH "C:/SDL2")
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
+find_package(SDL2_ttf REQUIRED)
 
-include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS})
+include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS})
 
 add_executable(bloubloulespoissons main.cpp fish.cpp decors.cpp)
 
 # Lier SDL2 et SDL2_image
-target_link_libraries(bloubloulespoissons ${SDL2_LIBRARIES} -lSDL2_image)
+target_link_libraries(bloubloulespoissons ${SDL2_LIBRARIES} -lSDL2_image -lSDL2_ttf)
