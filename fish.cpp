@@ -51,7 +51,7 @@ void Fish::draw(SDL_Renderer *renderer) {
 
 void Fish::cycle() {
     //std::cout << "Cycle " << cycle_count << " pour le poisson " << id << std::endl;
-    //std::cout << "Position: (" << x << ", " << y << ")" << std::endl;
+    std::cout << "Position: (" << x << ", " << y << ")" << std::endl;
     //std::cout << "Vitesse: (" << vx << ", " << vy << ")" << std::endl;
     int neighboring_boids = 0;
     float xvel_avg = 0, yvel_avg = 0, xpos_avg = 0, ypos_avg = 0, close_dx = 0, close_dy = 0;
@@ -91,13 +91,13 @@ void Fish::cycle() {
     if ( y <= 0) {
         vy += TURN_FACTOR;
     }
-    if ( y >= ENV_WIDTH - MARGIN_HEIGHT) {
+    if ( y >= (ENV_WIDTH - MARGIN_HEIGHT)) {
         vy -= TURN_FACTOR;
     }
     if ( x <= 0) {
         vx += TURN_FACTOR;
     }
-    if ( x >= ENV_WIDTH - MARGIN_WIDTH) {
+    if ( x >= (ENV_WIDTH - MARGIN_WIDTH)) {
         vx -= TURN_FACTOR;
     }
 
@@ -107,12 +107,13 @@ void Fish::cycle() {
         vx = (1 - BIASVALUE) * vx + (BIASVALUE * -1);
     }
 
-    if (float speed = sqrt(vx * vx + vy * vy); speed > MAX_SPEED) {
-        vx = vx * MAX_SPEED / speed;
-        vy = vy * MAX_SPEED / speed;
+    float speed = sqrt(vx * vx + vy * vy);
+    if (speed > MAX_SPEED) {
+        vx =  vx/speed * MAX_SPEED;
+        vy =  vy/speed * MAX_SPEED;
     } else if (speed < MIN_SPEED) {
-        vx = vx * MIN_SPEED / speed;
-        vy = vy * MIN_SPEED / speed;
+        vx = vx/ speed * MIN_SPEED;
+        vy = vy/ speed * MIN_SPEED;
     }
     x += vx;
     y += vy;

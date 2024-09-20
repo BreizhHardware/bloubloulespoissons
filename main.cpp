@@ -21,12 +21,12 @@ std::vector<Fish> school;
 int windowWidth = 800;
 int windowHeight = 600;
 
-Rock rock(100, 100, 50, 255, 0, 0);
+Rock rock(0, 0, 50, 255, 0, 0);
 Reef reef(300, 300);
 Kelp kelp(500, 500, 100, 4, 87, 0);
 
 bool initSDL();
-void handleEvents(int& playerX, int& playerY, const int playerSpeed);
+void handleEvents(int& playerX, int& playerY, int playerSpeed);
 void renderScene(int playerX, int playerY);
 void cleanup();
 
@@ -39,7 +39,7 @@ void drawGradientBackground(SDL_Renderer* renderer, int offsetX, int offsetY) {
 }
 
 // Function to update a range of fish
-void updateFishRange(std::vector<Fish>& school, int start, int end) {
+void updateFishRange(std::vector<Fish>& school, int start, int end){
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
         std::lock_guard<std::mutex> lock(mtx);
