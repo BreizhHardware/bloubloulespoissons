@@ -98,6 +98,24 @@ void displayFPS(SDL_Renderer* renderer, TTF_Font* font, int fps) {
     SDL_DestroyTexture(textTexture);
 }
 
+void displayPlayerCoord(SDL_Renderer* renderer, TTF_Font* font) {
+    Camera& camera = Camera::getInstance();
+    int cameraX = camera.getX();
+    int cameraY = camera.getY();
+
+    // Code pour afficher les coordonnées de la caméra
+    std::string coordText = "Camera: (" + std::to_string(cameraX) + ", " + std::to_string(cameraY) + ")";
+    SDL_Color textColor = {255, 255, 255, 255};
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, coordText.c_str(), textColor);
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+
+    SDL_Rect textRect = {10, 10, textSurface->w, textSurface->h};
+    SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+}
+
 int main(int argc, char* argv[]) {
     if (!initSDL()) {
         return 1;
@@ -283,6 +301,7 @@ void renderScene(int playerX, int playerY) {
     SDL_RenderCopy(renderer, playerTexture, nullptr, &playerRect);
 
     displayFPS(renderer, font, fps);
+    displayPlayerCoord(renderer, font);
 
     SDL_RenderPresent(renderer);
 }
