@@ -21,8 +21,10 @@ SDL_Texture* playerTexture = nullptr;
 std::vector<Fish> school;
 TTF_Font* font = nullptr;
 
-int windowWidth = 800;
-int windowHeight = 600;
+int windowWidth = 1500;
+int windowHeight = 800;
+int playerBaseX = windowWidth / 2;
+int playerBaseY = windowHeight / 2;
 
 Rock rock(0, 0, 50, 255, 0, 0);
 Reef reef(300, 300);
@@ -30,7 +32,7 @@ Kelp kelp(500, 500, 100, 4, 87, 0);
 
 bool initSDL();
 void handleEvents(int& playerX, int& playerY, int playerSpeed);
-void renderScene(int playerX, int playerY);
+void renderScene(int playerX, int playerY, int *fig);
 void cleanup();
 
 void drawGradientBackground(SDL_Renderer* renderer) {
@@ -105,15 +107,22 @@ void displayPlayerCoord(SDL_Renderer* renderer, TTF_Font* font) {
 
     // Code pour afficher les coordonnées de la caméra
     std::string coordText = "Camera: (" + std::to_string(cameraX) + ", " + std::to_string(cameraY) + ")";
-    SDL_Color textColor = {255, 255, 255, 255};
+    std::string coordText2 = "Player: (" + std::to_string(cameraX + playerBaseX) + ", " + std::to_string(cameraY + playerBaseY) + ")";
+    SDL_Color textColor = {0, 255, 0};
     SDL_Surface* textSurface = TTF_RenderText_Solid(font, coordText.c_str(), textColor);
+    SDL_Surface* textSurface2 = TTF_RenderText_Solid(font, coordText2.c_str(), textColor);
     SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_Texture* textTexture2 = SDL_CreateTextureFromSurface(renderer, textSurface2);
 
     SDL_Rect textRect = {10, 10, textSurface->w, textSurface->h};
+    SDL_Rect textRect2 = {10, 30, textSurface2->w, textSurface2->h};
     SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+    SDL_RenderCopy(renderer, textTexture2, nullptr, &textRect2);
 
     SDL_FreeSurface(textSurface);
+    SDL_FreeSurface(textSurface2);
     SDL_DestroyTexture(textTexture);
+    SDL_DestroyTexture(textTexture2);
 }
 
 int main(int argc, char* argv[]) {
@@ -134,10 +143,11 @@ int main(int argc, char* argv[]) {
     int playerX = windowWidth / 2;
     int playerY = windowHeight / 2;
     const int playerSpeed = 5;
-
+    int fig = 1;
     while (running) {
         handleEvents(playerX, playerY, playerSpeed);
-        renderScene(playerX, playerY);
+        renderScene(playerX, playerY, &fig);
+        //std::cout << "Window size: " << windowWidth << "x" << windowHeight << std::endl;
         SDL_Delay(10);
     }
 
@@ -180,7 +190,7 @@ bool initSDL() {
                               SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED,
                               windowWidth, windowHeight,
-                              SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
+                              SDL_WINDOW_SHOWN);
     if (window == nullptr) {
         std::cerr << "Erreur de création de la fenêtre: " << SDL_GetError() << std::endl;
         SDL_Quit();
@@ -207,7 +217,7 @@ bool initSDL() {
     schoolTexture = SDL_CreateTextureFromSurface(renderer, schoolSurface);
     SDL_FreeSurface(schoolSurface);
 
-    SDL_Surface* playerSurface = IMG_Load("../img/player.png");
+    SDL_Surface* playerSurface = IMG_Load("../img/player/player-full.png");
     playerTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
     SDL_FreeSurface(playerSurface);
 
@@ -221,38 +231,33 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
             running = false;
-        } else if (event.type == SDL_WINDOWEVENT) {
-            if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                windowWidth = event.window.data1;
-                windowHeight = event.window.data2;
-            }
         }
     }
 
     Camera& camera = Camera::getInstance();
 
     if (keystate[SDL_SCANCODE_W]) {
-        camera.move(0, -playerSpeed);
+        if(camera.getY() > -playerBaseY) {
+            camera.move(0, -playerSpeed);
+        }
     }
     if (keystate[SDL_SCANCODE_S]) {
-        camera.move(0, playerSpeed);
+        if(camera.getY() < ENV_HEIGHT - windowHeight) {
+            camera.move(0, playerSpeed);
+        }
     }
     if (keystate[SDL_SCANCODE_A]) {
-        camera.move(-playerSpeed, 0);
+        if(camera.getX() > -playerBaseX) {
+            camera.move(-playerSpeed, 0);
+        }
     }
     if (keystate[SDL_SCANCODE_D]) {
-        camera.move(playerSpeed, 0);
+        if(camera.getX() < ENV_WIDTH - windowWidth) {
+            camera.move(playerSpeed, 0);
+        }
     }
     if (keystate[SDL_SCANCODE_ESCAPE]) {
         running = false;
-    }
-    if (keystate[SDL_SCANCODE_F11]) {
-        Uint32 flags = SDL_GetWindowFlags(window);
-        if (flags & SDL_WINDOW_FULLSCREEN) {
-            SDL_SetWindowFullscreen(window, 0);
-        } else {
-            SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-        }
     }
 
     // Ensure player stays within environment bounds
@@ -269,7 +274,7 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
     }
 }
 
-void renderScene(int playerX, int playerY) {
+void renderScene(int playerX, int playerY, int *fig) {
     static Uint32 lastTime = 0;
     static int frameCount = 0;
     static int fps = 0;
@@ -297,8 +302,25 @@ void renderScene(int playerX, int playerY) {
         fish.draw(renderer);
     }
 
-    SDL_Rect playerRect = { playerX, playerY, 75, 75 };
-    SDL_RenderCopy(renderer, playerTexture, nullptr, &playerRect);
+    // SDL_Rect playerRect = { playerX, playerY, 75, 75 };
+    // SDL_RenderCopy(renderer, playerTexture, nullptr, &playerRect);
+    SDL_Rect playerRect = {0, 0, 513, 600};
+    if (*fig == 1) {
+        playerRect = {46, 26, 442, 541};
+        *fig = 2;
+    } else if (*fig == 2) {
+        playerRect = {560, 23, 426, 536};
+        *fig = 3;
+    }else if (*fig == 3) {
+        playerRect = {986, 23, 469, 530};
+        *fig = 4;
+    }else if (*fig == 4) {
+        playerRect = {1436, 23, 465, 520};
+        *fig = 1;
+    }
+
+    SDL_Rect playerPos = {playerX, playerY, 75, 75};
+    SDL_RenderCopyEx(renderer, playerTexture, &playerRect, &playerPos, 0, nullptr, SDL_FLIP_NONE);
 
     displayFPS(renderer, font, fps);
     displayPlayerCoord(renderer, font);

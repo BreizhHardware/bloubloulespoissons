@@ -14,6 +14,8 @@ class Camera {
         }
         int getX() const { return x; }
         int getY() const { return y; }
+        void setX(int newX) { x = newX; }
+        void setY(int newY) { y = newY; }
         void setPosition(int newX, int newY) { x = newX; y = newY; }
         void move(int dx, int dy) { x += dx; y += dy; }
     private:
