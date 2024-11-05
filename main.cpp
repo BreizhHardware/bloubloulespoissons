@@ -1,10 +1,40 @@
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
+#include <iostream>
+#include <vector>
+#include <thread>
+#include <mutex>
+#include <atomic>
 
-#include "camera.h"
-#include "decors.h"
 #include "fish.h"
+#include "decors.h"
+#include "camera.h"
+
+std::mutex mtx;
+std::atomic<bool> running(true);
+
+SDL_Window* window = nullptr;
+SDL_Renderer* renderer = nullptr;
+SDL_Texture* schoolTexture = nullptr;
+SDL_Texture* playerTexture = nullptr;
+SDL_Texture* backgroundTexture = nullptr;
+std::vector<Fish> school;
+TTF_Font* font = nullptr;
+
+int windowWidth = 1500;
+int windowHeight = 800;
+int playerBaseX = windowWidth / 2;
+int playerBaseY = windowHeight / 2;
+
+Rock rock(0, 0, 50, 255, 0, 0);
+Reef reef(300, 300);
+Kelp kelp(500, 500, 100, 4, 87, 0);
+
+bool initSDL();
+void handleEvents(int& playerX, int& playerY, int playerSpeed);
+void renderScene(int playerX, int playerY, int *fig);
+void cleanup();
 
 // Function to draw a gradient background
 void drawGradientBackground(SDL_Renderer* renderer) {
