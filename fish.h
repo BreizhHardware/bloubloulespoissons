@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "camera.h"
 
 const int ENV_WIDTH = 1920;
 const int ENV_HEIGHT = 1080;

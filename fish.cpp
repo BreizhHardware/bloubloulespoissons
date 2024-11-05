@@ -37,7 +37,11 @@ void Fish::drawArrow(SDL_Renderer *renderer, int x, int y, float vx, float vy) {
 }
 
 void Fish::draw(SDL_Renderer *renderer) {
-    SDL_Rect rect = {static_cast<int>(x), static_cast<int>(y), width, height};
+    Camera &camera = Camera::getInstance();
+    int cameraX = camera.getX();
+    int cameraY = camera.getY();
+
+    SDL_Rect rect = {static_cast<int>(x) - cameraX, static_cast<int>(y) - cameraY, width, height};
     float angle = atan2(vy, vx) * 180 / M_PI; // Convert angle to degrees
 
     if (texture) {

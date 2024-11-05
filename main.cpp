@@ -9,6 +9,7 @@
 
 #include "fish.h"
 #include "decors.h"
+#include "camera.h"
 
 std::mutex mtx;
 std::atomic<bool> running(true);
@@ -210,17 +211,19 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
         }
     }
 
+    Camera& camera = Camera::getInstance();
+
     if (keystate[SDL_SCANCODE_W]) {
-        playerY -= playerSpeed;
+        camera.move(0, -playerSpeed);
     }
     if (keystate[SDL_SCANCODE_S]) {
-        playerY += playerSpeed;
+        camera.move(0, playerSpeed);
     }
     if (keystate[SDL_SCANCODE_A]) {
-        playerX -= playerSpeed;
+        camera.move(-playerSpeed, 0);
     }
     if (keystate[SDL_SCANCODE_D]) {
-        playerX += playerSpeed;
+        camera.move(playerSpeed, 0);
     }
     if (keystate[SDL_SCANCODE_ESCAPE]) {
         running = false;
@@ -232,44 +235,6 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
         } else {
             SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
         }
-    }
-
-    // Déplacement de la vue avec les flèches du clavier
-    if (keystate[SDL_SCANCODE_UP]) {
-        playerY -= playerSpeed;
-        for (auto& fish : school) {
-            fish.y -= playerSpeed;
-        }
-        rock.y -= playerSpeed;
-        reef.y -= playerSpeed;
-        kelp.y -= playerSpeed;
-    }
-    if (keystate[SDL_SCANCODE_DOWN]) {
-        playerY += playerSpeed;
-        for (auto& fish : school) {
-            fish.y += playerSpeed;
-        }
-        rock.y += playerSpeed;
-        reef.y += playerSpeed;
-        kelp.y += playerSpeed;
-    }
-    if (keystate[SDL_SCANCODE_LEFT]) {
-        playerX -= playerSpeed;
-        for (auto& fish : school) {
-            fish.x -= playerSpeed;
-        }
-        rock.x -= playerSpeed;
-        reef.x -= playerSpeed;
-        kelp.x -= playerSpeed;
-    }
-    if (keystate[SDL_SCANCODE_RIGHT]) {
-        playerX += playerSpeed;
-        for (auto& fish : school) {
-            fish.x += playerSpeed;
-        }
-        rock.x += playerSpeed;
-        reef.x += playerSpeed;
-        kelp.x += playerSpeed;
     }
 
     // Ensure player stays within environment bounds

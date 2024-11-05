@@ -3,18 +3,25 @@
 //
 
 #include "decors.h"
+#include <iostream>
 
 void Rock::draw(SDL_Renderer* renderer) {
+    Camera& camera = Camera::getInstance();
+    int cameraX = camera.getX();
+    int cameraY = camera.getY();
+
     SDL_SetRenderDrawColor(renderer, r, g, b, 255);
     for (int w = 0; w < size * 2; w++) {
         for (int h = 0; h < size * 2; h++) {
             int dx = size - w;
             int dy = size - h;
             if ((dx * dx + dy * dy) <= (size * size)) {
-                SDL_RenderDrawPoint(renderer, x + dx, y + dy);
+                SDL_Rect rect = { x + dx - cameraX, y + dy - cameraY, 1, 1 };
+                SDL_RenderFillRect(renderer, &rect);
             }
         }
     }
+    //std::cout << "Rock drawn at (" << x << ", " << y << ")" << std::endl;
 }
 
 Reef::Reef(int x, int y) : x(x), y(y) {
@@ -36,7 +43,10 @@ void Reef::draw(SDL_Renderer* renderer) {
 }
 
 void Kelp::draw(SDL_Renderer* renderer) {
+    Camera& camera = Camera::getInstance();
+    int cameraX = camera.getX();
+    int cameraY = camera.getY();
     SDL_SetRenderDrawColor(renderer, r, g, b, 255);
-    SDL_Rect kelpRect = { x, y, size / 3, size };
+    SDL_Rect kelpRect = { x - cameraX, y - cameraY, size / 3, size };
     SDL_RenderFillRect(renderer, &kelpRect);
 }

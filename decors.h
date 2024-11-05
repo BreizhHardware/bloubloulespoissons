@@ -8,6 +8,7 @@
 #include <ctime>
 #include <cstdlib>
 #include <vector>
+#include "camera.h"
 
 class Rock {
 public:
