@@ -1,7 +1,7 @@
 #ifndef FISH_H
 #define FISH_H
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_image.h>
 #include <cmath>
 #include <iostream>
 #include <string>
@@ -12,8 +12,6 @@ const int ENV_WIDTH = 3840;
 const int ENV_HEIGHT = 2160;
 const int MARGIN_WIDTH = 100;
 const int MARGIN_HEIGHT = 100;
-
-
 
 class Fish {
 private:
@@ -26,28 +24,24 @@ private:
     const float MAX_SPEED = 13;
     const float MIN_SPEED = 0.6;
     const float BIASVALUE = 0.001;
-    //const float MAXBIAS = 0.01;
-
 
     float vx, vy;
     std::vector<Fish> &school;
     int id;
     SDL_Texture* texture;
-    //int cycle_count = 0;
     int width, height;
     int biasdir = 1;
 
-;
 public:
-    Fish(const int x, const int y, const float vx, const float vy,std::vector<Fish> &school, const int id,const int width,const int height, SDL_Texture* texture, SDL_Renderer* renderer,int biasdir): x(x), y(y), vx(vx), vy(vy), school(school), id(id), width(width),height(height), texture(texture), biasdir(biasdir) {}
+    Fish(const int x, const int y, const float vx, const float vy, std::vector<Fish> &school, const int id, const int width, const int height, SDL_Texture* texture, SDL_Renderer* renderer, int biasdir)
+        : x(x), y(y), vx(vx), vy(vy), school(school), id(id), width(width), height(height), texture(texture), biasdir(biasdir) {}
     ~Fish() = default;
 
-    float getX() const { return x; };
-    float getY() const { return y; };
-    float getVx() const { return vx; };
-    float getVy() const { return vy; };
-    int getId() const { return id; };
-
+    float getX() const { return x; }
+    float getY() const { return y; }
+    float getVx() const { return vx; }
+    float getVy() const { return vy; }
+    int getId() const { return id; }
 
     void draw(SDL_Renderer* renderer);
     void drawArrow(SDL_Renderer* renderer, int x, int y, float vx, float vy);

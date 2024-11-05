@@ -13,8 +13,8 @@ LIBS := -lSDL2 -lSDL2_image -lSDL2_ttf
 
 # Compiler and linker settings
 ARCH := -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
-CFLAGS := -g -O2 -Wall -mword-relocations $(ARCH) -I$(DEVKITPRO)/libctru/include -I$(INCLUDES)
-LDFLAGS := -L$(DEVKITPRO)/libctru/lib $(LIBS)
+CFLAGS := -g -O2 -Wall -mword-relocations $(ARCH) -I$(DEVKITPRO)/libctru/include -I$(DEVKITPRO)/portlibs/3ds/include -I$(DEVKITPRO)/portlibs/3ds/include/SDL
+LDFLAGS := -L$(DEVKITPRO)/libctru/lib -L$(DEVKITPRO)/portlibs/3ds/lib -lSDL -lSDL_image -lSDL_ttf
 
 # Rules
 all: $(BUILD)/$(TARGET).3dsx

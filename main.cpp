@@ -1,6 +1,6 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_image.h>
+#include <SDL3/SDL_ttf.h>
 #include <iostream>
 #include <vector>
 #include <thread>
@@ -241,7 +241,7 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
     const Uint8* keystate = SDL_GetKeyboardState(NULL);
 
     while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT) {
+        if (event.type == SDL_EVENT_QUIT) {
             running = false;
         }
     }
@@ -308,14 +308,11 @@ void renderScene(int playerX, int playerY, int *fig) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    //drawGridBackground(renderer);
-    //drawGradientBackground(renderer);
     Camera& camera = Camera::getInstance();
     SDL_Rect backgroundRect = { -camera.getX(), -camera.getY(), ENV_WIDTH, ENV_HEIGHT };
-    SDL_RenderCopy(renderer, backgroundTexture, nullptr, &backgroundRect);
+    SDL_RenderTexture(renderer, backgroundTexture, nullptr, &backgroundRect);
 
     rock.draw(renderer);
-    //reef.draw(renderer);
     kelp.draw(renderer);
 
     std::lock_guard<std::mutex> lock(mtx);
@@ -323,8 +320,6 @@ void renderScene(int playerX, int playerY, int *fig) {
         fish.draw(renderer);
     }
 
-    // SDL_Rect playerRect = { playerX, playerY, 75, 75 };
-    // SDL_RenderCopy(renderer, playerTexture, nullptr, &playerRect);
     SDL_Rect playerRect = {0, 0, 513, 600};
     if (*fig < 5 ) {
         playerRect = {46, 26, 442, 541};
@@ -340,7 +335,7 @@ void renderScene(int playerX, int playerY, int *fig) {
     *fig += 1;
 
     SDL_Rect playerPos = {playerX, playerY, 75, 75};
-    SDL_RenderCopyEx(renderer, playerTexture, &playerRect, &playerPos, 0, nullptr, SDL_FLIP_NONE);
+    SDL_RenderTextureRotated(renderer, playerTexture, &playerRect, &playerPos, 0, nullptr, SDL_FLIP_NONE);
 
     displayFPS(renderer, font, fps);
     displayPlayerCoord(renderer, font);
