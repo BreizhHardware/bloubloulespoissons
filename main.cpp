@@ -2,6 +2,10 @@
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
+#include "camera.h"
+#include "decors.h"
+#include "fish.h"
+
 // Function to draw a gradient background
 void drawGradientBackground(SDL_Renderer* renderer) {
     for (int y = 0; y < ENV_HEIGHT; ++y) {
