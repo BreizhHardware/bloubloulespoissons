@@ -55,7 +55,7 @@ void Fish::draw(SDL_Renderer *renderer) {
 
 void Fish::cycle() {
     //std::cout << "Cycle " << cycle_count << " pour le poisson " << id << std::endl;
-    std::cout << "Position: (" << x << ", " << y << ")" << std::endl;
+    //std::cout << "Position: (" << x << ", " << y << ")" << std::endl;
     //std::cout << "Vitesse: (" << vx << ", " << vy << ")" << std::endl;
     int neighboring_boids = 0;
     float xvel_avg = 0, yvel_avg = 0, xpos_avg = 0, ypos_avg = 0, close_dx = 0, close_dy = 0;

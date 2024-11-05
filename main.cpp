@@ -21,8 +21,8 @@ SDL_Texture* playerTexture = nullptr;
 std::vector<Fish> school;
 TTF_Font* font = nullptr;
 
-int windowWidth = 800;
-int windowHeight = 600;
+int windowWidth = 1500;
+int windowHeight = 800;
 int playerBaseX = windowWidth / 2;
 int playerBaseY = windowHeight / 2;
 
@@ -147,6 +147,7 @@ int main(int argc, char* argv[]) {
     while (running) {
         handleEvents(playerX, playerY, playerSpeed);
         renderScene(playerX, playerY);
+        //std::cout << "Window size: " << windowWidth << "x" << windowHeight << std::endl;
         SDL_Delay(10);
     }
 
@@ -189,7 +190,7 @@ bool initSDL() {
                               SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED,
                               windowWidth, windowHeight,
-                              SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
+                              SDL_WINDOW_SHOWN);
     if (window == nullptr) {
         std::cerr << "Erreur de création de la fenêtre: " << SDL_GetError() << std::endl;
         SDL_Quit();
@@ -230,11 +231,6 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
             running = false;
-        } else if (event.type == SDL_WINDOWEVENT) {
-            if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                windowWidth = event.window.data1;
-                windowHeight = event.window.data2;
-            }
         }
     }
 
@@ -262,14 +258,6 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
     }
     if (keystate[SDL_SCANCODE_ESCAPE]) {
         running = false;
-    }
-    if (keystate[SDL_SCANCODE_F11]) {
-        Uint32 flags = SDL_GetWindowFlags(window);
-        if (flags & SDL_WINDOW_FULLSCREEN) {
-            SDL_SetWindowFullscreen(window, 0);
-        } else {
-            SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-        }
     }
 
     // Ensure player stays within environment bounds
