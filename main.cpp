@@ -217,7 +217,7 @@ bool initSDL() {
     schoolTexture = SDL_CreateTextureFromSurface(renderer, schoolSurface);
     SDL_FreeSurface(schoolSurface);
 
-    SDL_Surface* playerSurface = IMG_Load("../img/player.png");
+    SDL_Surface* playerSurface = IMG_Load("../img/player/player-full.png");
     playerTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
     SDL_FreeSurface(playerSurface);
 
@@ -302,8 +302,25 @@ void renderScene(int playerX, int playerY) {
         fish.draw(renderer);
     }
 
-    SDL_Rect playerRect = { playerX, playerY, 75, 75 };
-    SDL_RenderCopy(renderer, playerTexture, nullptr, &playerRect);
+    // SDL_Rect playerRect = { playerX, playerY, 75, 75 };
+    // SDL_RenderCopy(renderer, playerTexture, nullptr, &playerRect);
+    SDL_Rect playerRect = {0, 0, 513, 600};
+    if (*fig == 1) {
+        playerRect = {46, 26, 442, 541};
+        *fig = 2;
+    } else if (*fig == 2) {
+        playerRect = {560, 23, 426, 536};
+        *fig = 3;
+    }else if (*fig == 3) {
+        playerRect = {986, 23, 469, 530};
+        *fig = 4;
+    }else if (*fig == 4) {
+        playerRect = {1436, 23, 465, 520};
+        *fig = 1;
+    }
+
+    SDL_Rect playerPos = {playerX, playerY, 75, 75};
+    SDL_RenderCopyEx(renderer, playerTexture, &playerRect, &playerPos, 0, nullptr, SDL_FLIP_NONE);
 
     displayFPS(renderer, font, fps);
     displayPlayerCoord(renderer, font);
