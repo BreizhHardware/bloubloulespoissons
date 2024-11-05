@@ -23,6 +23,8 @@ TTF_Font* font = nullptr;
 
 int windowWidth = 800;
 int windowHeight = 600;
+int playerBaseX = windowWidth / 2;
+int playerBaseY = windowHeight / 2;
 
 Rock rock(0, 0, 50, 255, 0, 0);
 Reef reef(300, 300);
@@ -105,15 +107,22 @@ void displayPlayerCoord(SDL_Renderer* renderer, TTF_Font* font) {
 
     // Code pour afficher les coordonnées de la caméra
     std::string coordText = "Camera: (" + std::to_string(cameraX) + ", " + std::to_string(cameraY) + ")";
-    SDL_Color textColor = {255, 255, 255, 255};
+    std::string coordText2 = "Player: (" + std::to_string(cameraX + playerBaseX) + ", " + std::to_string(cameraY + playerBaseY) + ")";
+    SDL_Color textColor = {0, 255, 0};
     SDL_Surface* textSurface = TTF_RenderText_Solid(font, coordText.c_str(), textColor);
+    SDL_Surface* textSurface2 = TTF_RenderText_Solid(font, coordText2.c_str(), textColor);
     SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_Texture* textTexture2 = SDL_CreateTextureFromSurface(renderer, textSurface2);
 
     SDL_Rect textRect = {10, 10, textSurface->w, textSurface->h};
+    SDL_Rect textRect2 = {10, 30, textSurface2->w, textSurface2->h};
     SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+    SDL_RenderCopy(renderer, textTexture2, nullptr, &textRect2);
 
     SDL_FreeSurface(textSurface);
+    SDL_FreeSurface(textSurface2);
     SDL_DestroyTexture(textTexture);
+    SDL_DestroyTexture(textTexture2);
 }
 
 int main(int argc, char* argv[]) {
@@ -232,16 +241,24 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
     Camera& camera = Camera::getInstance();
 
     if (keystate[SDL_SCANCODE_W]) {
-        camera.move(0, -playerSpeed);
+        if(camera.getY() > -playerBaseY) {
+            camera.move(0, -playerSpeed);
+        }
     }
     if (keystate[SDL_SCANCODE_S]) {
-        camera.move(0, playerSpeed);
+        if(camera.getY() < ENV_HEIGHT - windowHeight) {
+            camera.move(0, playerSpeed);
+        }
     }
     if (keystate[SDL_SCANCODE_A]) {
-        camera.move(-playerSpeed, 0);
+        if(camera.getX() > -playerBaseX) {
+            camera.move(-playerSpeed, 0);
+        }
     }
     if (keystate[SDL_SCANCODE_D]) {
-        camera.move(playerSpeed, 0);
+        if(camera.getX() < ENV_WIDTH - windowWidth) {
+            camera.move(playerSpeed, 0);
+        }
     }
     if (keystate[SDL_SCANCODE_ESCAPE]) {
         running = false;
