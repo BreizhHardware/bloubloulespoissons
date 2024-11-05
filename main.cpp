@@ -233,6 +233,8 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
             SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
         }
     }
+
+    // Déplacement de la vue avec les flèches du clavier
     if (keystate[SDL_SCANCODE_UP]) {
         playerY -= playerSpeed;
         for (auto& fish : school) {
@@ -300,7 +302,8 @@ void renderScene(int playerX, int playerY) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    drawGridBackground(renderer);
+    //drawGridBackground(renderer);
+    drawGradientBackground(renderer);
 
     rock.draw(renderer);
     reef.draw(renderer);
