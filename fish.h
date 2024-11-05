@@ -33,7 +33,7 @@ private:
     std::vector<Fish> &school;
     int id;
     SDL_Texture* texture;
-    int cycle_count = 0;
+    //int cycle_count = 0;
     int width, height;
     int biasdir = 1;
 
@@ -51,7 +51,6 @@ public:
 
     void draw(SDL_Renderer* renderer);
     void drawArrow(SDL_Renderer* renderer, int x, int y, float vx, float vy);
-    void move();
     void cycle();
 
     float x, y;

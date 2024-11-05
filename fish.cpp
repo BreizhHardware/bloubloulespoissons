@@ -1,18 +1,5 @@
 #include "fish.h"
 
-void Fish::move() {
-    Fish::cycle();
-    /*
-    if (x < 0 || x >= ENV_WIDTH) {
-        vx = -vx;
-    }
-    if (y < 0 || y >= ENV_HEIGHT) {
-        vy = -vy;
-    }
-    */
-}
-
-
 void Fish::drawArrow(SDL_Renderer *renderer, int x, int y, float vx, float vy) {
     const int arrowLength = 30; // Augmenter la longueur de la flèche
     const int arrowWidth = 10; // Garder la largeur de la flèche constante
@@ -55,11 +42,11 @@ void Fish::draw(SDL_Renderer *renderer) {
 
 void Fish::cycle() {
     //std::cout << "Cycle " << cycle_count << " pour le poisson " << id << std::endl;
-    std::cout << "Position: (" << x << ", " << y << ")" << std::endl;
+    //std::cout << "Poisson Position: (" << x << ", " << y << ")" << std::endl;
     //std::cout << "Vitesse: (" << vx << ", " << vy << ")" << std::endl;
     int neighboring_boids = 0;
     float xvel_avg = 0, yvel_avg = 0, xpos_avg = 0, ypos_avg = 0, close_dx = 0, close_dy = 0;
-    for (auto &schoolIt: school) {
+    for (Fish &schoolIt: school) {
         const float other_x = schoolIt.getX();
         const float other_y = schoolIt.getY();
         const float other_vx = schoolIt.getVx();
@@ -121,7 +108,7 @@ void Fish::cycle() {
     }
     x += vx;
     y += vy;
-    cycle_count++;
+    //cycle_count++;
     //std::cout << "Updated Position: (" << x << ", " << y << ")" << std::endl;
     //std::cout << "Updated Vitesse: (" << vx << ", " << vy << ")" << std::endl;
 }

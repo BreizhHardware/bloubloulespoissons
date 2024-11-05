@@ -18,3 +18,6 @@ add_executable(bloubloulespoissons main.cpp fish.cpp decors.cpp
 
 # Lier SDL2 et SDL2_image
 target_link_libraries(bloubloulespoissons ${SDL2_LIBRARIES} -lSDL2_image -lSDL2_ttf)
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
