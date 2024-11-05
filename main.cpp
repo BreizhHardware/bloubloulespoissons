@@ -249,12 +249,18 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
     Camera& camera = Camera::getInstance();
 
     if (keystate[SDL_SCANCODE_W]) {
-        if(camera.getY() > -playerBaseY) {
+        if (playerY > 0) {
+            playerY -= playerSpeed;
+        }
+        if (camera.getY() > 0 && playerY < playerBaseY) {
             camera.move(0, -playerSpeed);
         }
     }
     if (keystate[SDL_SCANCODE_S]) {
-        if(camera.getY() < ENV_HEIGHT - windowHeight) {
+        if (playerY < ENV_HEIGHT - 75) {
+            playerY += playerSpeed;
+        }
+        if (camera.getY() < ENV_HEIGHT - windowHeight && playerY > playerBaseY) {
             camera.move(0, playerSpeed);
         }
     }
