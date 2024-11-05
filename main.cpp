@@ -18,6 +18,7 @@ SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
 SDL_Texture* schoolTexture = nullptr;
 SDL_Texture* playerTexture = nullptr;
+SDL_Texture* backgroundTexture = nullptr;
 std::vector<Fish> school;
 TTF_Font* font = nullptr;
 
@@ -221,6 +222,17 @@ bool initSDL() {
     playerTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
     SDL_FreeSurface(playerSurface);
 
+    SDL_Surface* backgroundSurface = IMG_Load("../img/background.jpg");
+    if (backgroundSurface == nullptr) {
+        std::cerr << "Erreur de chargement de l'image de fond: " << IMG_GetError() << std::endl;
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return false;
+    }
+    backgroundTexture = SDL_CreateTextureFromSurface(renderer, backgroundSurface);
+    SDL_FreeSurface(backgroundSurface);
+
     return true;
 }
 
@@ -291,7 +303,10 @@ void renderScene(int playerX, int playerY, int *fig) {
     SDL_RenderClear(renderer);
 
     //drawGridBackground(renderer);
-    drawGradientBackground(renderer);
+    //drawGradientBackground(renderer);
+    Camera& camera = Camera::getInstance();
+    SDL_Rect backgroundRect = { -camera.getX(), -camera.getY(), ENV_WIDTH, ENV_HEIGHT };
+    SDL_RenderCopy(renderer, backgroundTexture, nullptr, &backgroundRect);
 
     rock.draw(renderer);
     //reef.draw(renderer);
@@ -332,6 +347,7 @@ void cleanup() {
     TTF_CloseFont(font);
     TTF_Quit();
     SDL_DestroyTexture(schoolTexture);
+    SDL_DestroyTexture(backgroundTexture);
     if (renderer != nullptr) {
         SDL_DestroyRenderer(renderer);
     }
