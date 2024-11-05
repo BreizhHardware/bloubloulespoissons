@@ -21,3 +21,11 @@ target_link_libraries(bloubloulespoissons ${SDL2_LIBRARIES} -lSDL2_image -lSDL2_
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+
+if (WIN32)
+    if (MINGW)
+        set_target_properties(bloubloulespoissons PROPERTIES LINK_FLAGS "-Wl,-subsystem,console")
+    else()
+        set_target_properties(bloubloulespoissons PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
+    endif()
+endif()

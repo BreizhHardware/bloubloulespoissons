@@ -6,6 +6,7 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <cstdlib>
 
 #include "fish.h"
 #include "decors.h"
@@ -101,14 +102,14 @@ void displayFPS(SDL_Renderer* renderer, TTF_Font* font, int fps) {
     SDL_DestroyTexture(textTexture);
 }
 
-void displayPlayerCoord(SDL_Renderer* renderer, TTF_Font* font) {
+void displayPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int playerX, int playerY) {
     Camera& camera = Camera::getInstance();
     int cameraX = camera.getX();
     int cameraY = camera.getY();
 
     // Code pour afficher les coordonnées de la caméra
     std::string coordText = "Camera: (" + std::to_string(cameraX) + ", " + std::to_string(cameraY) + ")";
-    std::string coordText2 = "Player: (" + std::to_string(cameraX + playerBaseX) + ", " + std::to_string(cameraY + playerBaseY) + ")";
+    std::string coordText2 = "Player: (" + std::to_string(playerX) + ", " + std::to_string(playerY) + ")";
     SDL_Color textColor = {0, 255, 0};
     SDL_Surface* textSurface = TTF_RenderText_Solid(font, coordText.c_str(), textColor);
     SDL_Surface* textSurface2 = TTF_RenderText_Solid(font, coordText2.c_str(), textColor);
@@ -140,6 +141,9 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < school.size(); i += fishPerThread) {
         threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
     }
+
+    freopen("CON", "w", stdout);
+    freopen("CON", "w", stderr);
 
     int playerX = windowWidth / 2;
     int playerY = windowHeight / 2;
@@ -249,18 +253,20 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
     Camera& camera = Camera::getInstance();
 
     if (keystate[SDL_SCANCODE_W]) {
-        if (playerY > 0) {
+        std::cout << "PlayerY: " << playerY << " Camera: " << camera.getY() << " ENV_HEIGHT: " << ENV_HEIGHT << " windowHeight: " << windowHeight << " playerBaseY: " << playerBaseY << std::endl;
+        if ((playerY > 0) && (camera.getY() == 0 && playerY <= windowHeight/2)) {
             playerY -= playerSpeed;
         }
-        if (camera.getY() > 0 && playerY < playerBaseY) {
+        if (camera.getY() > 0 && playerY == playerBaseY) {
             camera.move(0, -playerSpeed);
         }
     }
     if (keystate[SDL_SCANCODE_S]) {
-        if (playerY < ENV_HEIGHT - 75) {
+        // std::cout << "PlayerY: " << playerY << " Camera: " << camera.getY() << " ENV_HEIGHT: " << ENV_HEIGHT << " windowHeight: " << windowHeight << " playerBaseY: " << playerBaseY << std::endl;
+        if ((playerY <  ENV_HEIGHT-75) && ( playerY < windowHeight/2)) {
             playerY += playerSpeed;
         }
-        if (camera.getY() < ENV_HEIGHT - windowHeight && playerY > playerBaseY) {
+        if ((camera.getY() < ENV_HEIGHT -75) && (playerY >= playerBaseY)) {
             camera.move(0, playerSpeed);
         }
     }
@@ -343,7 +349,7 @@ void renderScene(int playerX, int playerY, int *fig) {
     SDL_RenderCopyEx(renderer, playerTexture, &playerRect, &playerPos, 0, nullptr, SDL_FLIP_NONE);
 
     displayFPS(renderer, font, fps);
-    displayPlayerCoord(renderer, font);
+    displayPlayerCoord(renderer, font, playerX, playerY);
 
     SDL_RenderPresent(renderer);
 }
