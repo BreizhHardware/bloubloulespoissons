@@ -32,7 +32,7 @@ Kelp kelp(500, 500, 100, 4, 87, 0);
 
 bool initSDL();
 void handleEvents(int& playerX, int& playerY, int playerSpeed);
-void renderScene(int playerX, int playerY);
+void renderScene(int playerX, int playerY, int *fig);
 void cleanup();
 
 void drawGradientBackground(SDL_Renderer* renderer) {
@@ -143,10 +143,10 @@ int main(int argc, char* argv[]) {
     int playerX = windowWidth / 2;
     int playerY = windowHeight / 2;
     const int playerSpeed = 5;
-
+    int fig = 1;
     while (running) {
         handleEvents(playerX, playerY, playerSpeed);
-        renderScene(playerX, playerY);
+        renderScene(playerX, playerY, &fig);
         //std::cout << "Window size: " << windowWidth << "x" << windowHeight << std::endl;
         SDL_Delay(10);
     }
@@ -274,7 +274,7 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
     }
 }
 
-void renderScene(int playerX, int playerY) {
+void renderScene(int playerX, int playerY, int *fig) {
     static Uint32 lastTime = 0;
     static int frameCount = 0;
     static int fps = 0;
