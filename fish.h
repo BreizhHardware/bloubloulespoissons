@@ -1,7 +1,7 @@
 #ifndef FISH_H
 #define FISH_H
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_image.h>
+#include <SDL3_image/SDL_image.h>
 #include <cmath>
 #include <iostream>
 #include <string>
