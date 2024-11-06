@@ -237,6 +237,10 @@ bool initSDL() {
     backgroundTexture = SDL_CreateTextureFromSurface(renderer, backgroundSurface);
     SDL_FreeSurface(backgroundSurface);
 
+    int backgroundWidth, backgroundHeight;
+    SDL_QueryTexture(backgroundTexture, nullptr, nullptr, &backgroundWidth, &backgroundHeight);
+    std::cout << "Background texture size: " << backgroundWidth << "x" << backgroundHeight << std::endl;
+
     return true;
 }
 
