@@ -271,13 +271,17 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
         }
     }
     if (keystate[SDL_SCANCODE_A]) {
-        if(camera.getX() > -playerBaseX) {
+        if(camera.getX() > 0 && (playerX == playerBaseX)) {
             camera.move(-playerSpeed, 0);
+        }else if (playerX > 0) {
+            playerX -= playerSpeed;
         }
     }
     if (keystate[SDL_SCANCODE_D]) {
-        if(camera.getX() < ENV_WIDTH - windowWidth) {
+        if(camera.getX() < ENV_WIDTH - 75 && (playerX == playerBaseX)) {
             camera.move(playerSpeed, 0);
+        }else if (playerX < windowWidth - 75) {
+            playerX += playerSpeed;
         }
     }
     if (keystate[SDL_SCANCODE_ESCAPE]) {

@@ -8,8 +8,8 @@
 #include <vector>
 #include "camera.h"
 
-const int ENV_WIDTH = 3840;
-const int ENV_HEIGHT = 2160;
+const int ENV_WIDTH = 3888;
+const int ENV_HEIGHT = 2200;
 const int MARGIN_WIDTH = 100;
 const int MARGIN_HEIGHT = 100;
 
