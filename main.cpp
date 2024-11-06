@@ -258,19 +258,18 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
 
     if (keystate[SDL_SCANCODE_W]) {
         std::cout << "PlayerY: " << playerY << " Camera: " << camera.getY() << " ENV_HEIGHT: " << ENV_HEIGHT << " windowHeight: " << windowHeight << " playerBaseY: " << playerBaseY << std::endl;
-        if ((playerY > 0) && (camera.getY() == 0 && playerY <= windowHeight/2)) {
-            playerY -= playerSpeed;
-        }
         if (camera.getY() > 0 && playerY == playerBaseY) {
             camera.move(0, -playerSpeed);
+        }else if (playerY > 0) {
+            playerY -= playerSpeed;
         }
     }
     if (keystate[SDL_SCANCODE_S]) {
         // std::cout << "PlayerY: " << playerY << " Camera: " << camera.getY() << " ENV_HEIGHT: " << ENV_HEIGHT << " windowHeight: " << windowHeight << " playerBaseY: " << playerBaseY << std::endl;
         
-        if ((camera.getY() < ENV_HEIGHT-windowHeight) && (playerY >= playerBaseY)) {
+        if ((camera.getY() < ENV_HEIGHT-windowHeight) && (playerY == playerBaseY)) {
             camera.move(0, playerSpeed);
-        }else if (playerY <= playerBaseY && playerY < windowHeight-75) {
+        }else if (playerY < windowHeight-75) {
             playerY += playerSpeed;
         }
     }
