@@ -36,7 +36,7 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
     int tempY = this->y;
     int speed = this->playerSpeed;
 
-    //Press left shift to increase speed
+    //Press left shift to increase speed MAIS C'EST BUG !!!!!!!!!!!!!
     if (keystate[SDL_SCANCODE_LSHIFT]) {
         speed = this->playerSpeed * 2;
     }
