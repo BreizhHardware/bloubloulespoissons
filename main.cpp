@@ -12,6 +12,7 @@
 #include "decors.h"
 #include "camera.h"
 #include "env.h"
+#include "player.h"
 
 std::mutex mtx;
 std::atomic<bool> running(true);
@@ -25,7 +26,7 @@ Kelp kelp(500, 500, 100, 4, 87, 0);
 
 bool initSDL();
 void handleEvents(int& playerX, int& playerY, int playerSpeed);
-void renderScene(int playerX, int playerY, int *fig);
+void renderScene(int playerX, int playerY, int *fig, Player player);
 void cleanup();
 
 void drawGradientBackground(SDL_Renderer* renderer) {
@@ -188,9 +189,14 @@ int main(int argc, char* args[]) {
     int playerY = windowHeight / 2;
     const int playerSpeed = 5;
     int fig = 1;
+
+    Player player = Player(playerX, playerY, playerSpeed, renderer);
+
+
     while (running) {
         handleEvents(playerX, playerY, playerSpeed);
-        renderScene(playerX, playerY, &fig);
+        player.updatePlayerPos(playerX, playerY);
+        renderScene(playerX, playerY, &fig, player);
         //std::cout << "Window size: " << windowWidth << "x" << windowHeight << std::endl;
         SDL_Delay(10);
     }
@@ -263,7 +269,7 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
     }
 }
 
-void renderScene(int playerX, int playerY, int *fig) {
+void renderScene(int playerX, int playerY, int *fig, Player player) {
     static Uint32 lastTime = 0;
     static int frameCount = 0;
     static int fps = 0;
@@ -296,22 +302,23 @@ void renderScene(int playerX, int playerY, int *fig) {
 
     // SDL_Rect playerRect = { playerX, playerY, 75, 75 };
     // SDL_RenderCopy(renderer, playerTexture, nullptr, &playerRect);
-    SDL_Rect playerRect = {0, 0, 513, 600};
-    if (*fig < 5 ) {
-        playerRect = {46, 26, 442, 541};
-    } else if (*fig < 8) {
-        playerRect = {560, 23, 426, 536};
-    }else if (*fig < 11) {
-        playerRect = {986, 23, 469, 530};
-    }else if (*fig < 14) {
-        playerRect = {1436, 23, 465, 520};
-    }else{
-        *fig = 0;
-    }
-    *fig += 1;
+    // SDL_Rect playerRect = {0, 0, 513, 600};
+    // if (*fig < 5 ) {
+    //     playerRect = {46, 26, 442, 541};
+    // } else if (*fig < 8) {
+    //     playerRect = {560, 23, 426, 536};
+    // }else if (*fig < 11) {
+    //     playerRect = {986, 23, 469, 530};
+    // }else if (*fig < 14) {
+    //     playerRect = {1436, 23, 465, 520};
+    // }else{
+    //     *fig = 0;
+    // }
+    // *fig += 1;
 
-    SDL_Rect playerPos = {playerX, playerY, 75, 75};
-    SDL_RenderCopyEx(renderer, playerTexture, &playerRect, &playerPos, 0, nullptr, SDL_FLIP_NONE);
+    // SDL_Rect playerPos = {playerX, playerY, 75, 75};
+    // SDL_RenderCopyEx(renderer, playerTexture, &playerRect, &playerPos, 0, nullptr, SDL_FLIP_NONE);
+    player.draw(renderer);
 
     displayFPS(renderer, font, fps);
     displayPlayerCoord(renderer, font, playerX, playerY);

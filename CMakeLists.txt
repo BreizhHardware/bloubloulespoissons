@@ -16,7 +16,10 @@ add_executable(bloubloulespoissons main.cpp fish.cpp decors.cpp
         camera.cpp
         camera.h
         env.h
-        env.cpp)
+        env.cpp
+        player.h
+        player.cpp
+        )
 
 # Lier SDL2 et SDL2_image
 target_link_libraries(bloubloulespoissons ${SDL2_LIBRARIES} -lSDL2_image -lSDL2_ttf)
