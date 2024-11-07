@@ -1,7 +1,3 @@
-//
-// Created by BreizhHardware on 07/11/2024.
-//
-
 #include "env.h"
 
 int windowWidth = 1500;
@@ -15,6 +11,7 @@ int ENV_WIDTH = 0;
 SDL_Texture* backgroundTexture = nullptr;
 SDL_Renderer* renderer = nullptr;
 SDL_Window* window = nullptr;
+TTF_Font* font = nullptr;
 
 bool initEnvironment(SDL_Renderer* renderer) {
     SDL_Surface* backgroundSurface = IMG_Load("../img/background.jpg");
@@ -25,7 +22,13 @@ bool initEnvironment(SDL_Renderer* renderer) {
     backgroundTexture = SDL_CreateTextureFromSurface(renderer, backgroundSurface);
     ENV_WIDTH = backgroundSurface->w;
     ENV_HEIGHT = backgroundSurface->h;
-    std::cout << "Environment size: " << ENV_WIDTH << "x" << ENV_HEIGHT << std::endl;
     SDL_FreeSurface(backgroundSurface);
+
+    font = TTF_OpenFont("../fonts/arial.ttf", 16);
+    if (font == nullptr) {
+        std::cerr << "Erreur de chargement de la police: " << TTF_GetError() << std::endl;
+        return false;
+    }
+
     return true;
 }

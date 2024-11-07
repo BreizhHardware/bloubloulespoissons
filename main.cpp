@@ -16,10 +16,8 @@
 std::mutex mtx;
 std::atomic<bool> running(true);
 
-SDL_Texture* schoolTexture = nullptr;
 SDL_Texture* playerTexture = nullptr;
 std::vector<Fish> school;
-TTF_Font* font = nullptr;
 
 Rock rock(0, 0, 50, 255, 0, 0);
 Reef reef(300, 300);
@@ -157,6 +155,11 @@ bool initSDL() {
         return false;
     }
 
+    if (TTF_Init() == -1) {
+        std::cerr << "SDL_ttf could not initialize! SDL_ttf Error: " << TTF_GetError() << std::endl;
+        return false;
+    }
+
     if (!initEnvironment(renderer)) {
         return false;
     }
@@ -170,45 +173,32 @@ int main(int argc, char* args[]) {
         return -1;
     }
 
-    // Main loop flag
-    bool quit = false;
-
-    // Event handler
-    SDL_Event e;
-
-    // While application is running
-    while (!quit) {
-        // Handle events on queue
-        while (SDL_PollEvent(&e) != 0) {
-            // User requests quit
-            if (e.type == SDL_QUIT) {
-                quit = true;
-            }
-        }
-
-        // Clear screen
-        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-        SDL_RenderClear(renderer);
-
-        // Render background texture
-        SDL_Rect backgroundRect = {0, 0, ENV_WIDTH, ENV_HEIGHT};
-        SDL_RenderCopy(renderer, backgroundTexture, nullptr, &backgroundRect);
-
-        // Update screen
-        SDL_RenderPresent(renderer);
+    for (int i = 0; i < 1000; ++i) {
+        school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 50, 50, renderer, rand() % 2 == 0 ? 1 : 0));
     }
-
-    // Free resources and close SDL
-    SDL_DestroyTexture(backgroundTexture);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    backgroundTexture = nullptr;
-    renderer = nullptr;
-    window = nullptr;
-
-    IMG_Quit();
-    SDL_Quit();
-
+    std::cout << "Thread: " << std::thread::hardware_concurrency() << std::endl;
+    std::vector<std::thread> threads;
+    int fishPerThread = school.size() / std::thread::hardware_concurrency();
+    for (int i = 0; i < school.size(); i += fishPerThread) {
+        threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+    }
+    freopen("CON", "w", stdout);
+    freopen("CON", "w", stderr);
+    int playerX = windowWidth / 2;
+    int playerY = windowHeight / 2;
+    const int playerSpeed = 5;
+    int fig = 1;
+    while (running) {
+        handleEvents(playerX, playerY, playerSpeed);
+        renderScene(playerX, playerY, &fig);
+        //std::cout << "Window size: " << windowWidth << "x" << windowHeight << std::endl;
+        SDL_Delay(10);
+    }
+    running = false;
+    for (auto& thread : threads) {
+        thread.join();
+    }
+    cleanup();
     return 0;
 }
 
@@ -234,7 +224,7 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
     }
     if (keystate[SDL_SCANCODE_S]) {
         // std::cout << "PlayerY: " << playerY << " Camera: " << camera.getY() << " ENV_HEIGHT: " << ENV_HEIGHT << " windowHeight: " << windowHeight << " playerBaseY: " << playerBaseY << std::endl;
-        
+
         if ((camera.getY() < ENV_HEIGHT-windowHeight) && (playerY == playerBaseY)) {
             camera.move(0, playerSpeed);
         }else if (playerY < windowHeight-75) {
@@ -332,7 +322,6 @@ void renderScene(int playerX, int playerY, int *fig) {
 void cleanup() {
     TTF_CloseFont(font);
     TTF_Quit();
-    SDL_DestroyTexture(schoolTexture);
     SDL_DestroyTexture(backgroundTexture);
     if (renderer != nullptr) {
         SDL_DestroyRenderer(renderer);
