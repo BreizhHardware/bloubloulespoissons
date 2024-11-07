@@ -11,22 +11,15 @@
 #include "fish.h"
 #include "decors.h"
 #include "camera.h"
+#include "env.h"
 
 std::mutex mtx;
 std::atomic<bool> running(true);
 
-SDL_Window* window = nullptr;
-SDL_Renderer* renderer = nullptr;
 SDL_Texture* schoolTexture = nullptr;
 SDL_Texture* playerTexture = nullptr;
-SDL_Texture* backgroundTexture = nullptr;
 std::vector<Fish> school;
 TTF_Font* font = nullptr;
-
-int windowWidth = 1500;
-int windowHeight = 800;
-int playerBaseX = windowWidth / 2;
-int playerBaseY = windowHeight / 2;
 
 Rock rock(0, 0, 50, 255, 0, 0);
 Reef reef(300, 300);
@@ -127,67 +120,9 @@ void displayPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int playerX, int
     SDL_DestroyTexture(textTexture2);
 }
 
-int main(int argc, char* argv[]) {
-    if (!initSDL()) {
-        return 1;
-    }
-
-    for (int i = 0; i < 1000; ++i) {
-        school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 50, 50, schoolTexture, renderer, rand() % 2 == 0 ? 1 : 0));
-    }
-    std::cout << "Thread: " << std::thread::hardware_concurrency() << std::endl;
-    std::vector<std::thread> threads;
-    int fishPerThread = school.size() / std::thread::hardware_concurrency();
-    for (int i = 0; i < school.size(); i += fishPerThread) {
-        threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
-    }
-
-    freopen("CON", "w", stdout);
-    freopen("CON", "w", stderr);
-
-    int playerX = windowWidth / 2;
-    int playerY = windowHeight / 2;
-    const int playerSpeed = 5;
-    int fig = 1;
-    while (running) {
-        handleEvents(playerX, playerY, playerSpeed);
-        renderScene(playerX, playerY, &fig);
-        //std::cout << "Window size: " << windowWidth << "x" << windowHeight << std::endl;
-        SDL_Delay(10);
-    }
-
-    running = false;
-    for (auto& thread : threads) {
-        thread.join();
-    }
-    cleanup();
-
-    return 0;
-}
-
 bool initSDL() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        std::cerr << "Erreur d'initialisation de SDL: " << SDL_GetError() << std::endl;
-        return false;
-    }
-
-    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
-        std::cerr << "Erreur d'initialisation de SDL_image: " << IMG_GetError() << std::endl;
-        SDL_Quit();
-        return false;
-    }
-
-    if (TTF_Init() == -1) {
-        std::cerr << "Erreur d'initialisation de SDL_ttf: " << TTF_GetError() << std::endl;
-        SDL_Quit();
-        return false;
-    }
-
-    font = TTF_OpenFont("../fonts/arial.ttf", 16);
-    if (font == nullptr) {
-        std::cerr << "Erreur de chargement de la police: " << TTF_GetError() << std::endl;
-        TTF_Quit();
-        SDL_Quit();
+        std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
         return false;
     }
 
@@ -197,8 +132,7 @@ bool initSDL() {
                               windowWidth, windowHeight,
                               SDL_WINDOW_SHOWN);
     if (window == nullptr) {
-        std::cerr << "Erreur de création de la fenêtre: " << SDL_GetError() << std::endl;
-        SDL_Quit();
+        std::cerr << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
         return false;
     }
 
@@ -218,30 +152,64 @@ bool initSDL() {
         return false;
     }
 
-    SDL_Surface* schoolSurface = IMG_Load("../img/poasson.png");
-    schoolTexture = SDL_CreateTextureFromSurface(renderer, schoolSurface);
-    SDL_FreeSurface(schoolSurface);
-
-    SDL_Surface* playerSurface = IMG_Load("../img/player/player-full.png");
-    playerTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
-    SDL_FreeSurface(playerSurface);
-
-    SDL_Surface* backgroundSurface = IMG_Load("../img/background.jpg");
-    if (backgroundSurface == nullptr) {
-        std::cerr << "Erreur de chargement de l'image de fond: " << IMG_GetError() << std::endl;
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
+        std::cerr << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError() << std::endl;
         return false;
     }
-    backgroundTexture = SDL_CreateTextureFromSurface(renderer, backgroundSurface);
-    SDL_FreeSurface(backgroundSurface);
 
-    int backgroundWidth, backgroundHeight;
-    SDL_QueryTexture(backgroundTexture, nullptr, nullptr, &backgroundWidth, &backgroundHeight);
-    std::cout << "Background texture size: " << backgroundWidth << "x" << backgroundHeight << std::endl;
+    if (!initEnvironment(renderer)) {
+        return false;
+    }
 
     return true;
+}
+
+int main(int argc, char* args[]) {
+    if (!initSDL()) {
+        std::cerr << "Failed to initialize!" << std::endl;
+        return -1;
+    }
+
+    // Main loop flag
+    bool quit = false;
+
+    // Event handler
+    SDL_Event e;
+
+    // While application is running
+    while (!quit) {
+        // Handle events on queue
+        while (SDL_PollEvent(&e) != 0) {
+            // User requests quit
+            if (e.type == SDL_QUIT) {
+                quit = true;
+            }
+        }
+
+        // Clear screen
+        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        SDL_RenderClear(renderer);
+
+        // Render background texture
+        SDL_Rect backgroundRect = {0, 0, ENV_WIDTH, ENV_HEIGHT};
+        SDL_RenderCopy(renderer, backgroundTexture, nullptr, &backgroundRect);
+
+        // Update screen
+        SDL_RenderPresent(renderer);
+    }
+
+    // Free resources and close SDL
+    SDL_DestroyTexture(backgroundTexture);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    backgroundTexture = nullptr;
+    renderer = nullptr;
+    window = nullptr;
+
+    IMG_Quit();
+    SDL_Quit();
+
+    return 0;
 }
 
 void handleEvents(int& playerX, int& playerY, const int playerSpeed) {

@@ -14,7 +14,9 @@ include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} ${SDL2_TTF_I
 
 add_executable(bloubloulespoissons main.cpp fish.cpp decors.cpp
         camera.cpp
-        camera.h)
+        camera.h
+        env.h
+        env.cpp)
 
 # Lier SDL2 et SDL2_image
 target_link_libraries(bloubloulespoissons ${SDL2_LIBRARIES} -lSDL2_image -lSDL2_ttf)
