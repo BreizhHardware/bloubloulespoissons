@@ -25,8 +25,8 @@ Reef reef(300, 300);
 Kelp kelp(500, 500, 100, 4, 87, 0);
 
 bool initSDL();
-void handleEvents(int& playerX, int& playerY, int playerSpeed);
-void renderScene(int playerX, int playerY, int *fig, Player player);
+void handleQuit();
+void renderScene(Player player);
 void cleanup();
 
 void drawGradientBackground(SDL_Renderer* renderer) {
@@ -194,9 +194,10 @@ int main(int argc, char* args[]) {
 
 
     while (running) {
-        handleEvents(playerX, playerY, playerSpeed);
-        player.updatePlayerPos(playerX, playerY);
-        renderScene(playerX, playerY, &fig, player);
+        // handleEvents(playerX, playerY, playerSpeed);
+        player.handlePlayerMovement(ENV_WIDTH, ENV_HEIGHT, windowWidth, windowHeight);
+        handleQuit();
+        renderScene(player);
         //std::cout << "Window size: " << windowWidth << "x" << windowHeight << std::endl;
         SDL_Delay(10);
     }
@@ -208,7 +209,7 @@ int main(int argc, char* args[]) {
     return 0;
 }
 
-void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
+void handleQuit() {
     SDL_Event event;
     const Uint8* keystate = SDL_GetKeyboardState(NULL);
 
@@ -218,58 +219,13 @@ void handleEvents(int& playerX, int& playerY, const int playerSpeed) {
         }
     }
 
-    Camera& camera = Camera::getInstance();
-
-    if (keystate[SDL_SCANCODE_W]) {
-        std::cout << "PlayerY: " << playerY << " Camera: " << camera.getY() << " ENV_HEIGHT: " << ENV_HEIGHT << " windowHeight: " << windowHeight << " playerBaseY: " << playerBaseY << std::endl;
-        if (camera.getY() > 0 && playerY == playerBaseY) {
-            camera.move(0, -playerSpeed);
-        }else if (playerY > 0) {
-            playerY -= playerSpeed;
-        }
-    }
-    if (keystate[SDL_SCANCODE_S]) {
-        // std::cout << "PlayerY: " << playerY << " Camera: " << camera.getY() << " ENV_HEIGHT: " << ENV_HEIGHT << " windowHeight: " << windowHeight << " playerBaseY: " << playerBaseY << std::endl;
-
-        if ((camera.getY() < ENV_HEIGHT-windowHeight) && (playerY == playerBaseY)) {
-            camera.move(0, playerSpeed);
-        }else if (playerY < windowHeight-75) {
-            playerY += playerSpeed;
-        }
-    }
-    if (keystate[SDL_SCANCODE_A]) {
-        if(camera.getX() > 0 && (playerX == playerBaseX)) {
-            camera.move(-playerSpeed, 0);
-        }else if (playerX > 0) {
-            playerX -= playerSpeed;
-        }
-    }
-    if (keystate[SDL_SCANCODE_D]) {
-        if(camera.getX() < ENV_WIDTH - windowWidth && (playerX == playerBaseX)) {
-            camera.move(playerSpeed, 0);
-        }else if (playerX < windowWidth) {
-            playerX += playerSpeed;
-        }
-    }
     if (keystate[SDL_SCANCODE_ESCAPE]) {
         running = false;
     }
-
-    // Ensure player stays within environment bounds
-    if (playerX < 0) {
-        playerX = 0;
-    } else if (playerX > ENV_WIDTH) {
-        playerX = ENV_WIDTH;
-    }
-
-    if (playerY < 0) {
-        playerY = 0;
-    } else if (playerY > ENV_HEIGHT) {
-        playerY = ENV_HEIGHT;
-    }
 }
 
-void renderScene(int playerX, int playerY, int *fig, Player player) {
+    
+void renderScene(Player player) {
     static Uint32 lastTime = 0;
     static int frameCount = 0;
     static int fps = 0;
@@ -300,27 +256,11 @@ void renderScene(int playerX, int playerY, int *fig, Player player) {
         fish.draw(renderer);
     }
 
-    // SDL_Rect playerRect = { playerX, playerY, 75, 75 };
-    // SDL_RenderCopy(renderer, playerTexture, nullptr, &playerRect);
-    // SDL_Rect playerRect = {0, 0, 513, 600};
-    // if (*fig < 5 ) {
-    //     playerRect = {46, 26, 442, 541};
-    // } else if (*fig < 8) {
-    //     playerRect = {560, 23, 426, 536};
-    // }else if (*fig < 11) {
-    //     playerRect = {986, 23, 469, 530};
-    // }else if (*fig < 14) {
-    //     playerRect = {1436, 23, 465, 520};
-    // }else{
-    //     *fig = 0;
-    // }
-    // *fig += 1;
-
-    // SDL_Rect playerPos = {playerX, playerY, 75, 75};
-    // SDL_RenderCopyEx(renderer, playerTexture, &playerRect, &playerPos, 0, nullptr, SDL_FLIP_NONE);
     player.draw(renderer);
 
     displayFPS(renderer, font, fps);
+    int playerX, playerY;
+    std::tie(playerX, playerY) = player.getPlayerPos();
     displayPlayerCoord(renderer, font, playerX, playerY);
 
     SDL_RenderPresent(renderer);

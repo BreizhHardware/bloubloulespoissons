@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <iostream>
+#include <tuple>
 
 
 enum playerData {
@@ -51,9 +52,10 @@ class Player {
         };
         void updatePlayerPos(int x, int y);
         void updatePlayerSpeed(int playerSpeed);
-        auto getPlayerPos();
+        std::tuple<int, int> getPlayerPos();
         int getPlayerSpeed();
         void draw(SDL_Renderer* renderer);
+        void handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth, int windowHeight);
 };
 
 #endif
