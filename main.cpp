@@ -185,20 +185,14 @@ int main(int argc, char* args[]) {
     }
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
-    int playerX = windowWidth / 2;
-    int playerY = windowHeight / 2;
-    const int playerSpeed = 5;
-    int fig = 1;
 
-    Player player = Player(playerX, playerY, playerSpeed, renderer);
+    Player player = Player(windowWidth / 2, windowHeight / 2, 5, renderer);
 
 
     while (running) {
-        // handleEvents(playerX, playerY, playerSpeed);
         player.handlePlayerMovement(ENV_WIDTH, ENV_HEIGHT, windowWidth, windowHeight);
         handleQuit();
         renderScene(player);
-        //std::cout << "Window size: " << windowWidth << "x" << windowHeight << std::endl;
         SDL_Delay(10);
     }
     running = false;
@@ -241,8 +235,6 @@ void renderScene(Player player) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    //drawGridBackground(renderer);
-    //drawGradientBackground(renderer);
     Camera& camera = Camera::getInstance();
     SDL_Rect backgroundRect = { -camera.getX(), -camera.getY(), ENV_WIDTH, ENV_HEIGHT };
     SDL_RenderCopy(renderer, backgroundTexture, nullptr, &backgroundRect);
