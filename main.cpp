@@ -18,6 +18,7 @@ std::mutex mtx;
 std::atomic<bool> running(true);
 
 SDL_Texture* playerTexture = nullptr;
+SDL_Texture* fishTextures[100]; // Adjust the size as needed
 std::vector<Fish> school;
 
 Rock rock(0, 0, 50, 255, 0, 0);
@@ -38,17 +39,13 @@ void drawGradientBackground(SDL_Renderer* renderer) {
 }
 
 void drawGridBackground(SDL_Renderer* renderer) {
-    // Dessiner le fond bleu
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
     SDL_RenderClear(renderer);
 
-    // Couleur des lignes de la grille
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 
-    // Dessiner les lignes horizontales et les coordonnées y
     for (int y = 0; y < ENV_HEIGHT; y += 50) {
         SDL_RenderDrawLine(renderer, 0, y, ENV_WIDTH, y);
-        // Afficher les coordonnées y
         std::string yText = std::to_string(y);
         SDL_Surface* textSurface = TTF_RenderText_Solid(font, yText.c_str(), {255, 255, 255});
         SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
@@ -58,10 +55,8 @@ void drawGridBackground(SDL_Renderer* renderer) {
         SDL_DestroyTexture(textTexture);
     }
 
-    // Dessiner les lignes verticales et les coordonnées x
     for (int x = 0; x < ENV_WIDTH; x += 50) {
         SDL_RenderDrawLine(renderer, x, 0, x, ENV_HEIGHT);
-        // Afficher les coordonnées x
         std::string xText = std::to_string(x);
         SDL_Surface* textSurface = TTF_RenderText_Solid(font, xText.c_str(), {255, 255, 255});
         SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
@@ -72,7 +67,6 @@ void drawGridBackground(SDL_Renderer* renderer) {
     }
 }
 
-// Function to update a range of fish
 void updateFishRange(std::vector<Fish>& school, int start, int end){
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
@@ -99,7 +93,6 @@ void displayPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int playerX, int
     int cameraX = camera.getX();
     int cameraY = camera.getY();
 
-    // Code pour afficher les coordonnées de la caméra
     std::string coordText = "Camera: (" + std::to_string(cameraX) + ", " + std::to_string(cameraY) + ")";
     std::string coordText2 = "Player: (" + std::to_string(playerX) + ", " + std::to_string(playerY) + ")";
     SDL_Color textColor = {0, 255, 0};
@@ -165,6 +158,21 @@ bool initSDL() {
         return false;
     }
 
+    for (int i = 0; i < fishCount; ++i) {
+        std::string fishTexturePath = "../img/fish/fish" + std::to_string(i) + ".png";
+        SDL_Surface* fishSurface = IMG_Load(fishTexturePath.c_str());
+        if (fishSurface == nullptr) {
+            std::cerr << "Erreur de chargement de l'image du poisson: " << IMG_GetError() << std::endl;
+            return false;
+        }
+        fishTextures[i] = SDL_CreateTextureFromSurface(renderer, fishSurface);
+        if (fishTextures[i] == nullptr) {
+            std::cerr << "Erreur de création de la texture du poisson: " << SDL_GetError() << std::endl;
+            return false;
+        }
+        SDL_FreeSurface(fishSurface);
+    }
+
     return true;
 }
 
@@ -175,7 +183,7 @@ int main(int argc, char* args[]) {
     }
 
     for (int i = 0; i < 1000; ++i) {
-        school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 50, 50, renderer, rand() % 2 == 0 ? 1 : 0));
+        school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 50, 50, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]));
     }
     std::cout << "Thread: " << std::thread::hardware_concurrency() << std::endl;
     std::vector<std::thread> threads;
@@ -218,7 +226,7 @@ void handleQuit() {
     }
 }
 
-    
+
 void renderScene(Player player) {
     static Uint32 lastTime = 0;
     static int frameCount = 0;
@@ -262,6 +270,9 @@ void cleanup() {
     TTF_CloseFont(font);
     TTF_Quit();
     SDL_DestroyTexture(backgroundTexture);
+    for (int i = 0; i < fishCount; ++i) {
+        SDL_DestroyTexture(fishTextures[i]);
+    }
     if (renderer != nullptr) {
         SDL_DestroyRenderer(renderer);
     }

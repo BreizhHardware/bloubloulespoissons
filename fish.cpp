@@ -113,9 +113,9 @@ void Fish::cycle() {
     //std::cout << "Updated Vitesse: (" << vx << ", " << vy << ")" << std::endl;
 }
 
-Fish::Fish(const int x, const int y, const float vx, const float vy, std::vector<Fish>&school, const int id, const int width, const int height, SDL_Renderer* renderer, int biasdir): x(x), y(y), vx(vx), vy(vy), school(school), id(id), width(width),height(height), texture(texture), biasdir(biasdir) {
-    texture = IMG_LoadTexture(renderer, "../img/poasson.png");
+Fish::Fish(const int x, const int y, const float vx, const float vy, std::vector<Fish>&school, const int id, const int width, const int height, SDL_Renderer* renderer, int biasdir, SDL_Texture* texture): x(x), y(y), vx(vx), vy(vy), school(school), id(id), width(width),height(height), texture(texture), biasdir(biasdir) {
     if (!texture) {
         std::cerr << "Erreur de chargement de la texture: " << IMG_GetError() << std::endl;
     }
 }
+

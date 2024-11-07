@@ -12,6 +12,7 @@ SDL_Texture* backgroundTexture = nullptr;
 SDL_Renderer* renderer = nullptr;
 SDL_Window* window = nullptr;
 TTF_Font* font = nullptr;
+int fishCount = 0;
 
 bool initEnvironment(SDL_Renderer* renderer) {
     SDL_Surface* backgroundSurface = IMG_Load("../img/background.jpg");
@@ -27,6 +28,23 @@ bool initEnvironment(SDL_Renderer* renderer) {
     font = TTF_OpenFont("../fonts/arial.ttf", 16);
     if (font == nullptr) {
         std::cerr << "Erreur de chargement de la police: " << TTF_GetError() << std::endl;
+        return false;
+    }
+
+    // Count the number of file in the ../img/fish directory
+    DIR* dir;
+    struct dirent* ent;
+    struct stat st;
+    if ((dir = opendir("../img/fish")) != nullptr) {
+        while ((ent = readdir(dir)) != nullptr) {
+            std::string filePath = std::string("../img/fish/") + ent->d_name;
+            if (stat(filePath.c_str(), &st) == 0 && S_ISREG(st.st_mode)) {
+                fishCount++;
+            }
+        }
+        closedir(dir);
+    } else {
+        std::cerr << "Erreur de lecture du dossier ../img/fish" << std::endl;
         return false;
     }
 

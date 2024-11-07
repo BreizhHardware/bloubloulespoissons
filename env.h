@@ -5,6 +5,10 @@
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include <iostream>
+#include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 extern int windowWidth;
 extern int windowHeight;
@@ -18,6 +22,7 @@ extern SDL_Texture* backgroundTexture;
 extern SDL_Renderer* renderer;
 extern SDL_Window* window;
 extern TTF_Font* font;
+extern int fishCount;
 
 bool initEnvironment(SDL_Renderer* renderer);
 
