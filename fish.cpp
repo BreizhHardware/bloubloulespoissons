@@ -47,11 +47,11 @@ void Fish::cycle() {
     int neighboring_boids = 0;
     float xvel_avg = 0, yvel_avg = 0, xpos_avg = 0, ypos_avg = 0, close_dx = 0, close_dy = 0;
     for (Fish &schoolIt: school) {
-        const float other_x = schoolIt.getX();
-        const float other_y = schoolIt.getY();
-        const float other_vx = schoolIt.getVx();
-        const float other_vy = schoolIt.getVy();
         if (schoolIt.getId() != id) {
+            const float other_x = schoolIt.getX();
+            const float other_y = schoolIt.getY();
+            const float other_vx = schoolIt.getVx();
+            const float other_vy = schoolIt.getVy();
             float dx = x - other_x;
             float dy = y - other_y;
             if (abs(dx) < VISUAL_RANGE && abs(dy) < VISUAL_RANGE) {

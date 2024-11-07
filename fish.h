@@ -28,7 +28,7 @@ private:
     const float BIASVALUE = 0.001;
     //const float MAXBIAS = 0.01;
 
-
+    float x, y;
     float vx, vy;
     std::vector<Fish> &school;
     int id;
@@ -36,6 +36,7 @@ private:
     //int cycle_count = 0;
     int width, height;
     int biasdir = 1;
+
 
 ;
 public:
@@ -53,7 +54,7 @@ public:
     void drawArrow(SDL_Renderer* renderer, int x, int y, float vx, float vy);
     void cycle();
 
-    float x, y;
+
 };
 
 #endif //FISH_H
