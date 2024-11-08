@@ -21,13 +21,9 @@ SDL_Texture* playerTexture = nullptr;
 SDL_Texture* fishTextures[100]; // Adjust the size as needed
 std::vector<Fish> school;
 
-Rock rock(0, 0, 50, 255, 0, 0);
-Reef reef(300, 300);
-Kelp kelp(500, 500, 100, 4, 87, 0);
-
 bool initSDL();
 void handleQuit();
-void renderScene(Player player);
+void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks);
 void cleanup();
 
 void drawGradientBackground(SDL_Renderer* renderer) {
@@ -173,6 +169,7 @@ bool initSDL() {
         SDL_FreeSurface(fishSurface);
     }
 
+    texturesVector = initTexture(renderer);
     return true;
 }
 
@@ -181,6 +178,10 @@ int main(int argc, char* args[]) {
         std::cerr << "Failed to initialize!" << std::endl;
         return -1;
     }
+
+    std::vector<Kelp> kelps;
+    std::vector<Rock> rocks;
+    generateProceduralDecorations(kelps, rocks, ENV_HEIGHT, ENV_WIDTH, renderer);
 
     for (int i = 0; i < 1000; ++i) {
         school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 50, 50, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]));
@@ -200,7 +201,7 @@ int main(int argc, char* args[]) {
     while (running) {
         player.handlePlayerMovement(ENV_WIDTH, ENV_HEIGHT, windowWidth, windowHeight);
         handleQuit();
-        renderScene(player);
+        renderScene(player, kelps, rocks);
         SDL_Delay(10);
     }
     running = false;
@@ -227,7 +228,7 @@ void handleQuit() {
 }
 
 
-void renderScene(Player player) {
+void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks) {
     static Uint32 lastTime = 0;
     static int frameCount = 0;
     static int fps = 0;
@@ -247,9 +248,13 @@ void renderScene(Player player) {
     SDL_Rect backgroundRect = { -camera.getX(), -camera.getY(), ENV_WIDTH, ENV_HEIGHT };
     SDL_RenderCopy(renderer, backgroundTexture, nullptr, &backgroundRect);
 
-    rock.draw(renderer);
-    //reef.draw(renderer);
-    kelp.draw(renderer);
+    for (const auto& kelp : kelps) {
+        kelp.draw(renderer);
+    }
+
+    for (const auto& rock : rocks) {
+        rock.draw(renderer);
+    }
 
     std::lock_guard<std::mutex> lock(mtx);
     for (auto& fish : school) {
