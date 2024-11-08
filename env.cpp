@@ -15,6 +15,7 @@ SDL_Renderer* renderer = nullptr;
 SDL_Window* window = nullptr;
 TTF_Font* font = nullptr;
 int fishCount = 0;
+int FISH_NUMBER = 1500;
 std::vector<SDL_Texture*> texturesVector;
 
 bool initEnvironment(SDL_Renderer* renderer) {

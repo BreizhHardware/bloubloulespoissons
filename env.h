@@ -24,6 +24,7 @@ extern SDL_Renderer* renderer;
 extern SDL_Window* window;
 extern TTF_Font* font;
 extern int fishCount;
+extern int FISH_NUMBER;
 extern std::vector<SDL_Texture*> texturesVector;
 
 bool initEnvironment(SDL_Renderer* renderer);

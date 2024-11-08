@@ -63,13 +63,18 @@ void drawGridBackground(SDL_Renderer* renderer) {
     }
 }
 
-void updateFishRange(std::vector<Fish>& school, int start, int end){
+void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
+    std::cout << "Thread updateFishRange ID : " << id << " : started" << std::endl;
+    int updateCount = 0;
     while (running) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));
-        std::lock_guard<std::mutex> lock(mtx);
+        std::this_thread::sleep_for(std::chrono::milliseconds(32));
+        //std::lock_guard<std::mutex> lock(mtx);
+        std::cout << "Thread updateFishRange ID : " << id << " : update " << updateCount << " started" << std::endl;
         for (int i = start; i < end; ++i) {
             school[i].cycle();
         }
+        std::cout << "Thread updateFishRange ID : " << id << " : update " << updateCount << " ended" << std::endl;
+        updateCount++;
     }
 }
 
@@ -173,6 +178,17 @@ bool initSDL() {
     return true;
 }
 
+void playerMovementThread(Player& player) {
+    std::cout << "starting playerMovementThread..." << std::endl;
+    while (running) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        player.handlePlayerMovement(ENV_WIDTH, ENV_HEIGHT, windowWidth, windowHeight);
+    }
+    std::cout << "playerMovementThread ended" << std::endl;
+}
+
+
+
 int main(int argc, char* args[]) {
     if (!initSDL()) {
         std::cerr << "Failed to initialize!" << std::endl;
@@ -183,29 +199,34 @@ int main(int argc, char* args[]) {
     std::vector<Rock> rocks;
     generateProceduralDecorations(kelps, rocks, ENV_HEIGHT, ENV_WIDTH, renderer);
 
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < FISH_NUMBER ; ++i) {
         school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 50, 50, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]));
     }
     std::cout << "Thread: " << std::thread::hardware_concurrency() << std::endl;
     std::vector<std::thread> threads;
     int fishPerThread = school.size() / std::thread::hardware_concurrency();
+    int thread_id = 0;
     for (int i = 0; i < school.size(); i += fishPerThread) {
-        threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+        threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())), thread_id);
+        thread_id++;
     }
+
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
     Player player = Player(windowWidth / 2, windowHeight / 2, 5, renderer);
 
+    std::thread player_thread(playerMovementThread, std::ref(player));
+
 
     while (running) {
-        player.handlePlayerMovement(ENV_WIDTH, ENV_HEIGHT, windowWidth, windowHeight);
         handleQuit();
         renderScene(player, kelps, rocks);
         SDL_Delay(10);
     }
     running = false;
-    for (auto& thread : threads) {
+    player_thread.join();
+    for (std::thread& thread : threads) {
         thread.join();
     }
     cleanup();
@@ -257,15 +278,14 @@ void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vecto
     }
 
     std::lock_guard<std::mutex> lock(mtx);
-    for (auto& fish : school) {
+    for (Fish& fish : school) {
         fish.draw(renderer);
     }
 
     player.draw(renderer);
 
     displayFPS(renderer, font, fps);
-    int playerX, playerY;
-    std::tie(playerX, playerY) = player.getPlayerPos();
+    auto [playerX, playerY] = player.getPlayerPos();
     displayPlayerCoord(renderer, font, playerX, playerY);
 
     SDL_RenderPresent(renderer);
