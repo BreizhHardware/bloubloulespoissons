@@ -67,7 +67,7 @@ void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
     std::cout << "Thread updateFishRange ID : " << id << " : started" << std::endl;
     int updateCount = 0;
     while (running) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(32));
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
         //std::lock_guard<std::mutex> lock(mtx);
         //std::cout << "Thread updateFishRange ID : " << id << " : update " << updateCount << " started" << std::endl;
         for (int i = start; i < end; ++i) {
@@ -187,6 +187,14 @@ void playerMovementThread(Player& player) {
     std::cout << "playerMovementThread ended" << std::endl;
 }
 
+void handleQuitThread() {
+    std::cout << "handleQuitThread..." << std::endl;
+    while (running) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        handleQuit();
+    }
+    std::cout << "handleQuitThread" << std::endl;
+};
 
 
 int main(int argc, char* args[]) {
