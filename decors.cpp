@@ -5,7 +5,7 @@
 #include "decors.h"
 #include <iostream>
 
-void Rock::draw(SDL_Renderer* renderer) {
+void Rock::draw(SDL_Renderer* renderer) const{
     Camera& camera = Camera::getInstance();
     int cameraX = camera.getX();
     int cameraY = camera.getY();
@@ -24,29 +24,39 @@ void Rock::draw(SDL_Renderer* renderer) {
     //std::cout << "Rock drawn at (" << x << ", " << y << ")" << std::endl;
 }
 
-Reef::Reef(int x, int y) : x(x), y(y) {
-    std::srand(std::time(0));
-    int numRocks = 2 + std::rand() % 7;
-    for (int i = 0; i < numRocks; i++) {
-        int size = 50 + std::rand() % 51;
-        int r = 46 + std::rand() % 47;
-        int g = 45 + std::rand() % 40;
-        int b = 45 + std::rand() % 26;
-        rocks.emplace_back(x + std::rand() % 100, y + std::rand() % 100, size, r, g, b);
-    }
-}
-
-void Reef::draw(SDL_Renderer* renderer) {
-    for (auto& rock : rocks) {
-        rock.draw(renderer);
-    }
-}
-
-void Kelp::draw(SDL_Renderer* renderer) {
+void Kelp::draw(SDL_Renderer* renderer) const{
     Camera& camera = Camera::getInstance();
     int cameraX = camera.getX();
     int cameraY = camera.getY();
     SDL_SetRenderDrawColor(renderer, r, g, b, 255);
     SDL_Rect kelpRect = { x - cameraX, y - cameraY, size / 3, size };
     SDL_RenderFillRect(renderer, &kelpRect);
+}
+
+void generateProceduralDecorations(std::vector<Kelp>&kelps, std::vector<Rock>&rocks, int envHeight, int envWidth) {
+    std::srand(std::time(0));
+
+    //Generate Kelp
+    int numKelps = 10 + std::rand() % 20;
+    for (int i = 0; i < numKelps; i++) {
+        int x = std::rand() % envWidth;
+        int y = envHeight - (std::rand() % (envHeight / 10));
+        int size = 50 + std::rand() % 100;
+        Uint8 r = 4;
+        Uint8 g = 87;
+        Uint8 b = 0;
+        kelps.emplace_back(Kelp(x, y, size, r, g, b));
+    }
+
+    //Generate Rocks
+    int numRocks = 10 + std::rand() % 20;
+    for (int i = 0; i < numRocks; i++) {
+        int x = std::rand() % envWidth;
+        int y = envHeight - (std::rand() % (envHeight / 10));
+        int size = 10 + std::rand() % 20;
+        int r = 100 + std::rand() % 156;
+        int g = 100 + std::rand() % 156;
+        int b = 100 + std::rand() % 156;
+        rocks.emplace_back(Rock(x, y, size, r, g, b));
+    }
 }

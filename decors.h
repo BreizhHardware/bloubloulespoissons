@@ -13,7 +13,7 @@
 class Rock {
 public:
     Rock(int x, int y, int size, Uint8 r, Uint8 g, Uint8 b) : x(x), y(y), size(size), r(r), g(g), b(b) {};
-    void draw(SDL_Renderer* renderer);
+    void draw(SDL_Renderer* renderer) const;
     int x;
     int y;
 private:
@@ -21,24 +21,12 @@ private:
     int r;
     int g;
     int b;
-};
-
-class Reef {
-public:
-    Reef(int x, int y);
-    void draw(SDL_Renderer* renderer);
-    int x;
-    int y;
-private:
-
-    int size;
-    std::vector<Rock> rocks;
 };
 
 class Kelp {
 public:
     Kelp(int x, int y, int height, Uint8 r, Uint8 g, Uint8 b) : x(x), y(y), size(height), r(r), g(g), b(b) {};
-    void draw(SDL_Renderer* renderer);
+    void draw(SDL_Renderer* renderer) const;
     int x;
     int y;
 private:
@@ -49,6 +37,7 @@ private:
     int b;
 };
 
+void generateProceduralDecorations(std::vector<Kelp>& kelps, std::vector<Rock>& rocks, int envHeight, int envWidth);
 
 
 #endif //DECORS_H
