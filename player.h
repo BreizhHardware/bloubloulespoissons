@@ -9,31 +9,29 @@
 
 enum playerData {
     PLAYER_SPRITE_1 = 0,
-    PLAYER_SPRITE_2 = 5,
-    PLAYER_SPRITE_3 = 8,
-    PLAYER_SPRITE_4 = 11,
-    PLAYER_SPRITE_5 = 14,
-    PLAYER_SIZE_X = 75,
-    PLAYER_SIZE_Y = 75
+    PLAYER_SPRITE_2 = 1,
+    PLAYER_SPRITE_3 = 2,
+    PLAYER_SIZE_X = 258,
+    PLAYER_SIZE_Y = 258
 };
 
 
-#define playerIMG "../img/player.png"
+#define playerIMG "../img/player/playerV2-full.png"
 
 class Player {
     private:
         int x, y;
         int playerBaseX, playerBaseY;
         int playerSpeed;
-        int currentSprite = 0;
+        int currentSprite = PLAYER_SPRITE_1;
+        int ticks = 0;
+        SDL_RendererFlip currentFlip = SDL_FLIP_NONE;
         SDL_Texture* playerTexture = nullptr;
         SDL_Rect playerPosForRender = {0, 0, PLAYER_SIZE_X, PLAYER_SIZE_Y};
-        SDL_Rect playerRect[5] = {
-            {0, 0, 513, 600},
-            {46, 26, 442, 541},
-            {560, 23, 426, 536},
-            {986, 23, 469, 530},
-            {1436, 23, 465, 520}
+        SDL_Rect playerRect[3] = {
+            {69, 73, 112, 117},
+            {326, 73, 112, 117},
+            {528, 73, 112, 117}
         };
 
     public:
