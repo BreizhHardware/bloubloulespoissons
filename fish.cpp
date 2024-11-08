@@ -40,6 +40,16 @@ void Fish::draw(SDL_Renderer *renderer) {
     //drawArrow(renderer, x + width / 2, y + height / 2, vx, vy);
 }
 
+bool Fish::isInView(Fish &other) {
+    return (other.getX() >= x - VISUAL_RANGE && other.getX() <= x + VISUAL_RANGE &&
+            other.getY() >= y - VISUAL_RANGE && other.getY() <= y + VISUAL_RANGE);
+}
+
+bool Fish::isClose(Fish &other) {
+    return (other.getX() >= x - PROTECTED_RANGE && other.getX() <= x + PROTECTED_RANGE &&
+            other.getY() >= y - PROTECTED_RANGE && other.getY() <= y + PROTECTED_RANGE);
+}
+
 void Fish::cycle() {
     //std::cout << "Cycle " << cycle_count << " pour le poisson " << id << std::endl;
     //std::cout << "Poisson Position: (" << x << ", " << y << ")" << std::endl;
@@ -48,23 +58,16 @@ void Fish::cycle() {
     float xvel_avg = 0, yvel_avg = 0, xpos_avg = 0, ypos_avg = 0, close_dx = 0, close_dy = 0;
     for (Fish &schoolIt: school) {
         if (schoolIt.getId() != id) {
-            const float other_x = schoolIt.getX();
-            const float other_y = schoolIt.getY();
-            const float other_vx = schoolIt.getVx();
-            const float other_vy = schoolIt.getVy();
-            float dx = x - other_x;
-            float dy = y - other_y;
-            if (abs(dx) < VISUAL_RANGE && abs(dy) < VISUAL_RANGE) {
-                if ((dx * dx + dy * dy) < PROTECTED_RANGE * PROTECTED_RANGE) {
-                    close_dx += x - other_x;
-                    close_dy += y - other_y;
-                } else if ((dx * dx + dy * dy) < VISUAL_RANGE * VISUAL_RANGE) {
-                    xpos_avg += other_x;
-                    ypos_avg += other_y;
-                    xvel_avg += other_vx;
-                    yvel_avg += other_vy;
-                    neighboring_boids++;
+            if (isInView(schoolIt)) {
+                if (isClose(schoolIt)) {
+                    close_dx += x - schoolIt.getX();
+                    close_dy += y - schoolIt.getY();
                 }
+                xpos_avg += schoolIt.getX();
+                ypos_avg += schoolIt.getY();
+                xvel_avg += schoolIt.getVx();
+                yvel_avg += schoolIt.getVy();
+                neighboring_boids++;
             }
         }
     }
@@ -79,32 +82,32 @@ void Fish::cycle() {
     vx += close_dx * AVOIDANCE_FORCE;
     vy += close_dy * AVOIDANCE_FORCE;
 
-    if ( y <= 0) {
+    if (y <= 0) {
         vy += TURN_FACTOR;
     }
-    if ( y >= (ENV_WIDTH - MARGIN_HEIGHT)) {
+    if (y >= (ENV_WIDTH - MARGIN_HEIGHT)) {
         vy -= TURN_FACTOR;
     }
-    if ( x <= 0) {
+    if (x <= 0) {
         vx += TURN_FACTOR;
     }
-    if ( x >= (ENV_WIDTH - MARGIN_WIDTH)) {
+    if (x >= (ENV_WIDTH - MARGIN_WIDTH)) {
         vx -= TURN_FACTOR;
     }
 
     if (biasdir == 1) {
         vx = (1 - BIASVALUE) * vx + (BIASVALUE * 1);
-    }else if (biasdir == 0){
+    } else if (biasdir == 0) {
         vx = (1 - BIASVALUE) * vx + (BIASVALUE * -1);
     }
 
     float speed = sqrt(vx * vx + vy * vy);
     if (speed > MAX_SPEED) {
-        vx =  vx/speed * MAX_SPEED;
-        vy =  vy/speed * MAX_SPEED;
+        vx = vx / speed * MAX_SPEED;
+        vy = vy / speed * MAX_SPEED;
     } else if (speed < MIN_SPEED) {
-        vx = vx/ speed * MIN_SPEED;
-        vy = vy/ speed * MIN_SPEED;
+        vx = vx / speed * MIN_SPEED;
+        vy = vy / speed * MIN_SPEED;
     }
     x += vx;
     y += vy;
@@ -113,7 +116,10 @@ void Fish::cycle() {
     //std::cout << "Updated Vitesse: (" << vx << ", " << vy << ")" << std::endl;
 }
 
-Fish::Fish(const int x, const int y, const float vx, const float vy, std::vector<Fish>&school, const int id, const int width, const int height, SDL_Renderer* renderer, int biasdir, SDL_Texture* texture): x(x), y(y), vx(vx), vy(vy), school(school), id(id), width(width),height(height), texture(texture), biasdir(biasdir) {
+Fish::Fish(const int x, const int y, const float vx, const float vy, std::vector<Fish> &school, const int id,
+           const int width, const int height, SDL_Renderer *renderer, int biasdir,
+           SDL_Texture *texture): x(x), y(y), vx(vx), vy(vy), school(school), id(id), width(width), height(height),
+                                  texture(texture), biasdir(biasdir) {
     if (!texture) {
         std::cerr << "Erreur de chargement de la texture: " << IMG_GetError() << std::endl;
     }

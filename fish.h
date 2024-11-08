@@ -48,6 +48,9 @@ public:
     void drawArrow(SDL_Renderer* renderer, int x, int y, float vx, float vy);
     void cycle();
 
+    bool isInView(Fish& other);
+    bool isClose(Fish& other);
+
 
 };
 

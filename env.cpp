@@ -13,6 +13,7 @@ SDL_Renderer* renderer = nullptr;
 SDL_Window* window = nullptr;
 TTF_Font* font = nullptr;
 int fishCount = 0;
+int FISH_NUMBER = 1500;
 
 bool initEnvironment(SDL_Renderer* renderer) {
     SDL_Surface* backgroundSurface = IMG_Load("../img/background.jpg");

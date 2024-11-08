@@ -27,6 +27,7 @@ void Player::draw(SDL_Renderer* renderer) {
 };
 
 void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth, int windowHeight) {
+
     SDL_Event event;
     const Uint8* keystate = SDL_GetKeyboardState(NULL);
 

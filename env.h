@@ -23,6 +23,7 @@ extern SDL_Renderer* renderer;
 extern SDL_Window* window;
 extern TTF_Font* font;
 extern int fishCount;
+extern int FISH_NUMBER;
 
 bool initEnvironment(SDL_Renderer* renderer);
 
