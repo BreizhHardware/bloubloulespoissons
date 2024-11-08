@@ -23,7 +23,27 @@ int Player::getPlayerSpeed() {
 
 
 void Player::draw(SDL_Renderer* renderer) {
-    SDL_RenderCopyEx(renderer, this->playerTexture, &this->playerRect[this->currentSprite], &this->playerPosForRender, 0, nullptr, SDL_FLIP_NONE);
+    switch (this->ticks) {
+        case 0:
+            this->currentSprite = PLAYER_SPRITE_1;
+            break;
+        case 5:
+            this->currentSprite = PLAYER_SPRITE_2;
+            break;
+        case 8:
+            this->currentSprite = PLAYER_SPRITE_3;
+            break;
+        default:
+            break;
+    }
+
+    if (this->ticks >= 8) {
+        this->ticks = 0;
+    } else {
+        this->ticks++;
+    }
+
+    SDL_RenderCopyEx(renderer, this->playerTexture, &this->playerRect[this->currentSprite], &this->playerPosForRender, 0, nullptr, this->currentFlip);
 };
 
 void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth, int windowHeight) {
@@ -54,22 +74,26 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
 
         if ((camera.getY() < ENV_HEIGHT-windowHeight) && (tempY == this->playerBaseY)) {
             camera.move(0, speed);
-        }else if (tempY < windowHeight-75) {
+        }else if (tempY < windowHeight-PLAYER_SIZE_Y) {
             tempY += speed;
         }
     }
     if (keystate[SDL_SCANCODE_A]) {
         if(camera.getX() > 0 && (tempX == this->playerBaseX)) {
             camera.move(-speed, 0);
+            this->currentFlip = SDL_FLIP_HORIZONTAL;
         }else if (tempX > 0) {
             tempX -= speed;
+            this->currentFlip = SDL_FLIP_HORIZONTAL;
         }
     }
     if (keystate[SDL_SCANCODE_D]) {
         if(camera.getX() < ENV_WIDTH - windowWidth && (tempX == this->playerBaseX)) {
             camera.move(speed, 0);
-        }else if (tempX < windowWidth) {
+            this->currentFlip = SDL_FLIP_NONE;
+        }else if (tempX < windowWidth-PLAYER_SIZE_X) {
             tempX += speed;
+            this->currentFlip = SDL_FLIP_NONE;
         }
     }
 
