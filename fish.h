@@ -7,18 +7,12 @@
 #include <string>
 #include <vector>
 #include "camera.h"
-
-const int ENV_WIDTH = 3840;
-const int ENV_HEIGHT = 2160;
-const int MARGIN_WIDTH = 100;
-const int MARGIN_HEIGHT = 100;
-
-
+#include "env.h"
 
 class Fish {
 private:
-    const int VISUAL_RANGE = 40;
-    const int PROTECTED_RANGE = 8;
+    const int VISUAL_RANGE = 100;
+    const int PROTECTED_RANGE = 20;
     const float AVOIDANCE_FORCE = 0.05;
     const float MATCHING_FACTOR = 0.05;
     const float CENTERING_FACTOR = 0.005;
@@ -40,7 +34,7 @@ private:
 
 ;
 public:
-    Fish(const int x, const int y, const float vx, const float vy,std::vector<Fish> &school, const int id,const int width,const int height, SDL_Texture* texture, SDL_Renderer* renderer,int biasdir): x(x), y(y), vx(vx), vy(vy), school(school), id(id), width(width),height(height), texture(texture), biasdir(biasdir) {}
+    Fish(const int x, const int y, const float vx, const float vy,std::vector<Fish> &school, const int id,const int width,const int height, SDL_Renderer* renderer,int biasdir, SDL_Texture* texture);
     ~Fish() = default;
 
     float getX() const { return x; };
