@@ -11,8 +11,8 @@ enum playerData {
     PLAYER_SPRITE_1 = 0,
     PLAYER_SPRITE_2 = 1,
     PLAYER_SPRITE_3 = 2,
-    PLAYER_SIZE_X = 258,
-    PLAYER_SIZE_Y = 258
+    PLAYER_SIZE_X = 124,
+    PLAYER_SIZE_Y = 124
 };
 
 
