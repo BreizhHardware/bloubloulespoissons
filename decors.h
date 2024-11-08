@@ -13,15 +13,15 @@
 
 class Rock {
 public:
-    Rock(int x, int y, int size, Uint8 r, Uint8 g, Uint8 b) : x(x), y(y), size(size), r(r), g(g), b(b) {};
+    Rock(int x, int y, int size, Uint8 r, Uint8 g, Uint8 b, SDL_Renderer* renderer) : x(x), y(y), size(size), r(r), g(g), b(b) {};
     void draw(SDL_Renderer* renderer) const;
     int x;
     int y;
 private:
     int size;
-    int r;
-    int g;
-    int b;
+    Uint8 r;
+    Uint8 g;
+    Uint8 b;
 };
 
 class Kelp {
