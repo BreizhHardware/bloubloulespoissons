@@ -5,6 +5,7 @@
 #ifndef DECORS_H
 #define DECORS_H
 #include <SDL_render.h>
+#include <SDL2/SDL_image.h>
 #include <ctime>
 #include <cstdlib>
 #include <vector>
@@ -25,19 +26,21 @@ private:
 
 class Kelp {
 public:
-    Kelp(int x, int y, int height, Uint8 r, Uint8 g, Uint8 b) : x(x), y(y), size(height), r(r), g(g), b(b) {};
+    Kelp(int x, int y, int size, Uint8 r, Uint8 g, Uint8 b, SDL_Renderer* renderer);
     void draw(SDL_Renderer* renderer) const;
     int x;
     int y;
+    ~Kelp();
 private:
 
     int size;
-    int r;
-    int g;
-    int b;
+    Uint8 r;
+    Uint8 g;
+    Uint8 b;
+    SDL_Texture* Kelptexture;
 };
 
-void generateProceduralDecorations(std::vector<Kelp>& kelps, std::vector<Rock>& rocks, int envHeight, int envWidth);
+void generateProceduralDecorations(std::vector<Kelp>& kelps, std::vector<Rock>& rocks, int envHeight, int envWidth, SDL_Renderer* renderer);
 
 
 #endif //DECORS_H

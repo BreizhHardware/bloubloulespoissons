@@ -24,16 +24,34 @@ void Rock::draw(SDL_Renderer* renderer) const{
     //std::cout << "Rock drawn at (" << x << ", " << y << ")" << std::endl;
 }
 
-void Kelp::draw(SDL_Renderer* renderer) const{
+Kelp::Kelp(int x, int y, int size, Uint8 r, Uint8 g, Uint8 b, SDL_Renderer* renderer) : x(x), y(y), size(size), r(r), g(g), b(b), Kelptexture(nullptr) {
+    Kelptexture = IMG_LoadTexture(renderer, "../img/kelp.png");
+    if (Kelptexture == nullptr) {
+        std::cerr << "Failed to load kelp texture: " << SDL_GetError() << std::endl;
+    }
+}
+
+Kelp::~Kelp() {
+    if (Kelptexture != nullptr) {
+        SDL_DestroyTexture(Kelptexture);
+    }
+}
+
+
+void Kelp::draw(SDL_Renderer* renderer) const {
     Camera& camera = Camera::getInstance();
     int cameraX = camera.getX();
     int cameraY = camera.getY();
-    SDL_SetRenderDrawColor(renderer, r, g, b, 255);
     SDL_Rect kelpRect = { x - cameraX, y - cameraY, size / 3, size };
-    SDL_RenderFillRect(renderer, &kelpRect);
+    if (Kelptexture != nullptr) {
+        SDL_RenderCopy(renderer, Kelptexture, nullptr, &kelpRect);
+    } else {
+        SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+        SDL_RenderFillRect(renderer, &kelpRect);
+    }
 }
 
-void generateProceduralDecorations(std::vector<Kelp>&kelps, std::vector<Rock>&rocks, int envHeight, int envWidth) {
+void generateProceduralDecorations(std::vector<Kelp>&kelps, std::vector<Rock>&rocks, int envHeight, int envWidth , SDL_Renderer* renderer) {
     std::srand(std::time(0));
 
     //Generate Kelp
@@ -45,7 +63,7 @@ void generateProceduralDecorations(std::vector<Kelp>&kelps, std::vector<Rock>&ro
         Uint8 r = 4;
         Uint8 g = 87;
         Uint8 b = 0;
-        kelps.emplace_back(Kelp(x, y, size, r, g, b));
+        kelps.emplace_back(Kelp(x, y, size, r, g, b, renderer));
     }
 
     //Generate Rocks
