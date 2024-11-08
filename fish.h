@@ -11,8 +11,8 @@
 
 class Fish {
 private:
-    const int VISUAL_RANGE = 40;
-    const int PROTECTED_RANGE = 8;
+    const int VISUAL_RANGE = 100;
+    const int PROTECTED_RANGE = 20;
     const float AVOIDANCE_FORCE = 0.05;
     const float MATCHING_FACTOR = 0.05;
     const float CENTERING_FACTOR = 0.005;
