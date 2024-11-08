@@ -1,5 +1,7 @@
 #include "env.h"
 
+#include <vector>
+
 int windowWidth = 1500;
 int windowHeight = 800;
 int playerBaseX = windowWidth / 2;
@@ -13,6 +15,7 @@ SDL_Renderer* renderer = nullptr;
 SDL_Window* window = nullptr;
 TTF_Font* font = nullptr;
 int fishCount = 0;
+std::vector<SDL_Texture*> texturesVector;
 
 bool initEnvironment(SDL_Renderer* renderer) {
     SDL_Surface* backgroundSurface = IMG_Load("../img/background.jpg");
@@ -49,4 +52,16 @@ bool initEnvironment(SDL_Renderer* renderer) {
     }
 
     return true;
+}
+
+std::vector<SDL_Texture*> initTexture(SDL_Renderer* renderer) {
+    std::vector<SDL_Texture*> textures;
+    // Load the Kelp texture
+    SDL_Surface* kelpSurface = IMG_Load("../img/kelp.png");
+    if (kelpSurface == nullptr) {
+        std::cerr << "Erreur de chargement de l'image du Kelp: " << IMG_GetError() << std::endl;
+    }
+    textures.push_back(SDL_CreateTextureFromSurface(renderer, kelpSurface));
+    SDL_FreeSurface(kelpSurface);
+    return textures;
 }

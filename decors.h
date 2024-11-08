@@ -26,18 +26,16 @@ private:
 
 class Kelp {
 public:
-    Kelp(int x, int y, int size, Uint8 r, Uint8 g, Uint8 b, SDL_Renderer* renderer);
+    Kelp(int x, int y, int size, Uint8 r, Uint8 g, Uint8 b, SDL_Renderer* renderer) : x(x), y(y), size(size), r(r), g(g), b(b) {};
     void draw(SDL_Renderer* renderer) const;
     int x;
     int y;
-    ~Kelp();
 private:
 
     int size;
     Uint8 r;
     Uint8 g;
     Uint8 b;
-    SDL_Texture* Kelptexture;
 };
 
 void generateProceduralDecorations(std::vector<Kelp>& kelps, std::vector<Rock>& rocks, int envHeight, int envWidth, SDL_Renderer* renderer);

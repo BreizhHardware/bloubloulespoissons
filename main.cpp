@@ -169,6 +169,7 @@ bool initSDL() {
         SDL_FreeSurface(fishSurface);
     }
 
+    texturesVector = initTexture(renderer);
     return true;
 }
 

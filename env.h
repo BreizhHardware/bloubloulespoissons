@@ -5,6 +5,7 @@
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include <iostream>
+#include <vector>
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -23,7 +24,9 @@ extern SDL_Renderer* renderer;
 extern SDL_Window* window;
 extern TTF_Font* font;
 extern int fishCount;
+extern std::vector<SDL_Texture*> texturesVector;
 
 bool initEnvironment(SDL_Renderer* renderer);
+std::vector<SDL_Texture*> initTexture(SDL_Renderer* renderer);
 
 #endif // ENV_H
