@@ -69,11 +69,11 @@ void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(32));
         //std::lock_guard<std::mutex> lock(mtx);
-        std::cout << "Thread updateFishRange ID : " << id << " : update " << updateCount << " started" << std::endl;
+        //std::cout << "Thread updateFishRange ID : " << id << " : update " << updateCount << " started" << std::endl;
         for (int i = start; i < end; ++i) {
             school[i].cycle();
         }
-        std::cout << "Thread updateFishRange ID : " << id << " : update " << updateCount << " ended" << std::endl;
+        //std::cout << "Thread updateFishRange ID : " << id << " : update " << updateCount << " ended" << std::endl;
         updateCount++;
     }
 }
