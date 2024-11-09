@@ -53,6 +53,18 @@ public:
 
     SDL_Texture* getTexture() const { return this->texture; };
     SDL_Rect getRect() const { return {static_cast<int>(this->x), static_cast<int>(this->y), this->width, this->height}; };
+    Fish& operator=(const Fish& other) {
+        if (this != &other) {
+            // Les membres constants ne peuvent pas être assignés, donc nous ne les assignons pas ici
+            // school est une référence, donc nous ne pouvons pas la réassigner non plus
+            // Si vous avez d'autres membres non constants, vous pouvez les assigner ici
+        }
+        return *this;
+    }
+    // Définir explicitement le constructeur de copie et l'opérateur d'affectation par déplacement si nécessaire
+    Fish(const Fish& other) = delete;
+    Fish(Fish&& other) = default;
+    Fish& operator=(Fish&& other) = default;
 };
 
 #endif //FISH_H

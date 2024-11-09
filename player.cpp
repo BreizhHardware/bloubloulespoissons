@@ -129,13 +129,18 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
 
         this->updatePlayerPos(tempX, tempY);
 
-        // Check for collisions with fish
-        for (Fish& fish : school) {
+        // Check for collisions with fish and remove fish if collided
+        auto it = school.begin();
+        while (it != school.end()) {
+            Fish& fish = *it;
             if (fish.getTexture() == fishTextures[0] && this->checkCollision(fish.getRect())) {
                 this->energy += 5.0f;
                 if (this->energy > 100.0f) {
                     this->energy = 100.0f;
                 }
+                it = school.erase(it); // Remove fish from school
+            } else {
+                ++it;
             }
         }
     }
