@@ -5,6 +5,8 @@
 #include <SDL2/SDL_image.h>
 #include <iostream>
 #include <tuple>
+#include <vector>
+#include "fish.h"
 
 
 enum playerData {
@@ -34,9 +36,10 @@ class Player {
             {326, 73, 112, 117},
             {528, 73, 112, 117}
         };
-
+        std::vector<Fish>& school;
+        SDL_Texture** fishTextures;
     public:
-        Player(int x, int y, int playerSpeed, SDL_Renderer* renderer) : x(x), y(y), playerBaseX(x), playerBaseY(y), playerSpeed(playerSpeed) {
+        Player(int x, int y, int playerSpeed, SDL_Renderer* renderer, std::vector<Fish>& school, SDL_Texture** fishTextures) : x(x), y(y), playerBaseX(x), playerBaseY(y), playerSpeed(playerSpeed), school(school), fishTextures(fishTextures) {
             playerPosForRender.x = x;
             playerPosForRender.y = y;
 
@@ -56,6 +59,7 @@ class Player {
         void draw(SDL_Renderer* renderer);
         void handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth, int windowHeight);
         void drawEnergyBar(SDL_Renderer* renderer);
+        bool checkCollision(SDL_Rect fishRect);
 };
 
 #endif

@@ -185,7 +185,7 @@ int main(int argc, char* args[]) {
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
-    Player player = Player(windowWidth / 2, windowHeight / 2, 5, renderer);
+    Player player = Player(windowWidth / 2, windowHeight / 2, 5, renderer, school, fishTextures);
 
     std::thread player_thread(playerMovementThread, std::ref(player));
 

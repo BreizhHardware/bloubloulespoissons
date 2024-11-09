@@ -64,70 +64,81 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
     }
 
     bool moved = false;
+    if (this->energy != 0){
+        if (keystate[SDL_SCANCODE_W]) {
+            if (camera.getY() > 0 && tempY == this->playerBaseY) {
+                camera.move(0, -speed);
+            } else if (tempY > 0) {
+                tempY -= speed;
+            }
+            moved = true;
+        }
+        if (keystate[SDL_SCANCODE_S]) {
+            if ((camera.getY() < ENV_HEIGHT - windowHeight) && (tempY == this->playerBaseY)) {
+                camera.move(0, speed);
+            } else if (tempY < windowHeight - PLAYER_SIZE_Y) {
+                tempY += speed;
+            }
+            moved = true;
+        }
+        if (keystate[SDL_SCANCODE_A]) {
+            if (camera.getX() > 0 && (tempX == this->playerBaseX)) {
+                camera.move(-speed, 0);
+                this->currentFlip = SDL_FLIP_HORIZONTAL;
+            } else if (tempX > 0) {
+                tempX -= speed;
+                this->currentFlip = SDL_FLIP_HORIZONTAL;
+            }
+            moved = true;
+        }
+        if (keystate[SDL_SCANCODE_D]) {
+            if (camera.getX() < ENV_WIDTH - windowWidth && (tempX == this->playerBaseX)) {
+                camera.move(speed, 0);
+                this->currentFlip = SDL_FLIP_NONE;
+            } else if (tempX < windowWidth - PLAYER_SIZE_X) {
+                tempX += speed;
+                this->currentFlip = SDL_FLIP_NONE;
+            }
+            moved = true;
+        }
 
-    if (keystate[SDL_SCANCODE_W]) {
-        if (camera.getY() > 0 && tempY == this->playerBaseY) {
-            camera.move(0, -speed);
-        } else if (tempY > 0) {
-            tempY -= speed;
+        if (moved && !isSprinting) {
+            this->energy -= 0.1f; // Reduce energy for each movement
+            if (this->energy < 0) {
+                this->energy = 0;
+            }
         }
-        moved = true;
-    }
-    if (keystate[SDL_SCANCODE_S]) {
-        if ((camera.getY() < ENV_HEIGHT - windowHeight) && (tempY == this->playerBaseY)) {
-            camera.move(0, speed);
-        } else if (tempY < windowHeight - PLAYER_SIZE_Y) {
-            tempY += speed;
+        if (moved && isSprinting) {
+            this->energy -= 0.2f; // Reduce energy for each movement
+            if (this->energy < 0) {
+                this->energy = 0;
+            }
         }
-        moved = true;
-    }
-    if (keystate[SDL_SCANCODE_A]) {
-        if (camera.getX() > 0 && (tempX == this->playerBaseX)) {
-            camera.move(-speed, 0);
-            this->currentFlip = SDL_FLIP_HORIZONTAL;
-        } else if (tempX > 0) {
-            tempX -= speed;
-            this->currentFlip = SDL_FLIP_HORIZONTAL;
-        }
-        moved = true;
-    }
-    if (keystate[SDL_SCANCODE_D]) {
-        if (camera.getX() < ENV_WIDTH - windowWidth && (tempX == this->playerBaseX)) {
-            camera.move(speed, 0);
-            this->currentFlip = SDL_FLIP_NONE;
-        } else if (tempX < windowWidth - PLAYER_SIZE_X) {
-            tempX += speed;
-            this->currentFlip = SDL_FLIP_NONE;
-        }
-        moved = true;
-    }
 
-    if (moved && !isSprinting) {
-        this->energy -= 0.1f; // Réduire l'énergie à chaque mouvement
-        if (this->energy < 0) {
-            this->energy = 0;
+        if (tempX < 0) {
+            tempX = 0;
+        } else if (tempX > ENV_WIDTH) {
+            tempX = ENV_WIDTH;
+        }
+
+        if (tempY < 0) {
+            tempY = 0;
+        } else if (tempY > ENV_HEIGHT) {
+            tempY = ENV_HEIGHT;
+        }
+
+        this->updatePlayerPos(tempX, tempY);
+
+        // Check for collisions with fish
+        for (Fish& fish : school) {
+            if (fish.getTexture() == fishTextures[0] && this->checkCollision(fish.getRect())) {
+                this->energy += 5.0f;
+                if (this->energy > 100.0f) {
+                    this->energy = 100.0f;
+                }
+            }
         }
     }
-    if (moved && isSprinting) {
-        this->energy -= 0.2f; // Réduire l'énergie à chaque mouvement
-        if (this->energy < 0) {
-            this->energy = 0;
-        }
-    }
-
-    if (tempX < 0) {
-        tempX = 0;
-    } else if (tempX > ENV_WIDTH) {
-        tempX = ENV_WIDTH;
-    }
-
-    if (tempY < 0) {
-        tempY = 0;
-    } else if (tempY > ENV_HEIGHT) {
-        tempY = ENV_HEIGHT;
-    }
-
-    this->updatePlayerPos(tempX, tempY);
 }
 
 void Player::drawEnergyBar(SDL_Renderer* renderer) {
@@ -139,4 +150,9 @@ void Player::drawEnergyBar(SDL_Renderer* renderer) {
 
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
     SDL_RenderFillRect(renderer, &energyBarForeground);
+}
+
+bool Player::checkCollision(SDL_Rect fishRect) {
+    SDL_Rect playerRect = {this->x, this->y, PLAYER_SIZE_X, PLAYER_SIZE_Y};
+    return SDL_HasIntersection(&playerRect, &fishRect);
 }

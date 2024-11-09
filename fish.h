@@ -51,7 +51,8 @@ public:
     bool isInView(Fish& other);
     bool isClose(Fish& other);
 
-
+    SDL_Texture* getTexture() const { return this->texture; };
+    SDL_Rect getRect() const { return {static_cast<int>(this->x), static_cast<int>(this->y), this->width, this->height}; };
 };
 
 #endif //FISH_H
