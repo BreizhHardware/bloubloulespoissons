@@ -25,6 +25,7 @@ class Player {
         int playerSpeed;
         int currentSprite = PLAYER_SPRITE_1;
         int ticks = 0;
+        float energy = 100.0f;
         SDL_RendererFlip currentFlip = SDL_FLIP_NONE;
         SDL_Texture* playerTexture = nullptr;
         SDL_Rect playerPosForRender = {0, 0, PLAYER_SIZE_X, PLAYER_SIZE_Y};
@@ -54,6 +55,7 @@ class Player {
         int getPlayerSpeed();
         void draw(SDL_Renderer* renderer);
         void handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth, int windowHeight);
+        void drawEnergyBar(SDL_Renderer* renderer);
 };
 
 #endif

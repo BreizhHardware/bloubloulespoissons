@@ -44,10 +44,11 @@ void Player::draw(SDL_Renderer* renderer) {
     }
 
     SDL_RenderCopyEx(renderer, this->playerTexture, &this->playerRect[this->currentSprite], &this->playerPosForRender, 0, nullptr, this->currentFlip);
+
+    this->drawEnergyBar(renderer);
 };
 
 void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth, int windowHeight) {
-
     SDL_Event event;
     const Uint8* keystate = SDL_GetKeyboardState(NULL);
 
@@ -56,49 +57,64 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
     int tempX = this->x;
     int tempY = this->y;
     int speed = this->playerSpeed;
-
-    //Press left shift to increase speed MAIS C'EST BUG !!!!!!!!!!!!!
+    bool isSprinting = false;
     if (keystate[SDL_SCANCODE_LSHIFT]) {
         speed = this->playerSpeed * 2;
+        isSprinting = true;
     }
+
+    bool moved = false;
 
     if (keystate[SDL_SCANCODE_W]) {
-        //std::cout << "PlayerY: " << playerY << " Camera: " << camera.getY() << " ENV_HEIGHT: " << ENV_HEIGHT << " windowHeight: " << windowHeight << " playerBaseY: " << playerBaseY << std::endl;
         if (camera.getY() > 0 && tempY == this->playerBaseY) {
             camera.move(0, -speed);
-        }else if (tempY > 0) {
+        } else if (tempY > 0) {
             tempY -= speed;
         }
+        moved = true;
     }
     if (keystate[SDL_SCANCODE_S]) {
-        // std::cout << "PlayerY: " << playerY << " Camera: " << camera.getY() << " ENV_HEIGHT: " << ENV_HEIGHT << " windowHeight: " << windowHeight << " playerBaseY: " << playerBaseY << std::endl;
-
-        if ((camera.getY() < ENV_HEIGHT-windowHeight) && (tempY == this->playerBaseY)) {
+        if ((camera.getY() < ENV_HEIGHT - windowHeight) && (tempY == this->playerBaseY)) {
             camera.move(0, speed);
-        }else if (tempY < windowHeight-PLAYER_SIZE_Y) {
+        } else if (tempY < windowHeight - PLAYER_SIZE_Y) {
             tempY += speed;
         }
+        moved = true;
     }
     if (keystate[SDL_SCANCODE_A]) {
-        if(camera.getX() > 0 && (tempX == this->playerBaseX)) {
+        if (camera.getX() > 0 && (tempX == this->playerBaseX)) {
             camera.move(-speed, 0);
             this->currentFlip = SDL_FLIP_HORIZONTAL;
-        }else if (tempX > 0) {
+        } else if (tempX > 0) {
             tempX -= speed;
             this->currentFlip = SDL_FLIP_HORIZONTAL;
         }
+        moved = true;
     }
     if (keystate[SDL_SCANCODE_D]) {
-        if(camera.getX() < ENV_WIDTH - windowWidth && (tempX == this->playerBaseX)) {
+        if (camera.getX() < ENV_WIDTH - windowWidth && (tempX == this->playerBaseX)) {
             camera.move(speed, 0);
             this->currentFlip = SDL_FLIP_NONE;
-        }else if (tempX < windowWidth-PLAYER_SIZE_X) {
+        } else if (tempX < windowWidth - PLAYER_SIZE_X) {
             tempX += speed;
             this->currentFlip = SDL_FLIP_NONE;
         }
+        moved = true;
     }
 
-    // Ensure player stays within environment bounds
+    if (moved && !isSprinting) {
+        this->energy -= 0.1f; // Réduire l'énergie à chaque mouvement
+        if (this->energy < 0) {
+            this->energy = 0;
+        }
+    }
+    if (moved && isSprinting) {
+        this->energy -= 0.2f; // Réduire l'énergie à chaque mouvement
+        if (this->energy < 0) {
+            this->energy = 0;
+        }
+    }
+
     if (tempX < 0) {
         tempX = 0;
     } else if (tempX > ENV_WIDTH) {
@@ -112,4 +128,15 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
     }
 
     this->updatePlayerPos(tempX, tempY);
-};
+}
+
+void Player::drawEnergyBar(SDL_Renderer* renderer) {
+    SDL_Rect energyBarBackground = {10, 10, 200, 20};
+    SDL_Rect energyBarForeground = {10, 10, static_cast<int>(2 * this->energy), 20};
+
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &energyBarBackground);
+
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    SDL_RenderFillRect(renderer, &energyBarForeground);
+}

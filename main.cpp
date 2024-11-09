@@ -26,43 +26,6 @@ void handleQuit();
 void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks);
 void cleanup();
 
-void drawGradientBackground(SDL_Renderer* renderer) {
-    for (int y = 0; y < ENV_HEIGHT; y++) {
-        Uint8 blue = static_cast<Uint8>(255 * (1.0 - static_cast<float>(y) / ENV_HEIGHT));
-        SDL_SetRenderDrawColor(renderer, 0, 0, blue, 255);
-        SDL_RenderDrawLine(renderer, 0, y, ENV_WIDTH, y);
-    }
-}
-
-void drawGridBackground(SDL_Renderer* renderer) {
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    SDL_RenderClear(renderer);
-
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-
-    for (int y = 0; y < ENV_HEIGHT; y += 50) {
-        SDL_RenderDrawLine(renderer, 0, y, ENV_WIDTH, y);
-        std::string yText = std::to_string(y);
-        SDL_Surface* textSurface = TTF_RenderText_Solid(font, yText.c_str(), {255, 255, 255});
-        SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-        SDL_Rect textRect = {0, y, textSurface->w, textSurface->h};
-        SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
-        SDL_FreeSurface(textSurface);
-        SDL_DestroyTexture(textTexture);
-    }
-
-    for (int x = 0; x < ENV_WIDTH; x += 50) {
-        SDL_RenderDrawLine(renderer, x, 0, x, ENV_HEIGHT);
-        std::string xText = std::to_string(x);
-        SDL_Surface* textSurface = TTF_RenderText_Solid(font, xText.c_str(), {255, 255, 255});
-        SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-        SDL_Rect textRect = {x, 0, textSurface->w, textSurface->h};
-        SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
-        SDL_FreeSurface(textSurface);
-        SDL_DestroyTexture(textTexture);
-    }
-}
-
 void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
     std::cout << "Thread updateFishRange ID : " << id << " : started" << std::endl;
     int updateCount = 0;
@@ -102,8 +65,8 @@ void displayPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int playerX, int
     SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
     SDL_Texture* textTexture2 = SDL_CreateTextureFromSurface(renderer, textSurface2);
 
-    SDL_Rect textRect = {10, 10, textSurface->w, textSurface->h};
-    SDL_Rect textRect2 = {10, 30, textSurface2->w, textSurface2->h};
+    SDL_Rect textRect = {10, 30, textSurface->w, textSurface->h};
+    SDL_Rect textRect2 = {10, 50, textSurface2->w, textSurface2->h};
     SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
     SDL_RenderCopy(renderer, textTexture2, nullptr, &textRect2);
 
@@ -225,7 +188,6 @@ int main(int argc, char* args[]) {
     Player player = Player(windowWidth / 2, windowHeight / 2, 5, renderer);
 
     std::thread player_thread(playerMovementThread, std::ref(player));
-
 
     while (running) {
         handleQuit();
