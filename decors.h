@@ -38,7 +38,18 @@ private:
     Uint8 b;
 };
 
-void generateProceduralDecorations(std::vector<Kelp>& kelps, std::vector<Rock>& rocks, int envHeight, int envWidth, SDL_Renderer* renderer);
+class Coral {
+public:
+    Coral(int x, int y, int size, Uint8 r, Uint8 g, Uint8 b, SDL_Renderer* renderer) : x(x), y(y), size(size), r(r), g(g), b(b) {};
+    void draw(SDL_Renderer* renderer) const;
+    int x;
+    int y;
+private:
+    int size;
+    Uint8 r, g, b;
+};
+
+void generateProceduralDecorations(std::vector<Kelp>& kelps, std::vector<Rock>& rocks, std::vector<Coral>& corals,int envHeight, int envWidth, SDL_Renderer* renderer);
 
 
 #endif //DECORS_H

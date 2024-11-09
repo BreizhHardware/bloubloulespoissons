@@ -72,5 +72,12 @@ std::vector<SDL_Texture*> initTexture(SDL_Renderer* renderer) {
     }
     textures.push_back(SDL_CreateTextureFromSurface(renderer, rockSurface));
     SDL_FreeSurface(rockSurface);
+
+    //Load the coral texture
+    SDL_Surface* coralSurface = IMG_Load("../img/coral.png");
+    if (coralSurface == nullptr) {
+        std::cerr << "Erreur de chargement de l'image du Coral: " << IMG_GetError() << std::endl;
+    }
+    textures.push_back(SDL_CreateTextureFromSurface(renderer, coralSurface));
     return textures;
 }

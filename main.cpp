@@ -23,7 +23,7 @@ std::vector<Fish> school;
 
 bool initSDL();
 void handleQuit();
-void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks);
+void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
 void cleanup();
 
 void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
@@ -168,7 +168,8 @@ int main(int argc, char* args[]) {
 
     std::vector<Kelp> kelps;
     std::vector<Rock> rocks;
-    generateProceduralDecorations(kelps, rocks, ENV_HEIGHT, ENV_WIDTH, renderer);
+    std::vector<Coral> corals;
+    generateProceduralDecorations(kelps, rocks, corals,ENV_HEIGHT, ENV_WIDTH, renderer);
 
     for (int i = 0; i < FISH_NUMBER ; ++i) {
         school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 50, 50, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]));
@@ -191,7 +192,7 @@ int main(int argc, char* args[]) {
 
     while (running) {
         handleQuit();
-        renderScene(player, kelps, rocks);
+        renderScene(player, kelps, rocks, corals);
         SDL_Delay(10);
     }
     running = false;
@@ -219,7 +220,7 @@ void handleQuit() {
 }
 
 
-void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks) {
+void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals) {
     static Uint32 lastTime = 0;
     static int frameCount = 0;
     static int fps = 0;
@@ -245,6 +246,10 @@ void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vecto
 
     for (const auto& rock : rocks) {
         rock.draw(renderer);
+    }
+
+    for (const auto& coral : corals) {
+        coral.draw(renderer);
     }
 
     std::lock_guard<std::mutex> lock(mtx);
