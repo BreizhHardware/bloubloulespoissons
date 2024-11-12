@@ -146,23 +146,14 @@ bool initSDL() {
     return true;
 }
 
-void playerMovementThread(Player& player) {
-    std::cout << "starting playerMovementThread..." << std::endl;
+void playerMovementThread(Player& player, int playerIndex) {
+    std::cout << "starting playerMovementThread for player " << playerIndex << "..." << std::endl;
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         player.handlePlayerMovement(ENV_WIDTH, ENV_HEIGHT, windowWidth, windowHeight);
     }
-    std::cout << "playerMovementThread ended" << std::endl;
+    std::cout << "playerMovementThread for player " << playerIndex << " ended" << std::endl;
 }
-
-void handleQuitThread() {
-    std::cout << "handleQuitThread..." << std::endl;
-    while (running) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        handleQuit();
-    }
-    std::cout << "handleQuitThread" << std::endl;
-};
 
 
 int main(int argc, char* args[]) {
@@ -174,9 +165,9 @@ int main(int argc, char* args[]) {
     std::vector<Kelp> kelps;
     std::vector<Rock> rocks;
     std::vector<Coral> corals;
-    generateProceduralDecorations(kelps, rocks, corals,ENV_HEIGHT, ENV_WIDTH, renderer);
+    generateProceduralDecorations(kelps, rocks, corals, ENV_HEIGHT, ENV_WIDTH, renderer);
 
-    for (int i = 0; i < FISH_NUMBER ; ++i) {
+    for (int i = 0; i < FISH_NUMBER; ++i) {
         school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 75, 75, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]));
     }
     std::cout << "Thread: " << std::thread::hardware_concurrency() << std::endl;
@@ -191,23 +182,20 @@ int main(int argc, char* args[]) {
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
-    //Player player = Player(windowWidth / 2, windowHeight / 2, 5, renderer);
-
     players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer));
     players.emplace_back(Player(windowWidth / 3, windowHeight / 3, 5, renderer));
 
-    std::thread player_thread(playerMovementThread, std::ref(players[0]));
-    std::thread player_thread2(playerMovementThread, std::ref(players[1]));
-
-    std::thread quit_thread(handleQuitThread);
+    std::thread player_thread(playerMovementThread, std::ref(players[0]), 0);
+    std::thread player_thread2(playerMovementThread, std::ref(players[1]), 1);
 
     while (running) {
         renderScene(players, kelps, rocks, corals);
+        handleQuit();
         SDL_Delay(10);
     }
     running = false;
-    quit_thread.join();
     player_thread.join();
+    player_thread2.join();
     for (auto& thread : threads) {
         thread.join();
     }
