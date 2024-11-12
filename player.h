@@ -36,10 +36,9 @@ class Player {
             {326, 73, 112, 117},
             {528, 73, 112, 117}
         };
-        std::vector<Fish>& school;
-        SDL_Texture** fishTextures;
+        Uint32 lastMoveTime; 
     public:
-        Player(int x, int y, int playerSpeed, SDL_Renderer* renderer, std::vector<Fish>& school, SDL_Texture** fishTextures) : x(x), y(y), playerBaseX(x), playerBaseY(y), playerSpeed(playerSpeed), school(school), fishTextures(fishTextures) {
+        Player(int x, int y, int playerSpeed, SDL_Renderer* renderer) : x(x), y(y), playerBaseX(x), playerBaseY(y), playerSpeed(playerSpeed) {
             playerPosForRender.x = x;
             playerPosForRender.y = y;
 

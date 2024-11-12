@@ -15,6 +15,7 @@
 #include "player.h"
 
 std::mutex mtx;
+std::mutex coutMutex;
 std::atomic<bool> running(true);
 
 SDL_Texture* playerTexture = nullptr;
@@ -27,7 +28,10 @@ void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vecto
 void cleanup();
 
 void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
-    std::cout << "Thread updateFishRange ID : " << id << " : started" << std::endl;
+    {
+        std::lock_guard<std::mutex> guard(coutMutex);
+        std::cout << "Thread updateFishRange ID : " << id << " : started" << std::endl;
+    }
     int updateCount = 0;
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
@@ -172,7 +176,7 @@ int main(int argc, char* args[]) {
     generateProceduralDecorations(kelps, rocks, corals,ENV_HEIGHT, ENV_WIDTH, renderer);
 
     for (int i = 0; i < FISH_NUMBER ; ++i) {
-        school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 50, 50, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]));
+        school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 75, 75, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]));
     }
     std::cout << "Thread: " << std::thread::hardware_concurrency() << std::endl;
     std::vector<std::thread> threads;
@@ -186,7 +190,7 @@ int main(int argc, char* args[]) {
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
-    Player player = Player(windowWidth / 2, windowHeight / 2, 5, renderer, school, fishTextures);
+    Player player = Player(windowWidth / 2, windowHeight / 2, 5, renderer);
 
     std::thread player_thread(playerMovementThread, std::ref(player));
     std::thread quit_thread(handleQuitThread);
@@ -198,7 +202,7 @@ int main(int argc, char* args[]) {
     running = false;
     quit_thread.join();
     player_thread.join();
-    for (std::thread& thread : threads) {
+    for (auto& thread : threads) {
         thread.join();
     }
     cleanup();

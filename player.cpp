@@ -102,19 +102,6 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
             moved = true;
         }
 
-        if (moved && !isSprinting) {
-            this->energy -= 0.1f; // Reduce energy for each movement
-            if (this->energy < 0) {
-                this->energy = 0;
-            }
-        }
-        if (moved && isSprinting) {
-            this->energy -= 0.2f; // Reduce energy for each movement
-            if (this->energy < 0) {
-                this->energy = 0;
-            }
-        }
-
         if (tempX < 0) {
             tempX = 0;
         } else if (tempX > ENV_WIDTH) {
@@ -128,19 +115,23 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
         }
 
         this->updatePlayerPos(tempX, tempY);
-
-        // Check for collisions with fish and remove fish if collided
-        auto it = school.begin();
-        while (it != school.end()) {
-            Fish& fish = *it;
-            if (fish.getTexture() == fishTextures[0] && this->checkCollision(fish.getRect())) {
-                this->energy += 5.0f;
-                if (this->energy > 100.0f) {
-                    this->energy = 100.0f;
-                }
-                it = school.erase(it); // Remove fish from school
-            } else {
-                ++it;
+    }
+    if (moved) {
+        lastMoveTime = SDL_GetTicks();
+        if (!isSprinting) {
+            this->energy -= 0.1f;
+        } else {
+            this->energy -= 0.2f;
+        }
+        if (this->energy < 0) {
+            this->energy = 0;
+        }
+    } else {
+        Uint32 currentTime = SDL_GetTicks();
+        if (currentTime - lastMoveTime >= 5000) {
+            this->energy += 0.2f;
+            if (this->energy > 100.0f) {
+                this->energy = 100.0f;
             }
         }
     }
@@ -155,9 +146,4 @@ void Player::drawEnergyBar(SDL_Renderer* renderer) {
 
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
     SDL_RenderFillRect(renderer, &energyBarForeground);
-}
-
-bool Player::checkCollision(SDL_Rect fishRect) {
-    SDL_Rect playerRect = {this->x, this->y, PLAYER_SIZE_X, PLAYER_SIZE_Y};
-    return SDL_HasIntersection(&playerRect, &fishRect);
 }
