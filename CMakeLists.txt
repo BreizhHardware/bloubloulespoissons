@@ -19,6 +19,10 @@ add_executable(bloubloulespoissons main.cpp fish.cpp decors.cpp
         env.cpp
         player.h
         player.cpp
+        TCPServer.cpp
+        TCPServer.h
+        TCPClient.cpp
+        TCPClient.h
 )
 
 # Lier SDL2 et SDL2_image
@@ -33,4 +37,5 @@ if (WIN32)
     else()
         set_target_properties(bloubloulespoissons PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
     endif()
+    target_link_libraries(bloubloulespoissons ws2_32)
 endif()

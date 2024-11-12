@@ -1,6 +1,7 @@
 #ifndef ENV_H
 #define ENV_H
 
+#include <atomic>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
@@ -26,6 +27,7 @@ extern TTF_Font* font;
 extern int fishCount;
 extern int FISH_NUMBER;
 extern std::vector<SDL_Texture*> texturesVector;
+extern std::atomic<bool> running;
 
 bool initEnvironment(SDL_Renderer* renderer);
 std::vector<SDL_Texture*> initTexture(SDL_Renderer* renderer);

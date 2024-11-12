@@ -13,10 +13,11 @@
 #include "camera.h"
 #include "env.h"
 #include "player.h"
+#include "TCPServer.h"
+#include "TCPClient.h"
 
 std::mutex mtx;
 std::mutex coutMutex;
-std::atomic<bool> running(true);
 
 SDL_Texture* playerTexture = nullptr;
 SDL_Texture* fishTextures[100]; // Adjust the size as needed
@@ -162,6 +163,12 @@ int main(int argc, char* args[]) {
         return -1;
     }
 
+    TCPServer server(12345, renderer);
+    server.start();
+
+    TCPClient client("127.0.0.1", 12345);
+    client.start();
+
     std::vector<Kelp> kelps;
     std::vector<Rock> rocks;
     std::vector<Coral> corals;
@@ -189,8 +196,13 @@ int main(int argc, char* args[]) {
     std::thread player_thread2(playerMovementThread, std::ref(players[1]), 1);
 
     while (running) {
+        SDL_Event e;
+        while (SDL_PollEvent(&e) != 0) {
+            if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)) {
+                running = false;
+            }
+        }
         renderScene(players, kelps, rocks, corals);
-        handleQuit();
         SDL_Delay(10);
     }
     running = false;
@@ -199,6 +211,8 @@ int main(int argc, char* args[]) {
     for (auto& thread : threads) {
         thread.join();
     }
+    client.stop();
+    server.stop();
     cleanup();
     return 0;
 }
