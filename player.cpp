@@ -13,7 +13,7 @@ void Player::updatePlayerSpeed(int playerSpeed) {
     this->playerSpeed = playerSpeed;
 };
 
-std::tuple<int, int> Player::getPlayerPos() {
+std::tuple<int, int> Player::getPlayerPos() const {
     return std::make_tuple(this->x, this->y);
 };
 

@@ -21,10 +21,11 @@ std::atomic<bool> running(true);
 SDL_Texture* playerTexture = nullptr;
 SDL_Texture* fishTextures[100]; // Adjust the size as needed
 std::vector<Fish> school;
+std::vector<Player> players;
 
 bool initSDL();
 void handleQuit();
-void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
+void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
 void cleanup();
 
 void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
@@ -190,13 +191,18 @@ int main(int argc, char* args[]) {
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
-    Player player = Player(windowWidth / 2, windowHeight / 2, 5, renderer);
+    //Player player = Player(windowWidth / 2, windowHeight / 2, 5, renderer);
 
-    std::thread player_thread(playerMovementThread, std::ref(player));
+    players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer));
+    players.emplace_back(Player(windowWidth / 3, windowHeight / 3, 5, renderer));
+
+    std::thread player_thread(playerMovementThread, std::ref(players[0]));
+    std::thread player_thread2(playerMovementThread, std::ref(players[1]));
+
     std::thread quit_thread(handleQuitThread);
 
     while (running) {
-        renderScene(player, kelps, rocks, corals);
+        renderScene(players, kelps, rocks, corals);
         SDL_Delay(10);
     }
     running = false;
@@ -224,8 +230,7 @@ void handleQuit() {
     }
 }
 
-
-void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals) {
+void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals) {
     static Uint32 lastTime = 0;
     static int frameCount = 0;
     static int fps = 0;
@@ -262,11 +267,15 @@ void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vecto
         fish.draw(renderer);
     }
 
-    player.draw(renderer);
+    for (auto& player : players) { // Removed const
+        player.draw(renderer);
+    }
 
     displayFPS(renderer, font, fps);
-    auto [playerX, playerY] = player.getPlayerPos();
-    displayPlayerCoord(renderer, font, playerX, playerY);
+    for (auto& player : players) { // Removed const
+        auto [playerX, playerY] = player.getPlayerPos();
+        displayPlayerCoord(renderer, font, playerX, playerY);
+    }
 
     SDL_RenderPresent(renderer);
 }

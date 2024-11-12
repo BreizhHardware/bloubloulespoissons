@@ -36,7 +36,7 @@ class Player {
             {326, 73, 112, 117},
             {528, 73, 112, 117}
         };
-        Uint32 lastMoveTime; 
+        Uint32 lastMoveTime;
     public:
         Player(int x, int y, int playerSpeed, SDL_Renderer* renderer) : x(x), y(y), playerBaseX(x), playerBaseY(y), playerSpeed(playerSpeed) {
             playerPosForRender.x = x;
@@ -53,7 +53,7 @@ class Player {
         };
         void updatePlayerPos(int x, int y);
         void updatePlayerSpeed(int playerSpeed);
-        std::tuple<int, int> getPlayerPos();
+        std::tuple<int, int> getPlayerPos() const;
         int getPlayerSpeed();
         void draw(SDL_Renderer* renderer);
         void handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth, int windowHeight);
