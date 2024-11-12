@@ -125,3 +125,17 @@ Fish::Fish(const int x, const int y, const float vx, const float vy, std::vector
     }
 }
 
+Fish::Fish(const Fish &other): x(other.x), y(other.y), vx(other.vx), vy(other.vy), school(other.school), id(other.id), width(other.width), height(other.height), biasdir(other.biasdir) {
+    // Copier la texture
+    if (other.texture != nullptr) {
+        texture = SDL_CreateTextureFromSurface(renderer, SDL_GetWindowSurface(SDL_GetWindowFromID(1)));
+        if (texture == nullptr) {
+            std::cerr << "Erreur de copie de la texture: " << SDL_GetError() << std::endl;
+        }
+    } else {
+        texture = nullptr;
+    }
+}
+
+
+

@@ -26,20 +26,6 @@ void handleQuit();
 void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
 void cleanup();
 
-void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
-    std::cout << "Thread updateFishRange ID : " << id << " : started" << std::endl;
-    int updateCount = 0;
-    while (running) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));
-        //std::lock_guard<std::mutex> lock(mtx);
-        //std::cout << "Thread updateFishRange ID : " << id << " : update " << updateCount << " started" << std::endl;
-        for (int i = start; i < end; ++i) {
-            school[i].cycle();
-        }
-        //std::cout << "Thread updateFishRange ID : " << id << " : update " << updateCount << " ended" << std::endl;
-        updateCount++;
-    }
-}
 
 void displayFPS(SDL_Renderer* renderer, TTF_Font* font, int fps) {
     std::string fpsText = "FPS: " + std::to_string(fps);
@@ -150,19 +136,12 @@ void playerMovementThread(Player& player) {
     std::cout << "playerMovementThread ended" << std::endl;
 }
 
-void handleQuitThread() {
-    std::cout << "handleQuitThread..." << std::endl;
-    while (running) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        handleQuit();
-    }
-    std::cout << "handleQuitThread" << std::endl;
-};
 
 void fishMovementThread(std::vector<Fish>& school) {
     std::cout << "starting fishMovementThread..." << std::endl;
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        std::sort(school.begin(), school.end(), Fish::SortByX);
         for (int i = 0; i < school.size(); ++i) {
             school[i].cycle();
         }
@@ -185,14 +164,6 @@ int main(int argc, char* args[]) {
     for (int i = 0; i < FISH_NUMBER ; ++i) {
         school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 75, 75, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]));
     }
-    std::cout << "Thread: " << std::thread::hardware_concurrency() << std::endl;
-    std::vector<std::thread> threads;
-    int fishPerThread = school.size() / std::thread::hardware_concurrency();
-    int thread_id = 0;
-    for (int i = 0; i < school.size(); i += fishPerThread) {
-        threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())), thread_id);
-        thread_id++;
-    }
 
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
@@ -200,15 +171,14 @@ int main(int argc, char* args[]) {
     Player player = Player(windowWidth / 2, windowHeight / 2, 5, renderer);
 
     std::thread player_thread(playerMovementThread, std::ref(player));
-    std::thread quit_thread(handleQuitThread);
     std::thread fish_thread(fishMovementThread, std::ref(school));
 
     while (running) {
         renderScene(player, kelps, rocks, corals);
+        handleQuit();
         SDL_Delay(10);
     }
     running = false;
-    quit_thread.join();
     player_thread.join();
     fish_thread.join();
     /*

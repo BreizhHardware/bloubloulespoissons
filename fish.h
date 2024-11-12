@@ -32,6 +32,7 @@ private:
     int biasdir = 1;
 
 
+
 ;
 public:
     Fish(const int x, const int y, const float vx, const float vy,std::vector<Fish> &school, const int id,const int width,const int height, SDL_Renderer* renderer,int biasdir, SDL_Texture* texture);
@@ -51,20 +52,12 @@ public:
     bool isInView(Fish& other);
     bool isClose(Fish& other);
 
-    SDL_Texture* getTexture() const { return this->texture; };
-    SDL_Rect getRect() const { return {static_cast<int>(this->x), static_cast<int>(this->y), this->width, this->height}; };
-    Fish& operator=(const Fish& other) {
-        if (this != &other) {
-            // Les membres constants ne peuvent pas être assignés, donc nous ne les assignons pas ici
-            // school est une référence, donc nous ne pouvons pas la réassigner non plus
-            // Si vous avez d'autres membres non constants, vous pouvez les assigner ici
-        }
-        return *this;
+    static bool SortByX(const Fish& a, const Fish& b) {
+        return a.getX() < b.getX();
     }
-    // Définir explicitement le constructeur de copie et l'opérateur d'affectation par déplacement si nécessaire
-    Fish(const Fish& other) = delete;
-    Fish(Fish&& other) = default;
-    Fish& operator=(Fish&& other) = default;
+
+    Fish(const Fish& other);
+
 };
 
 #endif //FISH_H
