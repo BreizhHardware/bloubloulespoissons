@@ -189,13 +189,14 @@ int main(int argc, char* args[]) {
     Player player = Player(windowWidth / 2, windowHeight / 2, 5, renderer, school, fishTextures);
 
     std::thread player_thread(playerMovementThread, std::ref(player));
+    std::thread quit_thread(handleQuitThread);
 
     while (running) {
-        handleQuit();
         renderScene(player, kelps, rocks, corals);
         SDL_Delay(10);
     }
     running = false;
+    quit_thread.join();
     player_thread.join();
     for (std::thread& thread : threads) {
         thread.join();
