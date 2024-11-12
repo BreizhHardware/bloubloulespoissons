@@ -25,6 +25,7 @@ std::vector<Fish> school;
 bool initSDL();
 void handleQuit();
 void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
+int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(int argc, char* args[]);
 void cleanup();
 
 void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
@@ -164,11 +165,21 @@ void handleQuitThread() {
 };
 
 
-int main(int argc, char* args[]) {
+int main(int argc, char* args[]){
     if (!initSDL()) {
         std::cerr << "Failed to initialize!" << std::endl;
         return -1;
     }
+    pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(argc, args);
+    return 0;
+}
+
+
+int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(int argc, char* args[]) {
+    // if (!initSDL()) {
+    //     std::cerr << "Failed to initialize!" << std::endl;
+    //     return -1;
+    // }
 
     std::vector<Kelp> kelps;
     std::vector<Rock> rocks;
