@@ -15,7 +15,6 @@
 #include "player.h"
 
 std::mutex mtx;
-std::mutex coutMutex;
 std::atomic<bool> running(true);
 
 SDL_Texture* playerTexture = nullptr;
@@ -28,10 +27,7 @@ void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vecto
 void cleanup();
 
 void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
-    {
-        std::lock_guard<std::mutex> guard(coutMutex);
-        std::cout << "Thread updateFishRange ID : " << id << " : started" << std::endl;
-    }
+    std::cout << "Thread updateFishRange ID : " << id << " : started" << std::endl;
     int updateCount = 0;
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
@@ -163,6 +159,17 @@ void handleQuitThread() {
     std::cout << "handleQuitThread" << std::endl;
 };
 
+void fishMovementThread(std::vector<Fish>& school) {
+    std::cout << "starting fishMovementThread..." << std::endl;
+    while (running) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        for (int i = 0; i < school.size(); ++i) {
+            school[i].cycle();
+        }
+    }
+    std::cout << "fishMovementThread ended" << std::endl;
+}
+
 
 int main(int argc, char* args[]) {
     if (!initSDL()) {
@@ -194,6 +201,7 @@ int main(int argc, char* args[]) {
 
     std::thread player_thread(playerMovementThread, std::ref(player));
     std::thread quit_thread(handleQuitThread);
+    std::thread fish_thread(fishMovementThread, std::ref(school));
 
     while (running) {
         renderScene(player, kelps, rocks, corals);
@@ -202,9 +210,12 @@ int main(int argc, char* args[]) {
     running = false;
     quit_thread.join();
     player_thread.join();
+    fish_thread.join();
+    /*
     for (auto& thread : threads) {
         thread.join();
     }
+    */
     cleanup();
     return 0;
 }
