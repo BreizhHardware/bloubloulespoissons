@@ -147,3 +147,14 @@ void Player::drawEnergyBar(SDL_Renderer* renderer) {
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
     SDL_RenderFillRect(renderer, &energyBarForeground);
 }
+
+int Player::getPlayerId() {
+    return playerId;
+}
+
+void Player::setPlayerPos(int x, int y) {
+    this->x = x;
+    this->y = y;
+    this->playerPosForRender.x = x;
+    this->playerPosForRender.y = y;
+}

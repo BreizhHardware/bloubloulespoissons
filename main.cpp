@@ -189,8 +189,8 @@ int main(int argc, char* args[]) {
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
-    players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer));
-    players.emplace_back(Player(windowWidth / 3, windowHeight / 3, 5, renderer));
+    players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
+    players.emplace_back(Player(windowWidth / 3, windowHeight / 3, 5, renderer, 1));
 
     std::thread player_thread(playerMovementThread, std::ref(players[0]), 0);
     std::thread player_thread2(playerMovementThread, std::ref(players[1]), 1);

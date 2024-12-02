@@ -11,7 +11,9 @@ TCPServer::TCPServer(int port, SDL_Renderer* renderer) : port(port), renderer(re
 }
 
 void TCPServer::start() {
+    std::cout << "Starting server..." << std::endl;
     serverThread = std::thread(&TCPServer::run, this);
+    std::cout << "Server started" << std::endl;
 }
 
 void TCPServer::stop() {
@@ -83,7 +85,9 @@ void TCPServer::handleClient(int clientSocket) {
     recv(clientSocket, (char*)&y, sizeof(y), 0);
     recv(clientSocket, (char*)&speed, sizeof(speed), 0);
 
-    Player newPlayer(x, y, speed, renderer);
+    static int playerIdCounter = 0;
+    int playerId = playerIdCounter++;
+    Player newPlayer(x, y, speed, renderer, playerId);
     {
         std::lock_guard<std::mutex> lock(playerMutex);
         players.push_back(newPlayer);
@@ -91,6 +95,22 @@ void TCPServer::handleClient(int clientSocket) {
 
     while (running) {
         // Handle client messages
+        int newX, newY;
+        recv(clientSocket, (char*)&newX, sizeof(newX), 0);
+        recv(clientSocket, (char*)&newY, sizeof(newY), 0);
+
+        {
+            std::lock_guard<std::mutex> lock(playerMutex);
+            for (auto& player: players) {
+                if (player.getPlayerId() == playerId) {
+                    player.setPlayerPos(newX, newY);
+                    break;
+                }
+            }
+        }
+        std::string messageMoved = std::to_string(playerId) + ";moved;" + std::to_string(newX) + ";" + std::to_string(newY);
+        send(clientSocket, messageMoved.c_str(), messageMoved.size() + 1, 0);
+        std::cout << "Message send" << std::endl;
     }
 
     {

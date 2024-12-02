@@ -58,9 +58,19 @@ void TCPClient::run() {
 #endif
         return;
     }
-
+    char buffer[1024];
     while (running) {
         // Communication with the server
+        int bytesRecieved = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+        if (bytesRecieved > 0) {
+            std::cout << buffer << std::endl;
+            buffer[bytesRecieved] = '\0';
+            std::string message(buffer);
+            std::cout << "Received: " << message << std::endl;
+            if (message.find("moved") != std::string::npos) {
+                std::cout << "Received message: " << message << std::endl;
+            }
+        }
     }
 
 #ifdef _WIN32

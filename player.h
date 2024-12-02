@@ -27,6 +27,7 @@ class Player {
         int playerSpeed;
         int currentSprite = PLAYER_SPRITE_1;
         int ticks = 0;
+        int playerId;
         float energy = 100.0f;
         SDL_RendererFlip currentFlip = SDL_FLIP_NONE;
         SDL_Texture* playerTexture = nullptr;
@@ -38,7 +39,7 @@ class Player {
         };
         Uint32 lastMoveTime;
     public:
-        Player(int x, int y, int playerSpeed, SDL_Renderer* renderer) : x(x), y(y), playerBaseX(x), playerBaseY(y), playerSpeed(playerSpeed) {
+        Player(int x, int y, int playerSpeed, SDL_Renderer* renderer, int playerId) : x(x), y(y), playerBaseX(x), playerBaseY(y), playerSpeed(playerSpeed), playerId(playerId) {
             playerPosForRender.x = x;
             playerPosForRender.y = y;
 
@@ -59,6 +60,8 @@ class Player {
         void handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth, int windowHeight);
         void drawEnergyBar(SDL_Renderer* renderer);
         bool checkCollision(SDL_Rect fishRect);
+        int getPlayerId();
+        void setPlayerPos(int x, int y);
 };
 
 #endif
