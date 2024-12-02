@@ -141,7 +141,7 @@ void fishMovementThread(std::vector<Fish>& school) {
     std::cout << "starting fishMovementThread..." << std::endl;
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
-        std::sort(school.begin(), school.end(), Fish::SortByX);
+        std::sort(school.begin(), school.end(), [](const Fish &a, const Fish &b){return a.getX() < b.getX();});
         for (int i = 0; i < school.size(); ++i) {
             school[i].cycle();
         }

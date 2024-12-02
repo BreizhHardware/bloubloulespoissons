@@ -52,7 +52,7 @@ public:
     bool isInView(Fish& other);
     bool isClose(Fish& other);
 
-    static bool SortByX(const Fish& a, const Fish& b) {
+    static bool SortByX(const Fish &a, const Fish &b) {
         return a.getX() < b.getX();
     }
 
