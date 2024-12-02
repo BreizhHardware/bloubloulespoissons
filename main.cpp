@@ -7,6 +7,7 @@
 #include <mutex>
 #include <atomic>
 #include <cstdlib>
+#include <algorithm>
 
 #include "fish.h"
 #include "decors.h"
