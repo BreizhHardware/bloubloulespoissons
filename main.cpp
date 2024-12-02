@@ -137,14 +137,19 @@ void playerMovementThread(Player& player) {
     std::cout << "playerMovementThread ended" << std::endl;
 }
 
+void displaySchool(std::vector<Fish> school) {
+    for (Fish& fish : school) {
+        std::cout << "Fish " << fish.getId() << " at (" << fish.getX() << ", " << fish.getY() << ")" << std::endl;
+    }
+}
 
 void fishMovementThread(std::vector<Fish>& school) {
     std::cout << "starting fishMovementThread..." << std::endl;
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
-        std::sort(school.begin(), school.end(), [](const Fish &a, const Fish &b){return a.getX() < b.getX();});
-        for (int i = 0; i < school.size(); ++i) {
-            school[i].cycle();
+        std::sort(school.begin(), school.end(), Fish::SortByX);
+        for (int i = 0; i < school.size(); ++i ) {
+            school[i].cycle(i);
         }
     }
     std::cout << "fishMovementThread ended" << std::endl;
@@ -165,6 +170,11 @@ int main(int argc, char* args[]) {
     for (int i = 0; i < FISH_NUMBER ; ++i) {
         school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 75, 75, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]));
     }
+    std::cout << "Initial school:" << std::endl;
+    displaySchool(school);
+    std::sort(school.begin(), school.end(), Fish::SortByX);
+    std::cout << "Sorted school:" << std::endl;
+    displaySchool(school);
 
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);

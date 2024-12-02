@@ -1,5 +1,31 @@
 #include "fish.h"
 
+Fish::Fish(const int x, const int y, const float vx, const float vy, std::vector<Fish> &school, const int id, const int width, const int height, SDL_Renderer* renderer, int biasdir, SDL_Texture* texture)
+    : x(x), y(y), vx(vx), vy(vy), school(school), id(id), width(width), height(height), biasdir(biasdir), texture(texture) {
+    // Constructor implementation
+}
+
+Fish::Fish(const Fish& other)
+    : x(other.x), y(other.y), vx(other.vx), vy(other.vy), school(other.school), id(other.id), texture(other.texture), width(other.width), height(other.height), biasdir(other.biasdir) {
+    // Additional initialization if needed
+}
+
+Fish& Fish::operator=(const Fish& other) {
+    if (this != &other) {
+        x = other.x;
+        y = other.y;
+        vx = other.vx;
+        vy = other.vy;
+        school = other.school;
+        id = other.id;
+        texture = other.texture;
+        width = other.width;
+        height = other.height;
+        biasdir = other.biasdir;
+    }
+    return *this;
+}
+
 void Fish::drawArrow(SDL_Renderer *renderer, int x, int y, float vx, float vy) {
     const int arrowLength = 30; // Augmenter la longueur de la flèche
     const int arrowWidth = 10; // Garder la largeur de la flèche constante
@@ -50,23 +76,21 @@ bool Fish::isClose(Fish &other) {
             other.getY() >= y - PROTECTED_RANGE && other.getY() <= y + PROTECTED_RANGE);
 }
 
-void Fish::cycle() {
-    //std::cout << "Cycle " << cycle_count << " pour le poisson " << id << std::endl;
-    //std::cout << "Poisson Position: (" << x << ", " << y << ")" << std::endl;
-    //std::cout << "Vitesse: (" << vx << ", " << vy << ")" << std::endl;
+void Fish::cycle(int iter) {
     int neighboring_boids = 0;
     float xvel_avg = 0, yvel_avg = 0, xpos_avg = 0, ypos_avg = 0, close_dx = 0, close_dy = 0;
-    for (Fish &schoolIt: school) {
-        if (schoolIt.getId() != id) {
-            if (isInView(schoolIt)) {
-                if (isClose(schoolIt)) {
-                    close_dx += x - schoolIt.getX();
-                    close_dy += y - schoolIt.getY();
+    for (int i = 0; i < school.size(); i++) {
+        if (school[i].getId() != id) {
+            if (school[i].getX() - VISUAL_RANGE > x + VISUAL_RANGE) { break; }
+            if (isInView(school[i])) {
+                if (isClose(school[i])) {
+                    close_dx += x - school[i].getX();
+                    close_dy += y - school[i].getY();
                 }
-                xpos_avg += schoolIt.getX();
-                ypos_avg += schoolIt.getY();
-                xvel_avg += schoolIt.getVx();
-                yvel_avg += schoolIt.getVy();
+                xpos_avg += school[i].getX();
+                ypos_avg += school[i].getY();
+                xvel_avg += school[i].getVx();
+                yvel_avg += school[i].getVy();
                 neighboring_boids++;
             }
         }
@@ -111,31 +135,4 @@ void Fish::cycle() {
     }
     x += vx;
     y += vy;
-    //cycle_count++;
-    //std::cout << "Updated Position: (" << x << ", " << y << ")" << std::endl;
-    //std::cout << "Updated Vitesse: (" << vx << ", " << vy << ")" << std::endl;
 }
-
-Fish::Fish(const int x, const int y, const float vx, const float vy, std::vector<Fish> &school, const int id,
-           const int width, const int height, SDL_Renderer *renderer, int biasdir,
-           SDL_Texture *texture): x(x), y(y), vx(vx), vy(vy), school(school), id(id), width(width), height(height),
-                                  texture(texture), biasdir(biasdir) {
-    if (!texture) {
-        std::cerr << "Erreur de chargement de la texture: " << IMG_GetError() << std::endl;
-    }
-}
-
-Fish::Fish(const Fish &other): x(other.x), y(other.y), vx(other.vx), vy(other.vy), school(other.school), id(other.id), width(other.width), height(other.height), biasdir(other.biasdir) {
-    // Copier la texture
-    if (other.texture != nullptr) {
-        texture = SDL_CreateTextureFromSurface(renderer, SDL_GetWindowSurface(SDL_GetWindowFromID(1)));
-        if (texture == nullptr) {
-            std::cerr << "Erreur de copie de la texture: " << SDL_GetError() << std::endl;
-        }
-    } else {
-        texture = nullptr;
-    }
-}
-
-
-

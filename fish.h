@@ -20,22 +20,17 @@ private:
     const float MAX_SPEED = 13;
     const float MIN_SPEED = 0.6;
     const float BIASVALUE = 0.001;
-    //const float MAXBIAS = 0.01;
 
     float x, y;
     float vx, vy;
     std::vector<Fish> &school;
     int id;
     SDL_Texture* texture;
-    //int cycle_count = 0;
     int width, height;
     int biasdir = 1;
 
-
-
-;
 public:
-    Fish(const int x, const int y, const float vx, const float vy,std::vector<Fish> &school, const int id,const int width,const int height, SDL_Renderer* renderer,int biasdir, SDL_Texture* texture);
+    Fish(const int x, const int y, const float vx, const float vy, std::vector<Fish> &school, const int id, const int width, const int height, SDL_Renderer* renderer, int biasdir, SDL_Texture* texture);
     ~Fish() = default;
 
     float getX() const { return x; };
@@ -44,10 +39,9 @@ public:
     float getVy() const { return vy; };
     int getId() const { return id; };
 
-
     void draw(SDL_Renderer* renderer);
     void drawArrow(SDL_Renderer* renderer, int x, int y, float vx, float vy);
-    void cycle();
+    void cycle(int iter);
 
     bool isInView(Fish& other);
     bool isClose(Fish& other);
@@ -56,8 +50,11 @@ public:
         return a.getX() < b.getX();
     }
 
+    // Copy constructor
     Fish(const Fish& other);
 
+    // Copy assignment operator
+    Fish& operator=(const Fish& other);
 };
 
 #endif //FISH_H
