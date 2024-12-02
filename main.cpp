@@ -13,6 +13,7 @@
 #include "camera.h"
 #include "env.h"
 #include "player.h"
+#include "menu.h"
 
 std::mutex mtx;
 std::mutex coutMutex;
@@ -170,7 +171,17 @@ int main(int argc, char* args[]){
         std::cerr << "Failed to initialize!" << std::endl;
         return -1;
     }
-    pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(argc, args);
+
+    Menu menu(renderer);
+    menu.addButton(300, 250, 200, 50, "Button", 10);
+    //std::thread quit_thread(handleQuitThread);
+
+    while (running) {
+        handleQuit();
+        menu.draw(renderer);
+        SDL_Delay(10);
+    }
+    //pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(argc, args);
     return 0;
 }
 
@@ -204,14 +215,13 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     Player player = Player(windowWidth / 2, windowHeight / 2, 5, renderer);
 
     std::thread player_thread(playerMovementThread, std::ref(player));
-    std::thread quit_thread(handleQuitThread);
 
     while (running) {
         renderScene(player, kelps, rocks, corals);
+        handleQuit();
         SDL_Delay(10);
     }
     running = false;
-    quit_thread.join();
     player_thread.join();
     for (auto& thread : threads) {
         thread.join();
@@ -281,6 +291,10 @@ void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vecto
 
     SDL_RenderPresent(renderer);
 }
+
+void rendererMenu(){
+    
+};
 
 void cleanup() {
     TTF_CloseFont(font);
