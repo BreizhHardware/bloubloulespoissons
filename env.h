@@ -28,6 +28,7 @@ extern int fishCount;
 extern int FISH_NUMBER;
 extern std::vector<SDL_Texture*> texturesVector;
 extern std::atomic<bool> running;
+extern std::atomic<bool> isPlayingOnline;
 
 bool initEnvironment(SDL_Renderer* renderer);
 std::vector<SDL_Texture*> initTexture(SDL_Renderer* renderer);
