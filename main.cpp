@@ -185,9 +185,12 @@ int main(int argc, char* args[]) {
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
-    isPlayingOnline = true;
-    std::cout << "Playing online: " << isPlayingOnline << std::endl;
-
+    isPlayingOnline = false;
+    if (isPlayingOnline) {
+        std::cout << "Playing online" << std::endl;
+    } else {
+        std::cout << "Playing offline" << std::endl;
+    }
     if (isPlayingOnline) {
         if (!initServer()) {
             std::cerr << "Failed to initialize server!" << std::endl;
