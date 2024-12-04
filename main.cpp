@@ -16,7 +16,6 @@
 #include "menu.h"
 
 std::mutex mtx;
-std::mutex coutMutex;
 std::atomic<bool> running(true);
 std::atomic<bool> menuRunning(true);
 
@@ -31,10 +30,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
 void cleanup();
 
 void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
-    {
-        std::lock_guard<std::mutex> guard(coutMutex);
-        std::cout << "Thread updateFishRange ID : " << id << " : started" << std::endl;
-    }
+    std::cout << "Thread updateFishRange ID : " << id << " : started" << std::endl;
     int updateCount = 0;
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
@@ -172,6 +168,18 @@ void HandleMenuClick(Menu& menu){
     }
 }
 
+void fishMovementThread(std::vector<Fish>& school) {
+    std::cout << "starting fishMovementThread..." << std::endl;
+    while (running) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        for (int i = 0; i < school.size(); ++i) {
+            school[i].cycle();
+        }
+    }
+    std::cout << "fishMovementThread ended" << std::endl;
+}
+
+
 int main(int argc, char* args[]){
     if (!initSDL()) {
         std::cerr << "Failed to initialize!" << std::endl;
@@ -289,6 +297,9 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
 
     std::thread player_thread(playerMovementThread, std::ref(player));
 
+    std::thread quit_thread(handleQuitThread);
+    std::thread fish_thread(fishMovementThread, std::ref(school));
+
     while (running) {
         renderScene(player, kelps, rocks, corals);
         handleQuit();
@@ -296,9 +307,12 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     }
     running = false;
     player_thread.join();
+    fish_thread.join();
+    /*
     for (auto& thread : threads) {
         thread.join();
     }
+    */
     return 0;
 }
 
@@ -363,10 +377,6 @@ void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vecto
 
     SDL_RenderPresent(renderer);
 }
-
-void rendererMenu(){
-    
-};
 
 void cleanup() {
     TTF_CloseFont(font);
