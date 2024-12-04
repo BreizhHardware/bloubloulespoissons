@@ -302,17 +302,34 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
 
     while (running) {
         renderScene(player, kelps, rocks, corals);
-        handleQuit();
         SDL_Delay(10);
     }
     running = false;
-    player_thread.join();
-    fish_thread.join();
-    /*
-    for (auto& thread : threads) {
-        thread.join();
+    try{
+        if(player_thread.joinable())
+            player_thread.join();
+    }catch(const std::system_error& e){
+        std::cerr << "Exception caught: " << e.what() << std::endl;
     }
-    */
+    try{
+        if(quit_thread.joinable())
+            quit_thread.join();
+    }catch(const std::system_error& e){
+        std::cerr << "Exception caught: " << e.what() << std::endl;
+    }
+    try {
+        if (fish_thread.joinable())
+            fish_thread.join();
+    } catch (const std::system_error& e) {
+        std::cerr << "Exception caught: " << e.what() << std::endl;
+    }
+    try {
+        for (auto& thread : threads) {
+            thread.join();
+        }
+    } catch (const std::system_error& e) {
+        std::cerr << "Exception caught: " << e.what() << std::endl;
+    }
     return 0;
 }
 
