@@ -14,10 +14,13 @@
 #include "camera.h"
 #include "env.h"
 #include "player.h"
+#include "menu.h"
 #include "network/networking.h"
 #include "network/networking_client.h"
 
 std::mutex mtx;
+std::atomic<bool> menuRunning(true);
+
 std::mutex coutMutex;
 SDL_Texture* playerTexture = nullptr;
 SDL_Texture* fishTextures[100]; // Adjust the size as needed
@@ -27,14 +30,12 @@ std::vector<Player> players;
 
 bool initSDL();
 void handleQuit();
+int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(int argc, char* args[]);
 void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
 void cleanup();
 
 void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
-    {
-        std::lock_guard<std::mutex> guard(coutMutex);
-        std::cout << "Thread updateFishRange ID : " << id << " : started" << std::endl;
-    }
+    std::cout << "Thread updateFishRange ID : " << id << " : started" << std::endl;
     int updateCount = 0;
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
@@ -158,12 +159,124 @@ void playerMovementThread(Player& player, int playerIndex) {
     std::cout << "playerMovementThread for player " << playerIndex << " ended" << std::endl;
 }
 
+void handleQuitThread() {
+    std::cout << "handleQuitThread..." << std::endl;
+    while (running) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        handleQuit();
+    }
+    std::cout << "handleQuitThread" << std::endl;
+};
 
-int main(int argc, char* args[]) {
+void HandleMenuClick(Menu& menu){
+    while (running) {
+        menu.handleClickedButton();
+    }
+}
+
+void fishMovementThread(std::vector<Fish>& school) {
+    std::cout << "starting fishMovementThread..." << std::endl;
+    while (running) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        for (int i = 0; i < school.size(); ++i) {
+            school[i].cycle();
+        }
+    }
+    std::cout << "fishMovementThread ended" << std::endl;
+}
+
+int main(int argc, char* args[]){
     if (!initSDL()) {
         std::cerr << "Failed to initialize!" << std::endl;
         return -1;
     }
+
+    Menu menu(renderer);
+    menu.addPage("Main");
+    menu.addPage("Multi");
+    menu.addPage("Multi-Host");
+    menu.changePage("Main");
+
+    std::thread menu_thread(HandleMenuClick, std::ref(menu));
+
+    menu.addText("Main", (windowWidth/2) - 300, 50, 600, 100, "BloubBloub les poissons", 1024);
+
+    menu.addText("Multi-Host", (windowWidth/2) - 100, 50, 200, 100, "Host", 1024);
+    // Show current host IP
+    menu.addText("Multi-Host", (windowWidth/2) - 75, 200, 150, 50, "Host IP: 192.168.1.1", 1024);
+
+    menu.addButton("Main", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Solo", 1024, [](){
+        std::cout << "SOlo" << std::endl;
+        menuRunning = false;
+        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(0, nullptr);
+        
+    });
+
+    menu.addButton("Main", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Multi", 1024, [&menu](){
+        std::cout << "Multi" << std::endl;
+        menu.changePage("Multi");
+    });
+
+    menu.addButton("Multi", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Host", 1024, [&menu](){
+        menu.changePage("Multi-Host");
+    });
+
+    menu.addButton("Multi", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Join", 1024, [&menu](){
+        std::cout << "Join" << std::endl;
+    });
+
+    // menu.addButton("Multi", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Retour", 1024, [&menu](){
+    //     menu.changePage("Main");
+    // });
+
+    menu.addButton("Multi-Host", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "", 24, [](){
+        std::cout << "Text input button clicked" << std::endl;
+    }, true);
+
+    menu.addButton("Multi-Host", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "", 24, [](){
+        std::cout << "Text input button clicked" << std::endl;
+    }, true);
+
+    menu.addButton("Multi-Host", (windowWidth/2) - 100, windowHeight/2 + 125, 200, 50, "Retour", 1024, [&menu](){
+         menu.changePage("Multi");
+    });
+    menu.addButton("Multi", (windowWidth/2) - 100, windowHeight/2 + 125, 200, 50, "Retour", 1024, [&menu](){
+         menu.changePage("Main");
+    });
+
+    //menu.addButton((windowWidth/2) - 100, (windowHeight/2 + 25) + 50, 200, 50, "Multi", 1024);
+    //std::thread quit_thread(handleQuitThread);
+
+    while (running) {
+            
+        handleQuit();
+        if (menuRunning){
+            if (menu.isShown()) { 
+                menu.draw(renderer);
+            }
+        }
+        
+        SDL_Delay(10);
+    }
+    
+    try {
+        if (menu_thread.joinable())
+            menu_thread.join();
+    } catch (const std::system_error& e) {
+        std::cerr << "Exception caught: " << e.what() << std::endl;
+    }
+    
+    cleanup();
+    //pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(argc, args);
+    return 0;
+}
+
+
+int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(int argc, char* args[]) {
+    // if (!initSDL()) {
+    //     std::cerr << "Failed to initialize!" << std::endl;
+    //     return -1;
+    // }
 
     std::vector<Kelp> kelps;
     std::vector<Rock> rocks;
@@ -224,6 +337,8 @@ int main(int argc, char* args[]) {
         return 0;
     }
 
+    std::thread quit_thread(handleQuitThread);
+    std::thread fish_thread(fishMovementThread, std::ref(school));
     // Offline
     players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
     std::thread player_thread(playerMovementThread, std::ref(players[0]), 0);
@@ -239,11 +354,34 @@ int main(int argc, char* args[]) {
         SDL_Delay(10);
     }
     running = false;
-    player_thread.join();
-    for (auto& thread : threads) {
-        thread.join();
+    try{
+        if(player_thread.joinable())
+            player_thread.join();
+            for (auto& thread : threads) {
+              thread.join();
+            }
+    }catch(const std::system_error& e){
+        std::cerr << "Exception caught: " << e.what() << std::endl;
     }
-    cleanup();
+    try{
+        if(quit_thread.joinable())
+            quit_thread.join();
+    }catch(const std::system_error& e){
+        std::cerr << "Exception caught: " << e.what() << std::endl;
+    }
+    try {
+        if (fish_thread.joinable())
+            fish_thread.join();
+    } catch (const std::system_error& e) {
+        std::cerr << "Exception caught: " << e.what() << std::endl;
+    }
+    try {
+        for (auto& thread : threads) {
+            thread.join();
+        }
+    } catch (const std::system_error& e) {
+        std::cerr << "Exception caught: " << e.what() << std::endl;
+    }
     return 0;
 }
 
