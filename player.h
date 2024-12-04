@@ -27,6 +27,7 @@ class Player {
         int playerSpeed;
         int currentSprite = PLAYER_SPRITE_1;
         int ticks = 0;
+        int playerId;
         float energy = 100.0f;
         SDL_RendererFlip currentFlip = SDL_FLIP_NONE;
         SDL_Texture* playerTexture = nullptr;
@@ -36,9 +37,10 @@ class Player {
             {326, 73, 112, 117},
             {528, 73, 112, 117}
         };
-        Uint32 lastMoveTime; 
+        Uint32 lastMoveTime;
+        bool onlineMovement();
     public:
-        Player(int x, int y, int playerSpeed, SDL_Renderer* renderer) : x(x), y(y), playerBaseX(x), playerBaseY(y), playerSpeed(playerSpeed) {
+        Player(int x, int y, int playerSpeed, SDL_Renderer* renderer, int playerId) : x(x), y(y), playerBaseX(x), playerBaseY(y), playerSpeed(playerSpeed), playerId(playerId) {
             playerPosForRender.x = x;
             playerPosForRender.y = y;
 
@@ -53,12 +55,15 @@ class Player {
         };
         void updatePlayerPos(int x, int y);
         void updatePlayerSpeed(int playerSpeed);
-        std::tuple<int, int> getPlayerPos();
+        std::tuple<int, int> getPlayerPos() const;
         int getPlayerSpeed();
         void draw(SDL_Renderer* renderer);
         void handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth, int windowHeight);
         void drawEnergyBar(SDL_Renderer* renderer);
         bool checkCollision(SDL_Rect fishRect);
+        int getPlayerId();
+        void setPlayerPos(int x, int y);
+        void handleClientMessages();
 };
 
 #endif

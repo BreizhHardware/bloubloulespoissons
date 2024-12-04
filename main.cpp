@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_net.h>
 #include <iostream>
 #include <vector>
 #include <thread>
@@ -14,19 +15,23 @@
 #include "env.h"
 #include "player.h"
 #include "menu.h"
+#include "network/networking.h"
+#include "network/networking_client.h"
 
 std::mutex mtx;
-std::atomic<bool> running(true);
 std::atomic<bool> menuRunning(true);
 
+std::mutex coutMutex;
 SDL_Texture* playerTexture = nullptr;
 SDL_Texture* fishTextures[100]; // Adjust the size as needed
 std::vector<Fish> school;
+std::vector<Player> players;
+
 
 bool initSDL();
 void handleQuit();
-void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
 int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(int argc, char* args[]);
+void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
 void cleanup();
 
 void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
@@ -34,19 +39,16 @@ void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
     int updateCount = 0;
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
-        //std::lock_guard<std::mutex> lock(mtx);
-        //std::cout << "Thread updateFishRange ID : " << id << " : update " << updateCount << " started" << std::endl;
         for (int i = start; i < end; ++i) {
             school[i].cycle();
         }
-        //std::cout << "Thread updateFishRange ID : " << id << " : update " << updateCount << " ended" << std::endl;
         updateCount++;
     }
 }
 
 void displayFPS(SDL_Renderer* renderer, TTF_Font* font, int fps) {
     std::string fpsText = "FPS: " + std::to_string(fps);
-    SDL_Color color = {0, 255, 0}; // Vert
+    SDL_Color color = {0, 255, 0}; // Green
     SDL_Surface* textSurface = TTF_RenderText_Solid(font, fpsText.c_str(), color);
     SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
     SDL_Rect textRect = {windowWidth - textSurface->w - 10, 10, textSurface->w, textSurface->h};
@@ -82,6 +84,10 @@ void displayPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int playerX, int
 bool initSDL() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
+        return false;
+    }
+    if (SDLNet_Init() < 0) {
+        std::cerr << "SDLNet could not initialize! SDLNet_Error: " << SDLNet_GetError() << std::endl;
         return false;
     }
 
@@ -144,13 +150,13 @@ bool initSDL() {
     return true;
 }
 
-void playerMovementThread(Player& player) {
-    std::cout << "starting playerMovementThread..." << std::endl;
+void playerMovementThread(Player& player, int playerIndex) {
+    std::cout << "starting playerMovementThread for player " << playerIndex << "..." << std::endl;
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         player.handlePlayerMovement(ENV_WIDTH, ENV_HEIGHT, windowWidth, windowHeight);
     }
-    std::cout << "playerMovementThread ended" << std::endl;
+    std::cout << "playerMovementThread for player " << playerIndex << " ended" << std::endl;
 }
 
 void handleQuitThread() {
@@ -178,7 +184,6 @@ void fishMovementThread(std::vector<Fish>& school) {
     }
     std::cout << "fishMovementThread ended" << std::endl;
 }
-
 
 int main(int argc, char* args[]){
     if (!initSDL()) {
@@ -276,9 +281,9 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     std::vector<Kelp> kelps;
     std::vector<Rock> rocks;
     std::vector<Coral> corals;
-    generateProceduralDecorations(kelps, rocks, corals,ENV_HEIGHT, ENV_WIDTH, renderer);
+    generateProceduralDecorations(kelps, rocks, corals, ENV_HEIGHT, ENV_WIDTH, renderer);
 
-    for (int i = 0; i < FISH_NUMBER ; ++i) {
+    for (int i = 0; i < FISH_NUMBER; ++i) {
         school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 75, 75, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]));
     }
     std::cout << "Thread: " << std::thread::hardware_concurrency() << std::endl;
@@ -293,21 +298,68 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
-    Player player = Player(windowWidth / 2, windowHeight / 2, 5, renderer);
+    isPlayingOnline = false;
+    if (isPlayingOnline) {
+        std::cout << "Playing online" << std::endl;
+    } else {
+        std::cout << "Playing offline" << std::endl;
+    }
+    if (isPlayingOnline) {
+        if (!initServer()) {
+            std::cerr << "Failed to initialize server!" << std::endl;
+            return -1;
+        }
+        std::thread acceptThread(acceptClients);
+        acceptThread.detach();
+        IPaddress ip;
+        if (!initClient(ip, "localhost", 1234)) {
+            std::cerr << "Failed to initialize client!" << std::endl;
+            return -1;
+        }
+        players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
+        std::thread messageThread(&Player::handleClientMessages, &players[0]);
+        std::thread playerThread(playerMovementThread, std::ref(players[0]), 0);
 
-    std::thread player_thread(playerMovementThread, std::ref(player));
+        while (running) {
+            SDL_Event e;
+            while (SDL_PollEvent(&e) != 0) {
+                if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)) {
+                    running = false;
+                }
+            }
+            renderScene(players, kelps, rocks, corals);
+            SDL_Delay(10);
+        }
+        running = false;
+        messageThread.join();
+        playerThread.join();
+        cleanup();
+        return 0;
+    }
 
     std::thread quit_thread(handleQuitThread);
     std::thread fish_thread(fishMovementThread, std::ref(school));
+    // Offline
+    players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
+    std::thread player_thread(playerMovementThread, std::ref(players[0]), 0);
 
     while (running) {
-        renderScene(player, kelps, rocks, corals);
+        SDL_Event e;
+        while (SDL_PollEvent(&e) != 0) {
+            if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)) {
+                running = false;
+            }
+        }
+        renderScene(players, kelps, rocks, corals);
         SDL_Delay(10);
     }
     running = false;
     try{
         if(player_thread.joinable())
             player_thread.join();
+            for (auto& thread : threads) {
+              thread.join();
+            }
     }catch(const std::system_error& e){
         std::cerr << "Exception caught: " << e.what() << std::endl;
     }
@@ -348,8 +400,7 @@ void handleQuit() {
     }
 }
 
-
-void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals) {
+void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals) {
     static Uint32 lastTime = 0;
     static int frameCount = 0;
     static int fps = 0;
@@ -386,11 +437,15 @@ void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vecto
         fish.draw(renderer);
     }
 
-    player.draw(renderer);
+    for (auto& player : players) {
+        player.draw(renderer);
+    }
 
     displayFPS(renderer, font, fps);
-    auto [playerX, playerY] = player.getPlayerPos();
-    displayPlayerCoord(renderer, font, playerX, playerY);
+    for (auto& player : players) {
+        auto [playerX, playerY] = player.getPlayerPos();
+        displayPlayerCoord(renderer, font, playerX, playerY);
+    }
 
     SDL_RenderPresent(renderer);
 }
@@ -409,5 +464,6 @@ void cleanup() {
         SDL_DestroyWindow(window);
     }
     IMG_Quit();
+    SDLNet_Quit();
     SDL_Quit();
 }
