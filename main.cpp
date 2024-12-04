@@ -3,6 +3,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
 #include <vector>
+#include <future>
 #include <thread>
 #include <mutex>
 #include <atomic>
@@ -137,24 +138,19 @@ void playerMovementThread(Player& player) {
     std::cout << "playerMovementThread ended" << std::endl;
 }
 
-void displaySchool(std::vector<Fish> school) {
-    for (Fish& fish : school) {
-        std::cout << "Fish " << fish.getId() << " at (" << fish.getX() << ", " << fish.getY() << ")" << std::endl;
-    }
-}
-
-void fishMovementThread(std::vector<Fish>& school) {
-    std::cout << "starting fishMovementThread..." << std::endl;
+void updateFishRange(std::vector<Fish>& school, int start, int end){
+    int updateCount = 0;
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
-        std::sort(school.begin(), school.end(), Fish::SortByX);
-        for (int i = 0; i < school.size(); ++i ) {
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            Fish::insertionSort(school);
+        }
+        for (int i = start; i < end; ++i) {
             school[i].cycle(i);
         }
     }
-    std::cout << "fishMovementThread ended" << std::endl;
 }
-
 
 int main(int argc, char* args[]) {
     if (!initSDL()) {
@@ -167,36 +163,33 @@ int main(int argc, char* args[]) {
     std::vector<Coral> corals;
     generateProceduralDecorations(kelps, rocks, corals,ENV_HEIGHT, ENV_WIDTH, renderer);
 
-    for (int i = 0; i < FISH_NUMBER ; ++i) {
-        school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 75, 75, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]));
-    }
-    std::cout << "Initial school:" << std::endl;
-    displaySchool(school);
-    std::sort(school.begin(), school.end(), Fish::SortByX);
-    std::cout << "Sorted school:" << std::endl;
-    displaySchool(school);
-
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
     Player player = Player(windowWidth / 2, windowHeight / 2, 5, renderer);
 
     std::thread player_thread(playerMovementThread, std::ref(player));
-    std::thread fish_thread(fishMovementThread, std::ref(school));
+
+    for (int i = 0; i < FISH_NUMBER ; ++i) {
+        school.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 75, 75, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]);
+    }
+    std::ranges::sort(school, Fish::SortByX);
+    std::vector<std::thread> fish_threads;
+    int fishPerThread = school.size() / std::thread::hardware_concurrency();
+    for (int i = 0; i < school.size(); i += fishPerThread) {
+        fish_threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+    }
 
     while (running) {
         renderScene(player, kelps, rocks, corals);
         handleQuit();
-        SDL_Delay(10);
     }
     running = false;
     player_thread.join();
-    fish_thread.join();
-    /*
-    for (auto& thread : threads) {
-        thread.join();
+
+    for (auto& fish_thread : fish_threads) {
+        fish_thread.join();
     }
-    */
     cleanup();
     return 0;
 }
@@ -249,7 +242,6 @@ void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vecto
         coral.draw(renderer);
     }
 
-    std::lock_guard<std::mutex> lock(mtx);
     for (Fish& fish : school) {
         fish.draw(renderer);
     }

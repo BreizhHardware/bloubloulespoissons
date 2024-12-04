@@ -29,6 +29,9 @@ private:
     int width, height;
     int biasdir = 1;
 
+    void checkNeighborhood(Fish &other, float &xpos_avg, float &ypos_avg, float &xvel_avg, float &yvel_avg, int &neighboring_boids, float &
+                           close_dx, float &close_dy);
+
 public:
     Fish(const int x, const int y, const float vx, const float vy, std::vector<Fish> &school, const int id, const int width, const int height, SDL_Renderer* renderer, int biasdir, SDL_Texture* texture);
     ~Fish() = default;
@@ -49,6 +52,8 @@ public:
     static bool SortByX(const Fish &a, const Fish &b) {
         return a.getX() < b.getX();
     }
+
+    static void insertionSort(std::vector<Fish>& school) ;
 
     // Copy constructor
     Fish(const Fish& other);

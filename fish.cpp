@@ -76,23 +76,47 @@ bool Fish::isClose(Fish &other) {
             other.getY() >= y - PROTECTED_RANGE && other.getY() <= y + PROTECTED_RANGE);
 }
 
+void Fish::checkNeighborhood(Fish &other,float &xpos_avg, float &ypos_avg, float &xvel_avg, float &yvel_avg, int &neighboring_boids, float &close_dx, float &close_dy) {
+    if (isInView(other)) {
+        if (isClose(other)) {
+            close_dx += x - other.getX();
+            close_dy += y - other.getY();
+        }
+        xpos_avg += other.getX();
+        ypos_avg += other.getY();
+        xvel_avg += other.getVx();
+        yvel_avg += other.getVy();
+        neighboring_boids++;
+    }
+
+}
+
+void Fish::insertionSort(std::vector<Fish>& school) {
+    for (size_t i = 1; i < school.size(); ++i) {
+        Fish key = school[i];
+        int j = i - 1;
+
+        while (j >= 0 && Fish::SortByX(key, school[j])) {
+            school[j + 1] = school[j];
+            --j;
+        }
+        school[j + 1] = key;
+    }
+}
+
 void Fish::cycle(int iter) {
     int neighboring_boids = 0;
     float xvel_avg = 0, yvel_avg = 0, xpos_avg = 0, ypos_avg = 0, close_dx = 0, close_dy = 0;
-    for (int i = 0; i < school.size(); i++) {
+    for (int i = iter; i < school.size(); i++) {
         if (school[i].getId() != id) {
             if (school[i].getX() - VISUAL_RANGE > x + VISUAL_RANGE) { break; }
-            if (isInView(school[i])) {
-                if (isClose(school[i])) {
-                    close_dx += x - school[i].getX();
-                    close_dy += y - school[i].getY();
-                }
-                xpos_avg += school[i].getX();
-                ypos_avg += school[i].getY();
-                xvel_avg += school[i].getVx();
-                yvel_avg += school[i].getVy();
-                neighboring_boids++;
-            }
+            checkNeighborhood(school[i], xpos_avg, ypos_avg, xvel_avg, yvel_avg, neighboring_boids, close_dx, close_dy);
+        }
+    }
+    for (int i = iter - 1; i >= 0; i--) {
+        if (school[i].getId() != id) {
+            if (school[i].getX() + VISUAL_RANGE < x - VISUAL_RANGE) { break; }
+            checkNeighborhood(school[i], xpos_avg, ypos_avg, xvel_avg, yvel_avg, neighboring_boids, close_dx, close_dy);
         }
     }
     if (neighboring_boids > 0) {
