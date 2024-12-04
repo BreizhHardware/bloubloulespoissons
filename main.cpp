@@ -18,6 +18,7 @@
 std::mutex mtx;
 std::mutex coutMutex;
 std::atomic<bool> running(true);
+std::atomic<bool> menuRunning(true);
 
 SDL_Texture* playerTexture = nullptr;
 SDL_Texture* fishTextures[100]; // Adjust the size as needed
@@ -165,6 +166,11 @@ void handleQuitThread() {
     std::cout << "handleQuitThread" << std::endl;
 };
 
+void HandleMenuClick(Menu& menu){
+    while (running) {
+        menu.handleClickedButton();
+    }
+}
 
 int main(int argc, char* args[]){
     if (!initSDL()) {
@@ -173,14 +179,81 @@ int main(int argc, char* args[]){
     }
 
     Menu menu(renderer);
-    menu.addButton(300, 250, 200, 50, "Button", 10);
+    menu.addPage("Main");
+    menu.addPage("Multi");
+    menu.addPage("Multi-Host");
+    menu.changePage("Main");
+
+    std::thread menu_thread(HandleMenuClick, std::ref(menu));
+
+    menu.addText("Main", (windowWidth/2) - 300, 50, 600, 100, "BloubBloub les poissons", 1024);
+
+    menu.addText("Multi-Host", (windowWidth/2) - 100, 50, 200, 100, "Host", 1024);
+    // Show current host IP
+    menu.addText("Multi-Host", (windowWidth/2) - 75, 200, 150, 50, "Host IP: 192.168.1.1", 1024);
+
+    menu.addButton("Main", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Solo", 1024, [](){
+        std::cout << "SOlo" << std::endl;
+        menuRunning = false;
+        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(0, nullptr);
+        
+    });
+
+    menu.addButton("Main", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Multi", 1024, [&menu](){
+        std::cout << "Multi" << std::endl;
+        menu.changePage("Multi");
+    });
+
+    menu.addButton("Multi", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Host", 1024, [&menu](){
+        menu.changePage("Multi-Host");
+    });
+
+    menu.addButton("Multi", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Join", 1024, [&menu](){
+        std::cout << "Join" << std::endl;
+    });
+
+    // menu.addButton("Multi", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Retour", 1024, [&menu](){
+    //     menu.changePage("Main");
+    // });
+
+    menu.addButton("Multi-Host", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "", 24, [](){
+        std::cout << "Text input button clicked" << std::endl;
+    }, true);
+
+    menu.addButton("Multi-Host", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "", 24, [](){
+        std::cout << "Text input button clicked" << std::endl;
+    }, true);
+
+    menu.addButton("Multi-Host", (windowWidth/2) - 100, windowHeight/2 + 125, 200, 50, "Retour", 1024, [&menu](){
+         menu.changePage("Multi");
+    });
+    menu.addButton("Multi", (windowWidth/2) - 100, windowHeight/2 + 125, 200, 50, "Retour", 1024, [&menu](){
+         menu.changePage("Main");
+    });
+
+    //menu.addButton((windowWidth/2) - 100, (windowHeight/2 + 25) + 50, 200, 50, "Multi", 1024);
     //std::thread quit_thread(handleQuitThread);
 
     while (running) {
+            
         handleQuit();
-        menu.draw(renderer);
+        if (menuRunning){
+            if (menu.isShown()) { 
+                menu.draw(renderer);
+            }
+        }
+        
         SDL_Delay(10);
     }
+    
+    try {
+        if (menu_thread.joinable())
+            menu_thread.join();
+    } catch (const std::system_error& e) {
+        std::cerr << "Exception caught: " << e.what() << std::endl;
+    }
+    
+    cleanup();
     //pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(argc, args);
     return 0;
 }
@@ -226,7 +299,6 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     for (auto& thread : threads) {
         thread.join();
     }
-    cleanup();
     return 0;
 }
 
