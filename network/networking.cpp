@@ -24,12 +24,18 @@ void acceptClients() {
     while (running) {
         TCPsocket clientSocket = SDLNet_TCP_Accept(server);
         if (clientSocket) {
+            clients.push_back(clientSocket);
             std::thread clientThread([clientSocket]() {
                 while (running) {
                     std::string message = receiveMessage(clientSocket);
                     if (!message.empty()) {
                         std::cout << "Server received: " << message << std::endl;
-                        sendMessage(clientSocket, "Echo: " + message); // Echo the message back to the client
+                        if (message.find(";moved;") != std::string::npos) {
+                            // Broadcast the new position to all clients
+                            for (TCPsocket client : clients) {
+                                sendMessage(client, message);
+                            }
+                        }
                     }
                     SDL_Delay(100);
                 }

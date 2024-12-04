@@ -1,5 +1,6 @@
 #include "player.h"
 #include <tuple>
+#include "network/networking_client.h"
 #include "camera.h"
 
 void Player::updatePlayerPos(int x, int y) {
@@ -126,6 +127,10 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
         if (this->energy < 0) {
             this->energy = 0;
         }
+
+        // Send the new position to the server
+        std::string message = std::to_string(this->playerId) + ";moved;" + std::to_string(tempX) + "," + std::to_string(tempY) + ";" + std::to_string(camera.getX()) + "," + std::to_string(camera.getY());
+        sendMessage(client, message);
     } else {
         Uint32 currentTime = SDL_GetTicks();
         if (currentTime - lastMoveTime >= 5000) {
@@ -157,4 +162,23 @@ void Player::setPlayerPos(int x, int y) {
     this->y = y;
     this->playerPosForRender.x = x;
     this->playerPosForRender.y = y;
+}
+
+void Player::handleClientMessages() {
+    while (running) {
+        std::string message = receiveMessage(client);
+        if (!message.empty()) {
+            std::cout << "Client received: " << message << std::endl;
+            if (message.find(";moved;") != std::string::npos) {
+                int clientId, x, y, xCam, yCam;
+                sscanf(message.c_str(), "%d;moved;%d,%d;%d,%d", &clientId, &x, &y, &xCam, &yCam);
+                // Update the player's position
+                if (clientId == this->playerId) {
+                    this->setPlayerPos(x, y);
+                    Camera& camera = Camera::getInstance();
+                    camera.setPosition(xCam, yCam);
+                }
+            }
+        }
+    }
 }

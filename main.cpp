@@ -30,16 +30,6 @@ void handleQuit();
 void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
 void cleanup();
 
-void handleClientMessages() {
-    while (running) {
-        std::string message = receiveMessage(client);
-        if (!message.empty()) {
-            std::cout << "Client received: " << message << std::endl;
-        }
-        SDL_Delay(100);
-    }
-}
-
 void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
     {
         std::lock_guard<std::mutex> guard(coutMutex);
@@ -175,37 +165,6 @@ int main(int argc, char* args[]) {
         return -1;
     }
 
-    isPlayingOnline = true;
-    std::cout << "Playing online: " << isPlayingOnline << std::endl;
-
-    if (isPlayingOnline) {
-        if (!initServer()) {
-            std::cerr << "Failed to initialize server!" << std::endl;
-            return -1;
-        }
-        std::thread acceptThread(acceptClients);
-        acceptThread.detach();
-        IPaddress ip;
-        if (!initClient(ip, "localhost", 1234)) {
-            std::cerr << "Failed to initialize client!" << std::endl;
-            return -1;
-        }
-        std::thread messageThread(handleClientMessages);
-        std::string input;
-        while (running) {
-            std::getline(std::cin, input);
-            std::cout << "Sending message: " << input << std::endl;
-            if (input == "quit") {
-                running = false;
-            } else {
-                sendMessage(client, input);
-            }
-        }
-        messageThread.join();
-        cleanup();
-        return 0;
-    }
-
     std::vector<Kelp> kelps;
     std::vector<Rock> rocks;
     std::vector<Coral> corals;
@@ -226,8 +185,44 @@ int main(int argc, char* args[]) {
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
-    players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
+    isPlayingOnline = true;
+    std::cout << "Playing online: " << isPlayingOnline << std::endl;
 
+    if (isPlayingOnline) {
+        if (!initServer()) {
+            std::cerr << "Failed to initialize server!" << std::endl;
+            return -1;
+        }
+        std::thread acceptThread(acceptClients);
+        acceptThread.detach();
+        IPaddress ip;
+        if (!initClient(ip, "localhost", 1234)) {
+            std::cerr << "Failed to initialize client!" << std::endl;
+            return -1;
+        }
+        players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
+        std::thread messageThread(&Player::handleClientMessages, &players[0]);
+        std::thread playerThread(playerMovementThread, std::ref(players[0]), 0);
+
+        while (running) {
+            SDL_Event e;
+            while (SDL_PollEvent(&e) != 0) {
+                if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)) {
+                    running = false;
+                }
+            }
+            renderScene(players, kelps, rocks, corals);
+            SDL_Delay(10);
+        }
+        running = false;
+        messageThread.join();
+        playerThread.join();
+        cleanup();
+        return 0;
+    }
+
+    // Offline
+    players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
     std::thread player_thread(playerMovementThread, std::ref(players[0]), 0);
 
     while (running) {

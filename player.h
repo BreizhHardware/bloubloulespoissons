@@ -62,6 +62,7 @@ class Player {
         bool checkCollision(SDL_Rect fishRect);
         int getPlayerId();
         void setPlayerPos(int x, int y);
+        void handleClientMessages();
 };
 
 #endif
