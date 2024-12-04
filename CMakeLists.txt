@@ -19,6 +19,8 @@ add_executable(bloubloulespoissons main.cpp fish.cpp decors.cpp
         env.cpp
         player.h
         player.cpp
+        menu.h
+        menu.cpp
 )
 
 # Lier SDL2 et SDL2_image
