@@ -31,6 +31,7 @@ std::vector<Player> players;
 bool initSDL();
 void handleQuit();
 int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(int argc, char* args[]);
+int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, char* args[]);
 void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
 void cleanup();
 
@@ -223,6 +224,9 @@ int main(int argc, char* args[]){
 
     menu.addButton("Multi", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Join", 1024, [&menu](){
         std::cout << "Join" << std::endl;
+        isPlayingOnline = true;
+        menuRunning = false;
+        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(0, nullptr);
     });
 
     // menu.addButton("Multi", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Retour", 1024, [&menu](){
@@ -298,45 +302,6 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
-    isPlayingOnline = false;
-    if (isPlayingOnline) {
-        std::cout << "Playing online" << std::endl;
-    } else {
-        std::cout << "Playing offline" << std::endl;
-    }
-    if (isPlayingOnline) {
-        if (!initServer()) {
-            std::cerr << "Failed to initialize server!" << std::endl;
-            return -1;
-        }
-        std::thread acceptThread(acceptClients);
-        acceptThread.detach();
-        IPaddress ip;
-        if (!initClient(ip, "localhost", 1234)) {
-            std::cerr << "Failed to initialize client!" << std::endl;
-            return -1;
-        }
-        players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
-        std::thread messageThread(&Player::handleClientMessages, &players[0]);
-        std::thread playerThread(playerMovementThread, std::ref(players[0]), 0);
-
-        while (running) {
-            SDL_Event e;
-            while (SDL_PollEvent(&e) != 0) {
-                if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)) {
-                    running = false;
-                }
-            }
-            renderScene(players, kelps, rocks, corals);
-            SDL_Delay(10);
-        }
-        running = false;
-        messageThread.join();
-        playerThread.join();
-        cleanup();
-        return 0;
-    }
-
     std::thread quit_thread(handleQuitThread);
     std::thread fish_thread(fishMovementThread, std::ref(school));
     // Offline
@@ -384,6 +349,111 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     }
     return 0;
 }
+
+int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, char* args[]) {
+    // if (!initSDL()) {
+    //     std::cerr << "Failed to initialize!" << std::endl;
+    //     return -1;
+    // }
+
+    std::vector<Kelp> kelps;
+    std::vector<Rock> rocks;
+    std::vector<Coral> corals;
+    generateProceduralDecorations(kelps, rocks, corals, ENV_HEIGHT, ENV_WIDTH, renderer);
+
+    for (int i = 0; i < FISH_NUMBER; ++i) {
+        school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 75, 75, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]));
+    }
+    std::cout << "Thread: " << std::thread::hardware_concurrency() << std::endl;
+    std::vector<std::thread> threads;
+    int fishPerThread = school.size() / std::thread::hardware_concurrency();
+    int thread_id = 0;
+    for (int i = 0; i < school.size(); i += fishPerThread) {
+        threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())), thread_id);
+        thread_id++;
+    }
+
+    freopen("CON", "w", stdout);
+    freopen("CON", "w", stderr);
+
+    if (isPlayingOnline) {
+        if (!initServer()) {
+            std::cerr << "Failed to initialize server!" << std::endl;
+            return -1;
+        }
+        std::thread acceptThread(acceptClients);
+        acceptThread.detach();
+        IPaddress ip;
+        if (!initClient(ip, "localhost", 1234)) {
+            std::cerr << "Failed to initialize client!" << std::endl;
+            return -1;
+        }
+        players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
+        std::thread quit_thread(handleQuitThread);
+        std::thread fish_thread(fishMovementThread, std::ref(school));
+        std::thread messageThread(&Player::handleClientMessages, &players[0]);
+        std::thread playerThread(playerMovementThread, std::ref(players[0]), 0);
+
+        while (running) {
+            SDL_Event e;
+            while (SDL_PollEvent(&e) != 0) {
+                if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)) {
+                    running = false;
+                }
+            }
+            renderScene(players, kelps, rocks, corals);
+            SDL_Delay(10);
+        }
+        running = false;
+        try{
+            if(playerThread.joinable())
+                playerThread.join();
+            for (auto& thread : threads) {
+                thread.join();
+            }
+        }catch(const std::system_error& e){
+            std::cerr << "Exception caught: " << e.what() << std::endl;
+        }
+        try{
+            if(quit_thread.joinable())
+                quit_thread.join();
+        }catch(const std::system_error& e){
+            std::cerr << "Exception caught: " << e.what() << std::endl;
+        }
+        try {
+            if (fish_thread.joinable())
+                fish_thread.join();
+        } catch (const std::system_error& e) {
+            std::cerr << "Exception caught: " << e.what() << std::endl;
+        }
+        try {
+            for (auto& thread : threads) {
+                thread.join();
+            }
+        } catch (const std::system_error& e) {
+            std::cerr << "Exception caught: " << e.what() << std::endl;
+        }
+        try {
+            if (messageThread.joinable())
+                messageThread.join();
+        } catch (const std::system_error& e) {
+            std::cerr << "Exception caught: " << e.what() << std::endl;
+        }
+        try {
+            if (acceptThread.joinable())
+                acceptThread.join();
+        } catch (const std::system_error& e) {
+            std::cerr << "Exception caught: " << e.what() << std::endl;
+        }
+        cleanup();
+        return 0;
+    }
+
+    running = false;
+
+    return 0;
+}
+
 
 void handleQuit() {
     SDL_Event event;
