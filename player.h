@@ -38,6 +38,7 @@ class Player {
             {528, 73, 112, 117}
         };
         Uint32 lastMoveTime;
+        bool onlineMovement();
     public:
         Player(int x, int y, int playerSpeed, SDL_Renderer* renderer, int playerId) : x(x), y(y), playerBaseX(x), playerBaseY(y), playerSpeed(playerSpeed), playerId(playerId) {
             playerPosForRender.x = x;
