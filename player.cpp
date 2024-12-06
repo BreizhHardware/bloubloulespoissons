@@ -173,8 +173,8 @@ void Player::handleClientMessages() {
             if (clientId == this->playerId) {
                 this->setPlayerPos(750, 400);
                 Camera& camera = Camera::getInstance();
-                if (xCam > 0 && xCam < ENV_WIDTH - windowWidth) {
-                    if ( yCam > 0 && yCam < ENV_HEIGHT - windowHeight) {
+                if (xCam >= 0 && xCam <= ENV_WIDTH - windowWidth) {
+                    if ( yCam >= 0 && yCam <= ENV_HEIGHT - windowHeight) {
                         camera.setPosition(xCam, yCam);
                     }
                 }
