@@ -10,6 +10,7 @@
 inline TCPsocket client;
 
 bool initClient(IPaddress& ip, const char* host, int port);
+void closeClient();
 void sendMessage(TCPsocket socket, const std::string& message);
 std::string receiveMessage(TCPsocket socket);
 

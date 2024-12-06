@@ -160,6 +160,14 @@ void playerMovementThread(Player& player, int playerIndex) {
     std::cout << "playerMovementThread for player " << playerIndex << " ended" << std::endl;
 }
 
+void handleClientMessages(Player& player) {
+    std::cout << "messageThread started..." << std::endl;
+    while (messageThreadRunning) {
+        player.handleClientMessages();
+    }
+    std::cout << "messageThread ended" << std::endl;
+}
+
 void handleQuitThread() {
     std::cout << "handleQuitThread..." << std::endl;
     while (running) {
@@ -309,12 +317,6 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     std::thread player_thread(playerMovementThread, std::ref(players[0]), 0);
 
     while (running) {
-        SDL_Event e;
-        while (SDL_PollEvent(&e) != 0) {
-            if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)) {
-                running = false;
-            }
-        }
         renderScene(players, kelps, rocks, corals);
         SDL_Delay(10);
     }
@@ -322,30 +324,27 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     try{
         if(player_thread.joinable())
             player_thread.join();
-            for (auto& thread : threads) {
-              thread.join();
-            }
     }catch(const std::system_error& e){
-        std::cerr << "Exception caught: " << e.what() << std::endl;
+        std::cerr << "Exception caught 1: " << e.what() << std::endl;
     }
+    for (auto& thread : threads) {
+            try {
+                thread.join();
+            } catch (const std::system_error& e) {
+                std::cerr << "Exception caught 2: " << e.what() << std::endl;
+            }   
+        }
     try{
         if(quit_thread.joinable())
             quit_thread.join();
     }catch(const std::system_error& e){
-        std::cerr << "Exception caught: " << e.what() << std::endl;
+        std::cerr << "Exception caught 3: " << e.what() << std::endl;
     }
     try {
         if (fish_thread.joinable())
             fish_thread.join();
     } catch (const std::system_error& e) {
-        std::cerr << "Exception caught: " << e.what() << std::endl;
-    }
-    try {
-        for (auto& thread : threads) {
-            thread.join();
-        }
-    } catch (const std::system_error& e) {
-        std::cerr << "Exception caught: " << e.what() << std::endl;
+        std::cerr << "Exception caught 4: " << e.what() << std::endl;
     }
     return 0;
 }
@@ -389,67 +388,62 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             return -1;
         }
         players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
-        std::thread quit_thread(handleQuitThread);
         std::thread fish_thread(fishMovementThread, std::ref(school));
-        std::thread messageThread(&Player::handleClientMessages, &players[0]);
+        messageThreadRunning = true;
+        std::thread messageThread(handleClientMessages, std::ref(players[0]));
         std::thread playerThread(playerMovementThread, std::ref(players[0]), 0);
 
         while (running) {
-            SDL_Event e;
-            while (SDL_PollEvent(&e) != 0) {
-                if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)) {
-                    running = false;
-                }
-            }
             renderScene(players, kelps, rocks, corals);
             SDL_Delay(10);
         }
         running = false;
+        messageThreadRunning = false;
         try{
-            if(playerThread.joinable())
-                playerThread.join();
-            for (auto& thread : threads) {
-                thread.join();
-            }
+            //if(playerThread.joinable())
+            std::cout << "Killing playerThread.." << std::endl;
+            playerThread.join();
+            std::cout << "playerThread killed" << std::endl;
+            
         }catch(const std::system_error& e){
-            std::cerr << "Exception caught: " << e.what() << std::endl;
-        }
-        try{
-            if(quit_thread.joinable())
-                quit_thread.join();
-        }catch(const std::system_error& e){
-            std::cerr << "Exception caught: " << e.what() << std::endl;
+            std::cerr << "Exception caught 1: " << e.what() << std::endl;
         }
         try {
-            if (fish_thread.joinable())
-                fish_thread.join();
+            //if (fish_thread.joinable())
+            std::cout << "Killing fish_thread..." << std::endl;
+            fish_thread.join();
+            std::cout << "fish_thread killed" << std::endl;
         } catch (const std::system_error& e) {
-            std::cerr << "Exception caught: " << e.what() << std::endl;
+            std::cerr << "Exception caught 2: " << e.what() << std::endl;
         }
-        try {
-            for (auto& thread : threads) {
+        for (auto& thread : threads) {
+            try {
+                std::cout << "Killing thread..." << std::endl;
                 thread.join();
-            }
-        } catch (const std::system_error& e) {
-            std::cerr << "Exception caught: " << e.what() << std::endl;
+                std::cout << "Thread killed" << std::endl;
+            } catch (const std::system_error& e) {
+                std::cerr << "Exception caught 3: " << e.what() << std::endl;
+            }   
         }
         try {
-            if (messageThread.joinable())
-                messageThread.join();
+            //if (messageThread.joinable()) 
+            closeClient();
+            std::cout << "Killing messageThread" << std::endl;
+            messageThread.join();
+            std::cout << "messageThread killed" << std::endl;
         } catch (const std::system_error& e) {
-            std::cerr << "Exception caught: " << e.what() << std::endl;
+            std::cerr << "Exception caught 4: " << e.what() << std::endl;
         }
         try {
-            if (acceptThread.joinable())
+            if (acceptThread.joinable()){
+                std::cout << "Killing acceptThread" << std::endl;
                 acceptThread.join();
+                std::cout << "acceptThread killed" << std::endl;
+            }
         } catch (const std::system_error& e) {
-            std::cerr << "Exception caught: " << e.what() << std::endl;
+            std::cerr << "Exception caught 5: " << e.what() << std::endl;
         }
-        cleanup();
-        return 0;
     }
-
-    running = false;
 
     return 0;
 }

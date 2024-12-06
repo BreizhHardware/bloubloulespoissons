@@ -15,6 +15,16 @@ bool initClient(IPaddress& ip, const char* host, int port) {
     return true;
 }
 
+void closeClient() {
+    try{
+        if(client)
+            SDLNet_TCP_Close(client);
+    }catch(const std::exception& e){
+        std::cerr << "Exception caught: " << e.what() << std::endl;
+    }
+}
+
+
 void sendMessage(TCPsocket socket, const std::string& message) {
     int len = message.length();
     SDLNet_TCP_Send(socket, &len, sizeof(len));
@@ -23,9 +33,28 @@ void sendMessage(TCPsocket socket, const std::string& message) {
 
 std::string receiveMessage(TCPsocket socket) {
     int len;
-    SDLNet_TCP_Recv(socket, &len, sizeof(len));
-    char* buffer = new char[len + 1];
-    SDLNet_TCP_Recv(socket, buffer, len);
+    if (SDLNet_TCP_Recv(socket, &len, sizeof(len)) <= 0) {
+        //std::cerr << "Failed to receive message length" << std::endl;
+        return "";
+    }
+
+    if (len <= 0 || len > 10000) { // Ajustez cette valeur selon vos besoins
+        //std::cerr << "Invalid message length: " << len << std::endl;
+        return "";
+    }
+
+    char* buffer = new(std::nothrow) char[len + 1];
+    if (!buffer) {
+        //std::cerr << "Memory allocation failed" << std::endl;
+        return "";
+    }
+
+    if (SDLNet_TCP_Recv(socket, buffer, len) <= 0) {
+        //std::cerr << "Failed to receive message" << std::endl;
+        delete[] buffer;
+        return "";
+    }
+
     buffer[len] = '\0';
     std::string message(buffer);
     delete[] buffer;
