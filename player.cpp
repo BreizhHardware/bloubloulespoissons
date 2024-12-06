@@ -70,16 +70,20 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
             if (keystate[SDL_SCANCODE_W]) {
                 if (camera.getY() > 0 && tempY == this->playerBaseY) {
                     camera.move(0, -speed);
+                    unifiedX = camera.getX() + this->x;
                 } else if (tempY > 0) {
                     tempY -= speed;
+                    unifiedX = camera.getX() + this->x;
                 }
                 moved = true;
             }
             if (keystate[SDL_SCANCODE_S]) {
                 if ((camera.getY() < ENV_HEIGHT - windowHeight) && (tempY == this->playerBaseY)) {
                     camera.move(0, speed);
+                    unifiedX = camera.getX() + this->x;
                 } else if (tempY < windowHeight - PLAYER_SIZE_Y) {
                     tempY += speed;
+                    unifiedX = camera.getX() + this->x;
                 }
                 moved = true;
             }
@@ -87,9 +91,11 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
                 if (camera.getX() > 0 && (tempX == this->playerBaseX)) {
                     camera.move(-speed, 0);
                     this->currentFlip = SDL_FLIP_HORIZONTAL;
+                    unifiedY = camera.getY() + this->y;
                 } else if (tempX > 0) {
                     tempX -= speed;
                     this->currentFlip = SDL_FLIP_HORIZONTAL;
+                    unifiedY = camera.getY() + this->y;
                 }
                 moved = true;
             }
@@ -97,9 +103,11 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
                 if (camera.getX() < ENV_WIDTH - windowWidth && (tempX == this->playerBaseX)) {
                     camera.move(speed, 0);
                     this->currentFlip = SDL_FLIP_NONE;
+                    unifiedY = camera.getY() + this->y;
                 } else if (tempX < windowWidth - PLAYER_SIZE_X) {
                     tempX += speed;
                     this->currentFlip = SDL_FLIP_NONE;
+                    unifiedY = camera.getY() + this->y;
                 }
                 moved = true;
             }
