@@ -171,9 +171,13 @@ void Player::handleClientMessages() {
             sscanf(message.c_str(), "%d;moved;%d,%d;%d,%d", &clientId, &x, &y, &xCam, &yCam);
             // Update the player's position
             if (clientId == this->playerId) {
-                this->setPlayerPos(x, y);
+                this->setPlayerPos(750, 400);
                 Camera& camera = Camera::getInstance();
-                camera.setPosition(xCam, yCam);
+                if (xCam > 0 && xCam < ENV_WIDTH - windowWidth) {
+                    if ( yCam > 0 && yCam < ENV_HEIGHT - windowHeight) {
+                        camera.setPosition(xCam, yCam);
+                    }
+                }
             }
         }
     }
