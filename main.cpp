@@ -261,7 +261,7 @@ int main(int argc, char* args[]){
         isPlayingOnline = true;
         menuRunning = false;
         int port = 1234;
-        char* ip = "192.168.1.1";
+        char* ip = "127.0.0.1";
         pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(port, ip);
     });
 
@@ -392,72 +392,129 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     freopen("CON", "w", stderr);
 
     if (isPlayingOnline) {
-        if (!initServer()) {
-            std::cerr << "Failed to initialize server!" << std::endl;
-            return -1;
-        }
-        std::thread acceptThread(acceptClients);
-        acceptThread.detach();
-        IPaddress ip;
-        if (!initClient(ip, "localhost", 1234)) {
-            std::cerr << "Failed to initialize client!" << std::endl;
-            return -1;
-        }
-        players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
-        std::thread fish_thread(fishMovementThread, std::ref(school));
-        messageThreadRunning = true;
-        std::thread messageThread(handleClientMessages, std::ref(players[0]));
-        std::thread playerThread(playerMovementThread, std::ref(players[0]), 0);
-
-        while (running) {
-            renderScene(players, kelps, rocks, corals);
-            SDL_Delay(10);
-        }
-        running = false;
-        messageThreadRunning = false;
-        try{
-            //if(playerThread.joinable())
-            std::cout << "Killing playerThread.." << std::endl;
-            playerThread.join();
-            std::cout << "playerThread killed" << std::endl;
-            
-        }catch(const std::system_error& e){
-            std::cerr << "Exception caught 1: " << e.what() << std::endl;
-        }
-        try {
-            //if (fish_thread.joinable())
-            std::cout << "Killing fish_thread..." << std::endl;
-            fish_thread.join();
-            std::cout << "fish_thread killed" << std::endl;
-        } catch (const std::system_error& e) {
-            std::cerr << "Exception caught 2: " << e.what() << std::endl;
-        }
-        for (auto& thread : threads) {
-            try {
-                std::cout << "Killing thread..." << std::endl;
-                thread.join();
-                std::cout << "Thread killed" << std::endl;
-            } catch (const std::system_error& e) {
-                std::cerr << "Exception caught 3: " << e.what() << std::endl;
-            }   
-        }
-        try {
-            //if (messageThread.joinable()) 
-            closeClient();
-            std::cout << "Killing messageThread" << std::endl;
-            messageThread.join();
-            std::cout << "messageThread killed" << std::endl;
-        } catch (const std::system_error& e) {
-            std::cerr << "Exception caught 4: " << e.what() << std::endl;
-        }
-        try {
-            if (acceptThread.joinable()){
-                std::cout << "Killing acceptThread" << std::endl;
-                acceptThread.join();
-                std::cout << "acceptThread killed" << std::endl;
+        if (argc == 0 && args == nullptr) {
+            if (!initServer()) {
+                std::cerr << "Failed to initialize server!" << std::endl;
+                return -1;
             }
-        } catch (const std::system_error& e) {
-            std::cerr << "Exception caught 5: " << e.what() << std::endl;
+            std::thread acceptThread(acceptClients);
+            acceptThread.detach();
+            IPaddress ip;
+            if (!initClient(ip, "localhost", 1234)) {
+                std::cerr << "Failed to initialize client!" << std::endl;
+                return -1;
+            }
+            players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
+            std::thread fish_thread(fishMovementThread, std::ref(school));
+            messageThreadRunning = true;
+            std::thread messageThread(handleClientMessages, std::ref(players[0]));
+            std::thread playerThread(playerMovementThread, std::ref(players[0]), 0);
+
+            while (running) {
+                renderScene(players, kelps, rocks, corals);
+                SDL_Delay(10);
+            }
+            running = false;
+            messageThreadRunning = false;
+            try{
+                //if(playerThread.joinable())
+                std::cout << "Killing playerThread.." << std::endl;
+                playerThread.join();
+                std::cout << "playerThread killed" << std::endl;
+
+            }catch(const std::system_error& e){
+                std::cerr << "Exception caught 1: " << e.what() << std::endl;
+            }
+            try {
+                //if (fish_thread.joinable())
+                std::cout << "Killing fish_thread..." << std::endl;
+                fish_thread.join();
+                std::cout << "fish_thread killed" << std::endl;
+            } catch (const std::system_error& e) {
+                std::cerr << "Exception caught 2: " << e.what() << std::endl;
+            }
+            for (auto& thread : threads) {
+                try {
+                    std::cout << "Killing thread..." << std::endl;
+                    thread.join();
+                    std::cout << "Thread killed" << std::endl;
+                } catch (const std::system_error& e) {
+                    std::cerr << "Exception caught 3: " << e.what() << std::endl;
+                }
+            }
+            try {
+                //if (messageThread.joinable())
+                closeClient();
+                std::cout << "Killing messageThread" << std::endl;
+                messageThread.join();
+                std::cout << "messageThread killed" << std::endl;
+            } catch (const std::system_error& e) {
+                std::cerr << "Exception caught 4: " << e.what() << std::endl;
+            }
+            try {
+                if (acceptThread.joinable()){
+                    std::cout << "Killing acceptThread" << std::endl;
+                    acceptThread.join();
+                    std::cout << "acceptThread killed" << std::endl;
+                }
+            } catch (const std::system_error& e) {
+                std::cerr << "Exception caught 5: " << e.what() << std::endl;
+            }
+        }
+        else if (argc > 0 && argc < 65535 && args != nullptr) {
+            int port = atoi(args);
+            char* host = args;
+            if (!initClient(ip, host, 1234)) {
+                std::cerr << "Failed to initialize client!" << std::endl;
+                return -1;
+            }
+            players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 1));
+            std::thread fish_thread(fishMovementThread, std::ref(school));
+            messageThreadRunning = true;
+            std::thread messageThread(handleClientMessages, std::ref(players[0]));
+            std::thread playerThread(playerMovementThread, std::ref(players[0]), 0);
+
+            while (running) {
+                renderScene(players, kelps, rocks, corals);
+                SDL_Delay(10);
+            }
+            running = false;
+            messageThreadRunning = false;
+            try{
+                //if(playerThread.joinable())
+                std::cout << "Killing playerThread.." << std::endl;
+                playerThread.join();
+                std::cout << "playerThread killed" << std::endl;
+
+            }catch(const std::system_error& e){
+                std::cerr << "Exception caught 1: " << e.what() << std::endl;
+            }
+            try {
+                //if (fish_thread.joinable())
+                std::cout << "Killing fish_thread..." << std::endl;
+                fish_thread.join();
+                std::cout << "fish_thread killed" << std::endl;
+            } catch (const std::system_error& e) {
+                std::cerr << "Exception caught 2: " << e.what() << std::endl;
+            }
+            for (auto& thread : threads) {
+                try {
+                    std::cout << "Killing thread..." << std::endl;
+                    thread.join();
+                    std::cout << "Thread killed" << std::endl;
+                } catch (const std::system_error& e) {
+                    std::cerr << "Exception caught 3: " << e.what() << std::endl;
+                }
+            }
+            try {
+                //if (messageThread.joinable())
+                closeClient();
+                std::cout << "Killing messageThread" << std::endl;
+                messageThread.join();
+                std::cout << "messageThread killed" << std::endl;
+            } catch (const std::system_error& e) {
+                std::cerr << "Exception caught 4: " << e.what() << std::endl;
+            }
         }
     }
 
