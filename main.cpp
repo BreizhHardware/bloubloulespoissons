@@ -204,7 +204,6 @@ int main(int argc, char* args[]){
     menu.addPage("Main");
     menu.addPage("Multi");
     menu.addPage("Multi-Join");
-    menu.addPage("Multi-Host");
     menu.changePage("Main");
 
     std::thread menu_thread(HandleMenuClick, std::ref(menu));
@@ -212,17 +211,6 @@ int main(int argc, char* args[]){
     menu.addText("Main", (windowWidth/2) - 300, 50, 600, 100, "BloubBloub les poissons", 1024);
 
     menu.addText("Multi-Join", (windowWidth/2) - 100, 50, 200, 100, "Join", 1024);
-
-    menu.addText("Multi-Host", (windowWidth/2) - 100, 50, 200, 100, "Host", 1024);
-    // Show current host IP
-    menu.addText("Multi-Host", (windowWidth/2) - 75, 200, 150, 50, "Your IP: 192.168.1.1", 1024);
-
-    menu.addButton("Multi-Host", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Host", 1024, [](){
-        std::cout << "Host" << std::endl;
-        isPlayingOnline = true;
-        menuRunning = false;
-        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(0, nullptr);
-    });
 
     menu.addButton("Main", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Solo", 1024, [](){
         std::cout << "SOlo" << std::endl;
@@ -237,7 +225,10 @@ int main(int argc, char* args[]){
     });
 
     menu.addButton("Multi", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Host", 1024, [&menu](){
-        menu.changePage("Multi-Host");
+        std::cout << "Host" << std::endl;
+        isPlayingOnline = true;
+        menuRunning = false;
+        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(0, nullptr);
     });
 
     menu.addButton("Multi", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Join", 1024, [&menu](){
