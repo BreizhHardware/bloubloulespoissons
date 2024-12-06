@@ -1,5 +1,7 @@
 #include "networking_client.h"
 
+extern TCPsocket server;
+
 bool initClient(IPaddress& ip, const char* host, int port) {
     std::cout << "Initializing client..." << std::endl;
     if (SDLNet_ResolveHost(&ip, host, port) < 0) {
@@ -59,4 +61,45 @@ std::string receiveMessage(TCPsocket socket) {
     std::string message(buffer);
     delete[] buffer;
     return message;
+}
+
+void handleClientMessage(Player& player) {
+    char message[1024];
+    while (messageThreadRunning) {
+        int len = SDLNet_TCP_Recv(server, message, 1024);
+        if (len > 0) {
+            message[len] = '\0';
+            std::string msg(message);
+            std::istringstream iss(msg);
+            std::string token;
+            while (std::getline(iss, token, ';')) {
+                if (token == "playerList") {
+                    while (std::getline(iss, token, ';')) {
+                        int playerId, x, y;
+                        sscanf(token.c_str(), "%d,%d,%d", &playerId, &x, &y);
+                        if (playerId < players.size()) {
+                            players[playerId].updatePosition(x, y);
+                        } else {
+                            players.emplace_back(Player(x, y, 5, renderer, playerId));
+                        }
+                    }
+                } else if (token == "newPlayer") {
+                    int playerId, x, y;
+                    sscanf(token.c_str(), "%d,%d,%d", &playerId, &x, &y);
+                    players.emplace_back(Player(x, y, 5, renderer, playerId));
+                } else {
+                    int playerId = std::stoi(token);
+                    std::getline(iss, token, ';'); // Skip the "moved" part
+                    std::getline(iss, token, ';');
+                    int x = std::stoi(token);
+                    std::getline(iss, token, ';');
+                    int y = std::stoi(token);
+
+                    if (playerId < players.size()) {
+                        players[playerId].updatePosition(x, y);
+                    }
+                }
+            }
+        }
+    }
 }

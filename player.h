@@ -39,6 +39,7 @@ class Player {
         };
         Uint32 lastMoveTime;
         bool onlineMovement();
+        int unifiedX, unifiedY;
     public:
         Player(int x, int y, int playerSpeed, SDL_Renderer* renderer, int playerId) : x(x), y(y), playerBaseX(x), playerBaseY(y), playerSpeed(playerSpeed), playerId(playerId) {
             playerPosForRender.x = x;
@@ -64,6 +65,10 @@ class Player {
         int getPlayerId();
         void setPlayerPos(int x, int y);
         void handleClientMessages();
+        void updatePosition(int x, int y);
+        int getUnifiedX();
+        int getUnifiedY();
+
 };
 
 #endif

@@ -6,6 +6,11 @@
 #define NETWORKING_CLIENT_H
 #include <SDL2/SDL_net.h>
 #include <iostream>
+#include <sstream>
+#include "../env.h"
+#include "../player.h"
+
+class Player;
 
 inline TCPsocket client;
 
@@ -13,6 +18,7 @@ bool initClient(IPaddress& ip, const char* host, int port);
 void closeClient();
 void sendMessage(TCPsocket socket, const std::string& message);
 std::string receiveMessage(TCPsocket socket);
+void handleClientMessage(Player& player);
 
 
 #endif //NETWORKING_CLIENT_H

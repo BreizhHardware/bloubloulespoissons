@@ -12,6 +12,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+class Player;
+
 extern int windowWidth;
 extern int windowHeight;
 extern int playerBaseX;
@@ -30,6 +32,7 @@ extern std::vector<SDL_Texture*> texturesVector;
 extern std::atomic<bool> running;
 extern std::atomic<bool> isPlayingOnline;
 extern std::atomic<bool> messageThreadRunning;
+extern std::vector<Player> players;
 
 bool initEnvironment(SDL_Renderer* renderer);
 std::vector<SDL_Texture*> initTexture(SDL_Renderer* renderer);

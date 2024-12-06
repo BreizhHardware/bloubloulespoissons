@@ -207,3 +207,18 @@ bool Player::onlineMovement() {
     }
     return false;
 }
+
+void Player::updatePosition(int x, int y) {
+    int camX = x - 750;
+    int camY = y - 400;
+    this->unifiedX = camX;
+    this->unifiedY = camY;
+}
+
+int Player::getUnifiedX() {
+    return unifiedX;
+}
+
+int Player::getUnifiedY() {
+    return unifiedY;
+}

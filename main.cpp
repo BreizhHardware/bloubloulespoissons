@@ -25,6 +25,7 @@ std::mutex coutMutex;
 SDL_Texture* playerTexture = nullptr;
 SDL_Texture* fishTextures[100]; // Adjust the size as needed
 std::vector<Fish> school;
+
 std::vector<Player> players;
 
 
@@ -80,6 +81,28 @@ void displayPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int playerX, int
     SDL_FreeSurface(textSurface2);
     SDL_DestroyTexture(textTexture);
     SDL_DestroyTexture(textTexture2);
+}
+
+void displayUnifiedPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int unifiedX, int unifiedY) {
+    std::string coordText = "Unified: (" + std::to_string(unifiedX) + ", " + std::to_string(unifiedY) + ")";
+    SDL_Color textColor = {0, 255, 0};
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, coordText.c_str(), textColor);
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_Rect textRect = {10, 70, textSurface->w, textSurface->h};
+    SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+}
+
+void displayPlayerCount(SDL_Renderer* renderer, TTF_Font* font, int playerCount) {
+    std::string playerCountText = "Player count: " + std::to_string(playerCount);
+    SDL_Color color = {0, 255, 0}; // Green
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, playerCountText.c_str(), color);
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_Rect textRect = {windowWidth - textSurface->w - 10, 30, textSurface->w, textSurface->h};
+    SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
 }
 
 bool initSDL() {
@@ -573,6 +596,9 @@ void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, c
     for (auto& player : players) {
         auto [playerX, playerY] = player.getPlayerPos();
         displayPlayerCoord(renderer, font, playerX, playerY);
+        int unifiedX = player.getUnifiedX();
+        int unifiedY = player.getUnifiedY();
+        displayUnifiedPlayerCoord(renderer, font, unifiedX, unifiedY);
     }
 
     SDL_RenderPresent(renderer);
