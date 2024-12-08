@@ -26,6 +26,8 @@ add_executable(bloubloulespoissons main.cpp fish.cpp decors.cpp
         network/networking.h
         network/networking_client.cpp
         network/networking_client.h
+        display.cpp
+        display.h
 )
 
 # Lier SDL2 et SDL2_image
