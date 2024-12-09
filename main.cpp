@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_net.h>
 #include <iostream>
 #include <vector>
 #include <future>
@@ -13,28 +14,46 @@
 #include "fish.h"
 #include "decors.h"
 #include "camera.h"
+#include "display.h"
 #include "env.h"
 #include "player.h"
 #include "menu.h"
+#include "network/networking.h"
+#include "network/networking_client.h"
 
 std::mutex mtx;
-std::atomic<bool> running(true);
 std::atomic<bool> menuRunning(true);
 
+std::mutex coutMutex;
 SDL_Texture* playerTexture = nullptr;
 SDL_Texture* fishTextures[100]; // Adjust the size as needed
 std::vector<Fish> school;
 
+std::vector<Player> players;
+
+
 bool initSDL();
 void handleQuit();
-void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
 int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(int argc, char* args[]);
+int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, char* args);
+void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
 void cleanup();
 
+void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
+    std::cout << "Thread updateFishRange ID : " << id << " : started" << std::endl;
+    int updateCount = 0;
+    while (running) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        for (int i = start; i < end; ++i) {
+            school[i].cycle();
+        }
+        updateCount++;
+    }
+}
 
 void displayFPS(SDL_Renderer* renderer, TTF_Font* font, int fps) {
     std::string fpsText = "FPS: " + std::to_string(fps);
-    SDL_Color color = {0, 255, 0}; // Vert
+    SDL_Color color = {0, 255, 0}; // Green
     SDL_Surface* textSurface = TTF_RenderText_Solid(font, fpsText.c_str(), color);
     SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
     SDL_Rect textRect = {windowWidth - textSurface->w - 10, 10, textSurface->w, textSurface->h};
@@ -67,9 +86,35 @@ void displayPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int playerX, int
     SDL_DestroyTexture(textTexture2);
 }
 
+void displayUnifiedPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int unifiedX, int unifiedY) {
+    std::string coordText = "Unified: (" + std::to_string(unifiedX) + ", " + std::to_string(unifiedY) + ")";
+    SDL_Color textColor = {0, 255, 0};
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, coordText.c_str(), textColor);
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_Rect textRect = {10, 70, textSurface->w, textSurface->h};
+    SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+}
+
+void displayPlayerCount(SDL_Renderer* renderer, TTF_Font* font, int playerCount) {
+    std::string playerCountText = "Player count: " + std::to_string(playerCount);
+    SDL_Color color = {0, 255, 0}; // Green
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, playerCountText.c_str(), color);
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_Rect textRect = {windowWidth - textSurface->w - 10, 30, textSurface->w, textSurface->h};
+    SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+}
+
 bool initSDL() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
+        return false;
+    }
+    if (SDLNet_Init() < 0) {
+        std::cerr << "SDLNet could not initialize! SDLNet_Error: " << SDLNet_GetError() << std::endl;
         return false;
     }
 
@@ -133,12 +178,21 @@ bool initSDL() {
 }
 
 void playerMovementThread(Player& player) {
-    std::cout << "starting playerMovementThread..." << std::endl;
+    int pId = player.getPlayerId();
+    std::cout << "starting playerMovementThread for player " << pId << "..." << std::endl;
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         player.handlePlayerMovement(ENV_WIDTH, ENV_HEIGHT, windowWidth, windowHeight);
     }
-    std::cout << "playerMovementThread ended" << std::endl;
+    std::cout << "playerMovementThread for player " << pId << " ended" << std::endl;
+}
+
+void handleClientMessages(Player& player) {
+    std::cout << "messageThread started..." << std::endl;
+    while (messageThreadRunning) {
+        player.handleClientMessages();
+    }
+    std::cout << "messageThread ended" << std::endl;
 }
 
 void handleQuitThread() {
@@ -183,16 +237,14 @@ int main(int argc, char* args[]) {
     Menu menu(renderer);
     menu.addPage("Main");
     menu.addPage("Multi");
-    menu.addPage("Multi-Host");
+    menu.addPage("Multi-Join");
     menu.changePage("Main");
 
     std::thread menu_thread(HandleMenuClick, std::ref(menu));
 
     menu.addText("Main", (windowWidth/2) - 300, 50, 600, 100, "BloubBloub les poissons", 1024);
 
-    menu.addText("Multi-Host", (windowWidth/2) - 100, 50, 200, 100, "Host", 1024);
-    // Show current host IP
-    menu.addText("Multi-Host", (windowWidth/2) - 75, 200, 150, 50, "Host IP: 192.168.1.1", 1024);
+    menu.addText("Multi-Join", (windowWidth/2) - 100, 50, 200, 100, "Join", 1024);
 
     menu.addButton("Main", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Solo", 1024, [](){
         std::cout << "SOlo" << std::endl;
@@ -207,26 +259,38 @@ int main(int argc, char* args[]) {
     });
 
     menu.addButton("Multi", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Host", 1024, [&menu](){
-        menu.changePage("Multi-Host");
+        std::cout << "Host" << std::endl;
+        isPlayingOnline = true;
+        menuRunning = false;
+        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(0, nullptr);
     });
 
     menu.addButton("Multi", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Join", 1024, [&menu](){
-        std::cout << "Join" << std::endl;
+        menu.changePage("Multi-Join");
     });
 
     // menu.addButton("Multi", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Retour", 1024, [&menu](){
     //     menu.changePage("Main");
     // });
 
-    menu.addButton("Multi-Host", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "", 24, [](){
+    menu.addButton("Multi-Join", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "", 24, [](){
         std::cout << "Text input button clicked" << std::endl;
     }, true);
 
-    menu.addButton("Multi-Host", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "", 24, [](){
+    menu.addButton("Multi-Join", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "", 24, [](){
         std::cout << "Text input button clicked" << std::endl;
     }, true);
 
-    menu.addButton("Multi-Host", (windowWidth/2) - 100, windowHeight/2 + 125, 200, 50, "Retour", 1024, [&menu](){
+    menu.addButton("Multi-Join", (windowWidth/2) - 100, (windowHeight/2 + 125) - 25, 200, 50, "Join", 1024, [&menu](){
+        std::cout << "Join" << std::endl;
+        isPlayingOnline = true;
+        menuRunning = false;
+        int port = 1234;
+        char* ip = "127.0.0.1";
+        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(port, ip);
+    });
+
+    menu.addButton("Multi-Join", (windowWidth/2) - 100, windowHeight/2 + 125, 200, 50, "Retour", 1024, [&menu](){
          menu.changePage("Multi");
     });
     menu.addButton("Multi", (windowWidth/2) - 100, windowHeight/2 + 125, 200, 50, "Retour", 1024, [&menu](){
@@ -270,12 +334,10 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     std::vector<Kelp> kelps;
     std::vector<Rock> rocks;
     std::vector<Coral> corals;
-    generateProceduralDecorations(kelps, rocks, corals,ENV_HEIGHT, ENV_WIDTH, renderer);
+    generateProceduralDecorations(kelps, rocks, corals, ENV_HEIGHT, ENV_WIDTH, renderer);
 
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
-
-    Player player = Player(windowWidth / 2, windowHeight / 2, 5, renderer);
 
     std::thread player_thread(playerMovementThread, std::ref(player));
     for (int i = 0; i < FISH_NUMBER ; ++i) {
@@ -288,6 +350,10 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
         fish_threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
     }
     std::thread quit_thread(handleQuitThread);
+  
+      // Offline
+    players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
+    std::thread player_thread(playerMovementThread, std::ref(players[0]));
 
     while (running) {
         renderScene(player, kelps, rocks, corals);
@@ -298,24 +364,187 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
         if(player_thread.joinable())
             player_thread.join();
     }catch(const std::system_error& e){
-        std::cerr << "Exception caught: " << e.what() << std::endl;
+        std::cerr << "Exception caught 1: " << e.what() << std::endl;
     }
+    for (auto& thread : threads) {
+            try {
+                thread.join();
+            } catch (const std::system_error& e) {
+                std::cerr << "Exception caught 2: " << e.what() << std::endl;
+            }   
+        }
     try{
         if(quit_thread.joinable())
             quit_thread.join();
     }catch(const std::system_error& e){
-        std::cerr << "Exception caught: " << e.what() << std::endl;
+        std::cerr << "Exception caught 3: " << e.what() << std::endl;
     }
     try {
       for (auto& fish_thread : fish_threads) {
         if (fish_thread.joinable())
             fish_thread.join();
-        }
     } catch (const std::system_error& e) {
-        std::cerr << "Exception caught: " << e.what() << std::endl;
+        std::cerr << "Exception caught 4: " << e.what() << std::endl;
     }
     return 0;
 }
+
+int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, char* args) {
+    // if (!initSDL()) {
+    //     std::cerr << "Failed to initialize!" << std::endl;
+    //     return -1;
+    // }
+
+    std::vector<Kelp> kelps;
+    std::vector<Rock> rocks;
+    std::vector<Coral> corals;
+    generateProceduralDecorations(kelps, rocks, corals, ENV_HEIGHT, ENV_WIDTH, renderer);
+
+    for (int i = 0; i < FISH_NUMBER; ++i) {
+        school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 75, 75, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]));
+    }
+    std::cout << "Thread: " << std::thread::hardware_concurrency() << std::endl;
+    std::vector<std::thread> threads;
+    int fishPerThread = school.size() / std::thread::hardware_concurrency();
+    int thread_id = 0;
+    for (int i = 0; i < school.size(); i += fishPerThread) {
+        threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())), thread_id);
+        thread_id++;
+    }
+
+    freopen("CON", "w", stdout);
+    freopen("CON", "w", stderr);
+
+    if (isPlayingOnline) {
+        if (argc == 0 && args == nullptr) {
+            if (!initServer()) {
+                std::cerr << "Failed to initialize server!" << std::endl;
+                return -1;
+            }
+            std::thread acceptThread(acceptClients);
+            acceptThread.detach();
+            IPaddress ip;
+            if (!initClient(ip, "localhost", 1234)) {
+                std::cerr << "Failed to initialize client!" << std::endl;
+                return -1;
+            }
+            players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 1));
+            std::thread fish_thread(fishMovementThread, std::ref(school));
+            messageThreadRunning = true;
+            std::thread messageThread(handleClientMessages, std::ref(players[0]));
+            std::thread playerThread(playerMovementThread, std::ref(players[0]));
+
+            while (running) {
+                renderScene(players, kelps, rocks, corals);
+                SDL_Delay(10);
+            }
+            running = false;
+            messageThreadRunning = false;
+            try{
+                //if(playerThread.joinable())
+                std::cout << "Killing playerThread.." << std::endl;
+                playerThread.join();
+                std::cout << "playerThread killed" << std::endl;
+
+            }catch(const std::system_error& e){
+                std::cerr << "Exception caught 1: " << e.what() << std::endl;
+            }
+            try {
+                //if (fish_thread.joinable())
+                std::cout << "Killing fish_thread..." << std::endl;
+                fish_thread.join();
+                std::cout << "fish_thread killed" << std::endl;
+            } catch (const std::system_error& e) {
+                std::cerr << "Exception caught 2: " << e.what() << std::endl;
+            }
+            for (auto& thread : threads) {
+                try {
+                    std::cout << "Killing thread..." << std::endl;
+                    thread.join();
+                    std::cout << "Thread killed" << std::endl;
+                } catch (const std::system_error& e) {
+                    std::cerr << "Exception caught 3: " << e.what() << std::endl;
+                }
+            }
+            try {
+                //if (messageThread.joinable())
+                closeClient();
+                std::cout << "Killing messageThread" << std::endl;
+                messageThread.join();
+                std::cout << "messageThread killed" << std::endl;
+            } catch (const std::system_error& e) {
+                std::cerr << "Exception caught 4: " << e.what() << std::endl;
+            }
+            try {
+                if (acceptThread.joinable()){
+                    std::cout << "Killing acceptThread" << std::endl;
+                    acceptThread.join();
+                    std::cout << "acceptThread killed" << std::endl;
+                }
+            } catch (const std::system_error& e) {
+                std::cerr << "Exception caught 5: " << e.what() << std::endl;
+            }
+        }
+        else if (argc > 0 && argc < 65535 && args != nullptr) {
+            int port = atoi(args);
+            char* host = args;
+            if (!initClient(ip, host, 1234)) {
+                std::cerr << "Failed to initialize client!" << std::endl;
+                return -1;
+            }
+            players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 1));
+            std::thread fish_thread(fishMovementThread, std::ref(school));
+            messageThreadRunning = true;
+            std::thread messageThread(handleClientMessages, std::ref(players[0]));
+            std::thread playerThread(playerMovementThread, std::ref(players[0]));
+
+            while (running) {
+                renderScene(players, kelps, rocks, corals);
+                SDL_Delay(10);
+            }
+            running = false;
+            messageThreadRunning = false;
+            try{
+                //if(playerThread.joinable())
+                std::cout << "Killing playerThread.." << std::endl;
+                playerThread.join();
+                std::cout << "playerThread killed" << std::endl;
+
+            }catch(const std::system_error& e){
+                std::cerr << "Exception caught 1: " << e.what() << std::endl;
+            }
+            try {
+                //if (fish_thread.joinable())
+                std::cout << "Killing fish_thread..." << std::endl;
+                fish_thread.join();
+                std::cout << "fish_thread killed" << std::endl;
+            } catch (const std::system_error& e) {
+                std::cerr << "Exception caught 2: " << e.what() << std::endl;
+            }
+            for (auto& thread : threads) {
+                try {
+                    std::cout << "Killing thread..." << std::endl;
+                    thread.join();
+                    std::cout << "Thread killed" << std::endl;
+                } catch (const std::system_error& e) {
+                    std::cerr << "Exception caught 3: " << e.what() << std::endl;
+                }
+            }
+            try {
+                //if (messageThread.joinable())
+                closeClient();
+                std::cout << "Killing messageThread" << std::endl;
+                messageThread.join();
+                std::cout << "messageThread killed" << std::endl;
+            } catch (const std::system_error& e) {
+                std::cerr << "Exception caught 4: " << e.what() << std::endl;
+            }
+        }
+    }
+
+    return 0;
+}
+
 
 void handleQuit() {
     SDL_Event event;
@@ -332,8 +561,7 @@ void handleQuit() {
     }
 }
 
-
-void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals) {
+void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals) {
     static Uint32 lastTime = 0;
     static int frameCount = 0;
     static int fps = 0;
@@ -369,11 +597,19 @@ void renderScene(Player player, const std::vector<Kelp>& kelps, const std::vecto
         fish.draw(renderer);
     }
 
-    player.draw(renderer);
+    for (auto& player : players) {
+        player.draw(renderer);
+    }
 
     displayFPS(renderer, font, fps);
-    auto [playerX, playerY] = player.getPlayerPos();
-    displayPlayerCoord(renderer, font, playerX, playerY);
+    for (auto& player : players) {
+        auto [playerX, playerY] = player.getPlayerPos();
+        displayPlayerCoord(renderer, font, playerX, playerY);
+        int unifiedX = player.getUnifiedX();
+        int unifiedY = player.getUnifiedY();
+        displayUnifiedPlayerCoord(renderer, font, unifiedX, unifiedY);
+        displayNearbyPlayers(renderer, font, player, players, 500.0);
+    }
 
     SDL_RenderPresent(renderer);
 }
@@ -392,5 +628,6 @@ void cleanup() {
         SDL_DestroyWindow(window);
     }
     IMG_Quit();
+    SDLNet_Quit();
     SDL_Quit();
 }

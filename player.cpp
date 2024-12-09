@@ -1,5 +1,6 @@
 #include "player.h"
 #include <tuple>
+#include "network/networking_client.h"
 #include "camera.h"
 
 void Player::updatePlayerPos(int x, int y) {
@@ -13,7 +14,7 @@ void Player::updatePlayerSpeed(int playerSpeed) {
     this->playerSpeed = playerSpeed;
 };
 
-std::tuple<int, int> Player::getPlayerPos() {
+std::tuple<int, int> Player::getPlayerPos() const {
     return std::make_tuple(this->x, this->y);
 };
 
@@ -49,9 +50,7 @@ void Player::draw(SDL_Renderer* renderer) {
 };
 
 void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth, int windowHeight) {
-    SDL_Event event;
     const Uint8* keystate = SDL_GetKeyboardState(NULL);
-
     Camera& camera = Camera::getInstance();
 
     int tempX = this->x;
@@ -64,57 +63,69 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
     }
 
     bool moved = false;
-    if (this->energy != 0){
-        if (keystate[SDL_SCANCODE_W]) {
-            if (camera.getY() > 0 && tempY == this->playerBaseY) {
-                camera.move(0, -speed);
-            } else if (tempY > 0) {
-                tempY -= speed;
+    if (this->energy != 0) {
+        if (isPlayingOnline) {
+            moved = onlineMovement();
+        } else {
+            if (keystate[SDL_SCANCODE_W]) {
+                if (camera.getY() > 0 && tempY == this->playerBaseY) {
+                    camera.move(0, -speed);
+                    unifiedX = camera.getX() + this->x;
+                } else if (tempY > 0) {
+                    tempY -= speed;
+                    unifiedX = camera.getX() + this->x;
+                }
+                moved = true;
             }
-            moved = true;
-        }
-        if (keystate[SDL_SCANCODE_S]) {
-            if ((camera.getY() < ENV_HEIGHT - windowHeight) && (tempY == this->playerBaseY)) {
-                camera.move(0, speed);
-            } else if (tempY < windowHeight - PLAYER_SIZE_Y) {
-                tempY += speed;
+            if (keystate[SDL_SCANCODE_S]) {
+                if ((camera.getY() < ENV_HEIGHT - windowHeight) && (tempY == this->playerBaseY)) {
+                    camera.move(0, speed);
+                    unifiedX = camera.getX() + this->x;
+                } else if (tempY < windowHeight - PLAYER_SIZE_Y) {
+                    tempY += speed;
+                    unifiedX = camera.getX() + this->x;
+                }
+                moved = true;
             }
-            moved = true;
-        }
-        if (keystate[SDL_SCANCODE_A]) {
-            if (camera.getX() > 0 && (tempX == this->playerBaseX)) {
-                camera.move(-speed, 0);
-                this->currentFlip = SDL_FLIP_HORIZONTAL;
-            } else if (tempX > 0) {
-                tempX -= speed;
-                this->currentFlip = SDL_FLIP_HORIZONTAL;
+            if (keystate[SDL_SCANCODE_A]) {
+                if (camera.getX() > 0 && (tempX == this->playerBaseX)) {
+                    camera.move(-speed, 0);
+                    this->currentFlip = SDL_FLIP_HORIZONTAL;
+                    unifiedY = camera.getY() + this->y;
+                } else if (tempX > 0) {
+                    tempX -= speed;
+                    this->currentFlip = SDL_FLIP_HORIZONTAL;
+                    unifiedY = camera.getY() + this->y;
+                }
+                moved = true;
             }
-            moved = true;
-        }
-        if (keystate[SDL_SCANCODE_D]) {
-            if (camera.getX() < ENV_WIDTH - windowWidth && (tempX == this->playerBaseX)) {
-                camera.move(speed, 0);
-                this->currentFlip = SDL_FLIP_NONE;
-            } else if (tempX < windowWidth - PLAYER_SIZE_X) {
-                tempX += speed;
-                this->currentFlip = SDL_FLIP_NONE;
+            if (keystate[SDL_SCANCODE_D]) {
+                if (camera.getX() < ENV_WIDTH - windowWidth && (tempX == this->playerBaseX)) {
+                    camera.move(speed, 0);
+                    this->currentFlip = SDL_FLIP_NONE;
+                    unifiedY = camera.getY() + this->y;
+                } else if (tempX < windowWidth - PLAYER_SIZE_X) {
+                    tempX += speed;
+                    this->currentFlip = SDL_FLIP_NONE;
+                    unifiedY = camera.getY() + this->y;
+                }
+                moved = true;
             }
-            moved = true;
-        }
 
-        if (tempX < 0) {
-            tempX = 0;
-        } else if (tempX > ENV_WIDTH) {
-            tempX = ENV_WIDTH;
-        }
+            if (tempX < 0) {
+                tempX = 0;
+            } else if (tempX > ENV_WIDTH) {
+                tempX = ENV_WIDTH;
+            }
 
-        if (tempY < 0) {
-            tempY = 0;
-        } else if (tempY > ENV_HEIGHT) {
-            tempY = ENV_HEIGHT;
-        }
+            if (tempY < 0) {
+                tempY = 0;
+            } else if (tempY > ENV_HEIGHT) {
+                tempY = ENV_HEIGHT;
+            }
 
-        this->updatePlayerPos(tempX, tempY);
+            this->updatePlayerPos(tempX, tempY);
+        }
     }
     if (moved) {
         lastMoveTime = SDL_GetTicks();
@@ -146,4 +157,79 @@ void Player::drawEnergyBar(SDL_Renderer* renderer) {
 
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
     SDL_RenderFillRect(renderer, &energyBarForeground);
+}
+
+int Player::getPlayerId() {
+    return playerId;
+}
+
+void Player::setPlayerPos(int x, int y) {
+    this->x = x;
+    this->y = y;
+    this->playerPosForRender.x = x;
+    this->playerPosForRender.y = y;
+}
+
+void Player::handleClientMessages() {
+    std::string message = receiveMessage(client);
+    if (!message.empty()) {
+        std::cout << "Client received: " << message << std::endl;
+        if (message.find(";moved;") != std::string::npos) {
+            int clientId, x, y, xCam, yCam;
+            sscanf(message.c_str(), "%d;moved;%d,%d;%d,%d", &clientId, &x, &y, &xCam, &yCam);
+            // Update the player's position
+            if (clientId == this->playerId) {
+                this->setPlayerPos(750, 400);
+                Camera& camera = Camera::getInstance();
+                if (xCam >= 0 && xCam <= ENV_WIDTH - windowWidth) {
+                    if ( yCam >= 0 && yCam <= ENV_HEIGHT - windowHeight) {
+                        camera.setPosition(xCam, yCam);
+                    }
+                }
+            }
+        }
+    }
+}
+
+bool Player::onlineMovement() {
+    const Uint8* keystate = SDL_GetKeyboardState(NULL);
+    std::string message = std::to_string(this->playerId) + ";move;";
+    bool moved = false;
+    if (keystate[SDL_SCANCODE_W]) {
+        //std::string message = std::to_string(this->playerId) + ";move;up";
+        message += "up-";
+        moved = true;
+    }
+    if (keystate[SDL_SCANCODE_S]) {
+        message += "down-";
+        moved = true;
+    }
+    if (keystate[SDL_SCANCODE_A]) {
+        message += "left-";
+        moved = true;
+    }
+    if (keystate[SDL_SCANCODE_D]) {
+        message += "right-";
+        moved = true;
+    }
+    if (moved) { 
+        sendMessage(client, message);
+        return true;
+    }
+    return false;
+}
+
+void Player::updatePosition(int x, int y) {
+    int camX = x - 750;
+    int camY = y - 400;
+    this->unifiedX = camX;
+    this->unifiedY = camY;
+}
+
+int Player::getUnifiedX() {
+    return unifiedX;
+}
+
+int Player::getUnifiedY() {
+    return unifiedY;
 }

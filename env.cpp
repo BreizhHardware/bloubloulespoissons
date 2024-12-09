@@ -17,6 +17,9 @@ TTF_Font* font = nullptr;
 int fishCount = 0;
 int FISH_NUMBER = 5000;
 std::vector<SDL_Texture*> texturesVector;
+std::atomic<bool> running(true);
+std::atomic<bool> isPlayingOnline(false);
+std::atomic<bool> messageThreadRunning(false);
 
 bool initEnvironment(SDL_Renderer* renderer) {
     SDL_Surface* backgroundSurface = IMG_Load("../img/background.png");
