@@ -21,8 +21,7 @@ void closeClient();
 void sendMessage(TCPsocket socket, const std::string& message);
 std::string receiveMessage(TCPsocket socket);
 void handleClientMessage(Player& player);
-void sendKeepAlive(int clientId);
-void startKeepAlive(int clientId);
-
+void sendKeepAlive(TCPsocket serverSocket);
+void startKeepAlive(TCPsocket serverSocket);
 
 #endif //NETWORKING_CLIENT_H

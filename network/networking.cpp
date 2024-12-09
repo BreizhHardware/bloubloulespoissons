@@ -30,13 +30,16 @@ void acceptClients() {
             int clientId = clients.size() - 1;
             createNewPlayer(clientId);
             updateKeepAlive(clientId);
-            startKeepAlive(clientId);
             std::thread clientThread([clientSocket, clientId]() {
+                std::thread keepAliveThread(sendKeepAlive, clientSocket);
+                keepAliveThread.detach();
                 while (running) {
                     std::string message = receiveMessage(clientSocket);
                     if (!message.empty()) {
                         std::cout << "Server received: " << message << std::endl;
-                        if (message.find(";move;") != std::string::npos) {
+                        if (message == "keepalive") {
+                            updateKeepAlive(clientId);
+                        } else if (message.find(";move;") != std::string::npos) {
                             char direction[20];
                             sscanf(message.c_str(), "%d;move;%s", &clientId, &direction);
 
@@ -158,9 +161,9 @@ void checkClientAlive() {
             std::cerr << "Client " << it->first << " is not responding. Removing..." << std::endl;
             SDLNet_TCP_Close(clients[it->first]);
             clients.erase(clients.begin() + it->first);
+            playerPositions.erase(it->first); // Supprimer la position du joueur
             it = lastKeepAlive.erase(it);
-        }
-        else {
+        } else {
             ++it;
         }
     }

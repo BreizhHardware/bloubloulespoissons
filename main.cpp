@@ -250,7 +250,7 @@ int main(int argc, char* args[]) {
         
     });
 
-    menu.addButton("Main", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Multi", 1024, [&menu](){
+    menu.addButton("Main", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Multi (WIP)", 1024, [&menu](){
         std::cout << "Multi" << std::endl;
         menu.changePage("Multi");
     });

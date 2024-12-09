@@ -124,15 +124,18 @@ void handleClientMessage(Player& player) {
     }
 }
 
-void sendKeepAlive(int clientId) {
-    std::string message = std::to_string(clientId) + ";still_alive";
-    sendMessage(client, message);
+void sendKeepAlive(TCPsocket serverSocket) {
+    while (true) {
+        std::string keepAliveMessage = "keepalive";
+        sendMessage(serverSocket, keepAliveMessage);
+        SDL_Delay(3000); // Envoyer un message de keepalive toutes les 3 secondes
+    }
 }
 
-void startKeepAlive(int clientId) {
-    std::thread([clientId] () {
+void startKeepAlive(TCPsocket serverSocket) {
+    std::thread([serverSocket] () {
         while (messageThreadRunning) {
-            sendKeepAlive(clientId);
+            sendKeepAlive(serverSocket);
             std::this_thread::sleep_for(std::chrono::seconds(5));
         }
     }).detach();
