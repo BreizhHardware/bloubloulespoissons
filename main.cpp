@@ -220,6 +220,14 @@ int main(int argc, char* args[]) {
     if (argc > 1 && std::string(args[1]) == "69") {
         std::cout << "69" << std::endl;
         pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(0, nullptr);
+    }else if (argc > 1 && std::string(args[1]) == "420") {
+        std::cout << "420" << std::endl;
+        std::thread timer_thread([](){
+            std::this_thread::sleep_for(std::chrono::seconds(10));
+            running = false;
+        });
+        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(0, nullptr);
+        timer_thread.join();
     }
 
     Menu menu(renderer);
@@ -296,8 +304,6 @@ int main(int argc, char* args[]) {
                 menu.draw(renderer);
             }
         }
-        
-        SDL_Delay(10);
     }
     
     try {
@@ -555,7 +561,7 @@ void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, c
     static int frameCount = 0;
     static int fps = 0;
 
-    Uint32 currentTime = SDL_GetTicks();
+    const Uint32 currentTime = SDL_GetTicks64();
     frameCount++;
     if (currentTime - lastTime >= 1000) {
         fps = frameCount;
