@@ -175,8 +175,8 @@ void Player::handleClientMessages() {
     if (!message.empty()) {
         std::cout << "Client received: " << message << std::endl;
         if (message.find(";moved;") != std::string::npos) {
-            int clientId, x, y, xCam, yCam;
-            sscanf(message.c_str(), "%d;moved;%d,%d;%d,%d", &clientId, &x, &y, &xCam, &yCam);
+            int clientId, UnifiedX, UnifiedY, xCam, yCam;
+            sscanf(message.c_str(), "%d;moved;%d,%d", &clientId, &xCam, &yCam);
             // Update the player's position
             if (clientId == this->playerId) {
                 this->setPlayerPos(750, 400);
@@ -184,6 +184,7 @@ void Player::handleClientMessages() {
                 if (xCam >= 0 && xCam <= ENV_WIDTH - windowWidth) {
                     if ( yCam >= 0 && yCam <= ENV_HEIGHT - windowHeight) {
                         camera.setPosition(xCam, yCam);
+                        updatePosition(xCam, yCam);
                     }
                 }
             }
@@ -220,8 +221,8 @@ bool Player::onlineMovement() {
 }
 
 void Player::updatePosition(int x, int y) {
-    int camX = x - 750;
-    int camY = y - 400;
+    int camX = x + windowWidth / 2;
+    int camY = y + windowHeight / 2;
     this->unifiedX = camX;
     this->unifiedY = camY;
 }

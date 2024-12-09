@@ -40,12 +40,10 @@ void acceptClients() {
                             char direction[20];
                             sscanf(message.c_str(), "%d;move;%s", &clientId, &direction);
 
-                            int newX = 0, newY = 0, newXCam = 0, newYCam = 0;
+                            int newX = 0, newY = 0, newUnifedX = 0, newUnifedY = 0;
                             std::cout << "Client " << clientId << " moved " << direction << std::endl;
                             std::tie(newX, newY) = updatePlayerPosition(clientId, direction);
-                            std::tie(newXCam, newYCam) = updateCameraPosition(clientId, newX, newY);
-
-                            std::string updatedMessage = std::to_string(clientId) + ";moved;" + std::to_string(newX) + "," + std::to_string(newY) + ";" + std::to_string(newXCam) + "," + std::to_string(newYCam);
+                            std::string updatedMessage = std::to_string(clientId) + ";moved;" + std::to_string(newX) + "," + std::to_string(newY);
                             for (TCPsocket client : clients) {
                                 sendMessage(client, updatedMessage);
                             }
@@ -123,13 +121,6 @@ std::pair<int, int> updatePlayerPosition(int clientId, const std::string& direct
     }
 
     return {newX, newY};
-}
-
-std::pair<int, int> updateCameraPosition(int clientId, int newX, int newY) {
-    // Implement the logic to update the camera position based on the new player position
-    int newXCam = newX, newYCam = newY;
-    // Example logic (you need to replace this with your actual logic)
-    return {newXCam, newYCam};
 }
 
 void createNewPlayer(int clientId) {

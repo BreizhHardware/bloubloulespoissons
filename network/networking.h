@@ -18,7 +18,6 @@ inline std::vector<TCPsocket> clients;
 bool initServer();
 void acceptClients();
 std::pair<int, int> updatePlayerPosition(int clientId, const std::string& direction);
-std::pair<int, int> updateCameraPosition(int clientId, int newX, int newY);
 void createNewPlayer(int clientId);
 void updateKeepAlive(int clientId);
 void checkClientAlive();

@@ -77,6 +77,7 @@ std::string receiveMessage(TCPsocket socket) {
 }
 
 void handleClientMessage(Player& player) {
+    std::cout << "handleClientMessage called" << std::endl;
     char message[1024];
     while (messageThreadRunning) {
         int len = SDLNet_TCP_Recv(server, message, 1024);
@@ -86,6 +87,7 @@ void handleClientMessage(Player& player) {
             std::istringstream iss(msg);
             std::string token;
             while (std::getline(iss, token, ';')) {
+                std::cout << "Token: " << token << std::endl; // Ajout de débogage
                 if (token == "playerList") {
                     while (std::getline(iss, token, ';')) {
                         int playerId, x, y;
@@ -105,13 +107,16 @@ void handleClientMessage(Player& player) {
                 } else {
                     int playerId = std::stoi(token);
                     std::getline(iss, token, ';');
+                    int unifiedX = std::stoi(token);
                     std::getline(iss, token, ';');
-                    int x = std::stoi(token);
+                    int unifiedY = std::stoi(token);
                     std::getline(iss, token, ';');
-                    int y = std::stoi(token);
-
+                    int PlayerX = std::stoi(token);
+                    std::getline(iss, token, ';');
+                    int PlayerY = std::stoi(token);
+                    std::cout << "Unified position: " << unifiedX << ", " << unifiedY << std::endl;
                     if (playerId > 0 && playerId < players.size()) {
-                        players[playerId].updatePosition(x, y);
+                        players[playerId].updatePosition(PlayerX, PlayerY);
                     }
                 }
             }
