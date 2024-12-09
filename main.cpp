@@ -4,10 +4,12 @@
 #include <SDL2/SDL_net.h>
 #include <iostream>
 #include <vector>
+#include <future>
 #include <thread>
 #include <mutex>
 #include <atomic>
 #include <cstdlib>
+#include <algorithm>
 
 #include "fish.h"
 #include "decors.h"
@@ -36,18 +38,6 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
 int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, char* args);
 void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
 void cleanup();
-
-void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
-    std::cout << "Thread updateFishRange ID : " << id << " : started" << std::endl;
-    int updateCount = 0;
-    while (running) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));
-        for (int i = start; i < end; ++i) {
-            school[i].cycle();
-        }
-        updateCount++;
-    }
-}
 
 void displayFPS(SDL_Renderer* renderer, TTF_Font* font, int fps) {
     std::string fpsText = "FPS: " + std::to_string(fps);
@@ -208,21 +198,28 @@ void HandleMenuClick(Menu& menu){
     }
 }
 
-void fishMovementThread(std::vector<Fish>& school) {
-    std::cout << "starting fishMovementThread..." << std::endl;
+void updateFishRange(std::vector<Fish>& school, int start, int end){
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
-        for (int i = 0; i < school.size(); ++i) {
-            school[i].cycle();
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            Fish::insertionSort(school);
+        }
+        for (int i = start; i < end; ++i) {
+            school[i].cycle(i);
         }
     }
-    std::cout << "fishMovementThread ended" << std::endl;
 }
 
-int main(int argc, char* args[]){
+int main(int argc, char* args[]) {
     if (!initSDL()) {
         std::cerr << "Failed to initialize!" << std::endl;
         return -1;
+    }
+
+    if (argc > 1 && std::string(args[1]) == "69") {
+        std::cout << "69" << std::endl;
+        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(0, nullptr);
     }
 
     Menu menu(renderer);
@@ -327,30 +324,27 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     std::vector<Coral> corals;
     generateProceduralDecorations(kelps, rocks, corals, ENV_HEIGHT, ENV_WIDTH, renderer);
 
-    for (int i = 0; i < FISH_NUMBER; ++i) {
-        school.emplace_back(Fish(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 75, 75, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]));
-    }
-    std::cout << "Thread: " << std::thread::hardware_concurrency() << std::endl;
-    std::vector<std::thread> threads;
-    int fishPerThread = school.size() / std::thread::hardware_concurrency();
-    int thread_id = 0;
-    for (int i = 0; i < school.size(); i += fishPerThread) {
-        threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())), thread_id);
-        thread_id++;
-    }
-
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
+    for (int i = 0; i < FISH_NUMBER ; ++i) {
+        school.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 75, 75, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]);
+    }
+    std::ranges::sort(school, Fish::SortByX);
+    std::vector<std::thread> fish_threads;
+    int fishPerThread = school.size() / std::thread::hardware_concurrency();
+    for (int i = 0; i < school.size(); i += fishPerThread) {
+        fish_threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+    }
     std::thread quit_thread(handleQuitThread);
-    std::thread fish_thread(fishMovementThread, std::ref(school));
-    // Offline
+  
+      // Offline
     players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
     std::thread player_thread(playerMovementThread, std::ref(players[0]));
 
     while (running) {
         renderScene(players, kelps, rocks, corals);
-        SDL_Delay(10);
+        handleQuit();
     }
     running = false;
     try{
@@ -359,13 +353,6 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     }catch(const std::system_error& e){
         std::cerr << "Exception caught 1: " << e.what() << std::endl;
     }
-    for (auto& thread : threads) {
-            try {
-                thread.join();
-            } catch (const std::system_error& e) {
-                std::cerr << "Exception caught 2: " << e.what() << std::endl;
-            }   
-        }
     try{
         if(quit_thread.joinable())
             quit_thread.join();
@@ -373,8 +360,10 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
         std::cerr << "Exception caught 3: " << e.what() << std::endl;
     }
     try {
-        if (fish_thread.joinable())
-            fish_thread.join();
+      for (auto& fish_thread : fish_threads) {
+          if (fish_thread.joinable())
+              fish_thread.join();
+      }
     } catch (const std::system_error& e) {
         std::cerr << "Exception caught 4: " << e.what() << std::endl;
     }
@@ -400,10 +389,8 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     int fishPerThread = school.size() / std::thread::hardware_concurrency();
     int thread_id = 0;
     for (int i = 0; i < school.size(); i += fishPerThread) {
-        threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())), thread_id);
-        thread_id++;
+        threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
     }
-
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
@@ -421,7 +408,12 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
                 return -1;
             }
             players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 1));
-            std::thread fish_thread(fishMovementThread, std::ref(school));
+            std::ranges::sort(school, Fish::SortByX);
+            std::vector<std::thread> fish_threads;
+            int fishPerThread = school.size() / std::thread::hardware_concurrency();
+            for (int i = 0; i < school.size(); i += fishPerThread) {
+                fish_threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+            }
             messageThreadRunning = true;
             std::thread messageThread(handleClientMessages, std::ref(players[0]));
             std::thread playerThread(playerMovementThread, std::ref(players[0]));
@@ -442,10 +434,10 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
                 std::cerr << "Exception caught 1: " << e.what() << std::endl;
             }
             try {
-                //if (fish_thread.joinable())
-                std::cout << "Killing fish_thread..." << std::endl;
-                fish_thread.join();
-                std::cout << "fish_thread killed" << std::endl;
+                for (auto& fish_thread : fish_threads) {
+                    if (fish_thread.joinable())
+                        fish_thread.join();
+                }
             } catch (const std::system_error& e) {
                 std::cerr << "Exception caught 2: " << e.what() << std::endl;
             }
@@ -485,7 +477,12 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
                 return -1;
             }
             players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 1));
-            std::thread fish_thread(fishMovementThread, std::ref(school));
+            std::ranges::sort(school, Fish::SortByX);
+            std::vector<std::thread> fish_threads;
+            int fishPerThread = school.size() / std::thread::hardware_concurrency();
+            for (int i = 0; i < school.size(); i += fishPerThread) {
+                fish_threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+            }
             messageThreadRunning = true;
             std::thread messageThread(handleClientMessages, std::ref(players[0]));
             std::thread playerThread(playerMovementThread, std::ref(players[0]));
@@ -506,10 +503,10 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
                 std::cerr << "Exception caught 1: " << e.what() << std::endl;
             }
             try {
-                //if (fish_thread.joinable())
-                std::cout << "Killing fish_thread..." << std::endl;
-                fish_thread.join();
-                std::cout << "fish_thread killed" << std::endl;
+                for (auto& fish_thread : fish_threads) {
+                    if (fish_thread.joinable())
+                        fish_thread.join();
+                }
             } catch (const std::system_error& e) {
                 std::cerr << "Exception caught 2: " << e.what() << std::endl;
             }
@@ -585,7 +582,6 @@ void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, c
         coral.draw(renderer);
     }
 
-    std::lock_guard<std::mutex> lock(mtx);
     for (Fish& fish : school) {
         fish.draw(renderer);
     }

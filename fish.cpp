@@ -1,5 +1,31 @@
 #include "fish.h"
 
+Fish::Fish(const int x, const int y, const float vx, const float vy, std::vector<Fish> &school, const int id, const int width, const int height, SDL_Renderer* renderer, int biasdir, SDL_Texture* texture)
+    : x(x), y(y), vx(vx), vy(vy), school(school), id(id), width(width), height(height), biasdir(biasdir), texture(texture) {
+    // Constructor implementation
+}
+
+Fish::Fish(const Fish& other)
+    : x(other.x), y(other.y), vx(other.vx), vy(other.vy), school(other.school), id(other.id), texture(other.texture), width(other.width), height(other.height), biasdir(other.biasdir) {
+    // Additional initialization if needed
+}
+
+Fish& Fish::operator=(const Fish& other) {
+    if (this != &other) {
+        x = other.x;
+        y = other.y;
+        vx = other.vx;
+        vy = other.vy;
+        school = other.school;
+        id = other.id;
+        texture = other.texture;
+        width = other.width;
+        height = other.height;
+        biasdir = other.biasdir;
+    }
+    return *this;
+}
+
 void Fish::drawArrow(SDL_Renderer *renderer, int x, int y, float vx, float vy) {
     const int arrowLength = 30; // Augmenter la longueur de la flèche
     const int arrowWidth = 10; // Garder la largeur de la flèche constante
@@ -50,25 +76,47 @@ bool Fish::isClose(Fish &other) {
             other.getY() >= y - PROTECTED_RANGE && other.getY() <= y + PROTECTED_RANGE);
 }
 
-void Fish::cycle() {
-    //std::cout << "Cycle " << cycle_count << " pour le poisson " << id << std::endl;
-    //std::cout << "Poisson Position: (" << x << ", " << y << ")" << std::endl;
-    //std::cout << "Vitesse: (" << vx << ", " << vy << ")" << std::endl;
+void Fish::checkNeighborhood(Fish &other,float &xpos_avg, float &ypos_avg, float &xvel_avg, float &yvel_avg, int &neighboring_boids, float &close_dx, float &close_dy) {
+    if (isInView(other)) {
+        if (isClose(other)) {
+            close_dx += x - other.getX();
+            close_dy += y - other.getY();
+        }
+        xpos_avg += other.getX();
+        ypos_avg += other.getY();
+        xvel_avg += other.getVx();
+        yvel_avg += other.getVy();
+        neighboring_boids++;
+    }
+
+}
+
+void Fish::insertionSort(std::vector<Fish>& school) {
+    for (size_t i = 1; i < school.size(); ++i) {
+        Fish key = school[i];
+        int j = i - 1;
+
+        while (j >= 0 && Fish::SortByX(key, school[j])) {
+            school[j + 1] = school[j];
+            --j;
+        }
+        school[j + 1] = key;
+    }
+}
+
+void Fish::cycle(int iter) {
     int neighboring_boids = 0;
     float xvel_avg = 0, yvel_avg = 0, xpos_avg = 0, ypos_avg = 0, close_dx = 0, close_dy = 0;
-    for (Fish &schoolIt: school) {
-        if (schoolIt.getId() != id) {
-            if (isInView(schoolIt)) {
-                if (isClose(schoolIt)) {
-                    close_dx += x - schoolIt.getX();
-                    close_dy += y - schoolIt.getY();
-                }
-                xpos_avg += schoolIt.getX();
-                ypos_avg += schoolIt.getY();
-                xvel_avg += schoolIt.getVx();
-                yvel_avg += schoolIt.getVy();
-                neighboring_boids++;
-            }
+    for (int i = iter; i < school.size(); i++) {
+        if (school[i].getId() != id) {
+            if (school[i].getX() - VISUAL_RANGE > x + VISUAL_RANGE) { break; }
+            checkNeighborhood(school[i], xpos_avg, ypos_avg, xvel_avg, yvel_avg, neighboring_boids, close_dx, close_dy);
+        }
+    }
+    for (int i = iter - 1; i >= 0; i--) {
+        if (school[i].getId() != id) {
+            if (school[i].getX() + VISUAL_RANGE < x - VISUAL_RANGE) { break; }
+            checkNeighborhood(school[i], xpos_avg, ypos_avg, xvel_avg, yvel_avg, neighboring_boids, close_dx, close_dy);
         }
     }
     if (neighboring_boids > 0) {
@@ -111,17 +159,4 @@ void Fish::cycle() {
     }
     x += vx;
     y += vy;
-    //cycle_count++;
-    //std::cout << "Updated Position: (" << x << ", " << y << ")" << std::endl;
-    //std::cout << "Updated Vitesse: (" << vx << ", " << vy << ")" << std::endl;
 }
-
-Fish::Fish(const int x, const int y, const float vx, const float vy, std::vector<Fish> &school, const int id,
-           const int width, const int height, SDL_Renderer *renderer, int biasdir,
-           SDL_Texture *texture): x(x), y(y), vx(vx), vy(vy), school(school), id(id), width(width), height(height),
-                                  texture(texture), biasdir(biasdir) {
-    if (!texture) {
-        std::cerr << "Erreur de chargement de la texture: " << IMG_GetError() << std::endl;
-    }
-}
-

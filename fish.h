@@ -20,21 +20,20 @@ private:
     const float MAX_SPEED = 13;
     const float MIN_SPEED = 0.6;
     const float BIASVALUE = 0.001;
-    //const float MAXBIAS = 0.01;
 
     float x, y;
     float vx, vy;
     std::vector<Fish> &school;
     int id;
     SDL_Texture* texture;
-    //int cycle_count = 0;
     int width, height;
     int biasdir = 1;
 
+    void checkNeighborhood(Fish &other, float &xpos_avg, float &ypos_avg, float &xvel_avg, float &yvel_avg, int &neighboring_boids, float &
+                           close_dx, float &close_dy);
 
-;
 public:
-    Fish(const int x, const int y, const float vx, const float vy,std::vector<Fish> &school, const int id,const int width,const int height, SDL_Renderer* renderer,int biasdir, SDL_Texture* texture);
+    Fish(const int x, const int y, const float vx, const float vy, std::vector<Fish> &school, const int id, const int width, const int height, SDL_Renderer* renderer, int biasdir, SDL_Texture* texture);
     ~Fish() = default;
 
     float getX() const { return x; };
@@ -43,28 +42,24 @@ public:
     float getVy() const { return vy; };
     int getId() const { return id; };
 
-
     void draw(SDL_Renderer* renderer);
     void drawArrow(SDL_Renderer* renderer, int x, int y, float vx, float vy);
-    void cycle();
+    void cycle(int iter);
 
     bool isInView(Fish& other);
     bool isClose(Fish& other);
 
-    SDL_Texture* getTexture() const { return this->texture; };
-    SDL_Rect getRect() const { return {static_cast<int>(this->x), static_cast<int>(this->y), this->width, this->height}; };
-    Fish& operator=(const Fish& other) {
-        if (this != &other) {
-            // Les membres constants ne peuvent pas être assignés, donc nous ne les assignons pas ici
-            // school est une référence, donc nous ne pouvons pas la réassigner non plus
-            // Si vous avez d'autres membres non constants, vous pouvez les assigner ici
-        }
-        return *this;
+    static bool SortByX(const Fish &a, const Fish &b) {
+        return a.getX() < b.getX();
     }
-    // Définir explicitement le constructeur de copie et l'opérateur d'affectation par déplacement si nécessaire
-    Fish(const Fish& other) = delete;
-    Fish(Fish&& other) = default;
-    Fish& operator=(Fish&& other) = default;
+
+    static void insertionSort(std::vector<Fish>& school) ;
+
+    // Copy constructor
+    Fish(const Fish& other);
+
+    // Copy assignment operator
+    Fish& operator=(const Fish& other);
 };
 
 #endif //FISH_H
