@@ -28,9 +28,22 @@ void closeClient() {
 
 
 void sendMessage(TCPsocket socket, const std::string& message) {
+    if (!socket) {
+        std::cerr << "Invalid socket" << std::endl;
+        return;
+    }
+
     int len = message.length();
-    SDLNet_TCP_Send(socket, &len, sizeof(len));
-    SDLNet_TCP_Send(socket, message.c_str(), len);
+    int result = SDLNet_TCP_Send(socket, &len, sizeof(len));
+    if (result < sizeof(len)) {
+        std::cerr << "SDLNet_TCP_Send failed: " << SDLNet_GetError() << std::endl;
+        return;
+    }
+
+    result = SDLNet_TCP_Send(socket, message.c_str(), len);
+    if (result < len) {
+        std::cerr << "SDLNet_TCP_Send failed: " << SDLNet_GetError() << std::endl;
+    }
 }
 
 std::string receiveMessage(TCPsocket socket) {
