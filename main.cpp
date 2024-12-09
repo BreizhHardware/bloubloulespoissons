@@ -175,13 +175,14 @@ bool initSDL() {
     return true;
 }
 
-void playerMovementThread(Player& player, int playerIndex) {
-    std::cout << "starting playerMovementThread for player " << playerIndex << "..." << std::endl;
+void playerMovementThread(Player& player) {
+    int pId = player.getPlayerId();
+    std::cout << "starting playerMovementThread for player " << pId << "..." << std::endl;
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         player.handlePlayerMovement(ENV_WIDTH, ENV_HEIGHT, windowWidth, windowHeight);
     }
-    std::cout << "playerMovementThread for player " << playerIndex << " ended" << std::endl;
+    std::cout << "playerMovementThread for player " << pId << " ended" << std::endl;
 }
 
 void handleClientMessages(Player& player) {
@@ -345,7 +346,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     std::thread fish_thread(fishMovementThread, std::ref(school));
     // Offline
     players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
-    std::thread player_thread(playerMovementThread, std::ref(players[0]), 0);
+    std::thread player_thread(playerMovementThread, std::ref(players[0]));
 
     while (running) {
         renderScene(players, kelps, rocks, corals);
@@ -419,11 +420,11 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
                 std::cerr << "Failed to initialize client!" << std::endl;
                 return -1;
             }
-            players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
+            players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 1));
             std::thread fish_thread(fishMovementThread, std::ref(school));
             messageThreadRunning = true;
             std::thread messageThread(handleClientMessages, std::ref(players[0]));
-            std::thread playerThread(playerMovementThread, std::ref(players[0]), 0);
+            std::thread playerThread(playerMovementThread, std::ref(players[0]));
 
             while (running) {
                 renderScene(players, kelps, rocks, corals);
@@ -487,7 +488,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             std::thread fish_thread(fishMovementThread, std::ref(school));
             messageThreadRunning = true;
             std::thread messageThread(handleClientMessages, std::ref(players[0]));
-            std::thread playerThread(playerMovementThread, std::ref(players[0]), 0);
+            std::thread playerThread(playerMovementThread, std::ref(players[0]));
 
             while (running) {
                 renderScene(players, kelps, rocks, corals);
