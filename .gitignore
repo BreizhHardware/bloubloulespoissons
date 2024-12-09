@@ -42,3 +42,11 @@ cmake-build-debug/
 cmake-build-mingw/
 cmake-build-debug
 cmake-build-mingw
+cmake-build-debug-clang
+cmake-build-debug-gcc
+cmake-build-debug-clang/
+cmake-build-debug-gcc/
+cmake-build-release-clang
+cmake-build-release-clang/
+cmake-build-release-gcc
+cmake-build-release-gcc/
