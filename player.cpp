@@ -194,10 +194,9 @@ void Player::handleClientMessages() {
 
 bool Player::onlineMovement() {
     const Uint8* keystate = SDL_GetKeyboardState(NULL);
-    std::string message = std::to_string(this->playerId) + ";move;";
+    std::string message = std::to_string(getPlayerId()) + ";move;";
     bool moved = false;
     if (keystate[SDL_SCANCODE_W]) {
-        //std::string message = std::to_string(this->playerId) + ";move;up";
         message += "up-";
         moved = true;
     }

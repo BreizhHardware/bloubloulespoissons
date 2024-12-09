@@ -40,8 +40,7 @@ void acceptClients() {
                             char direction[20];
                             sscanf(message.c_str(), "%d;move;%s", &clientId, &direction);
 
-                            int newX = 0, newY = 0, newUnifedX = 0, newUnifedY = 0;
-                            std::cout << "Client " << clientId << " moved " << direction << std::endl;
+                            int newX = 0, newY = 0;
                             std::tie(newX, newY) = updatePlayerPosition(clientId, direction);
                             std::string updatedMessage = std::to_string(clientId) + ";moved;" + std::to_string(newX) + "," + std::to_string(newY);
                             for (TCPsocket client : clients) {
@@ -124,7 +123,7 @@ std::pair<int, int> updatePlayerPosition(int clientId, const std::string& direct
 }
 
 void createNewPlayer(int clientId) {
-    if (clientId <= 0) {
+    if (clientId < 0) {
         std::cerr << "Invalid client ID: " << clientId << std::endl;
         return;
     }

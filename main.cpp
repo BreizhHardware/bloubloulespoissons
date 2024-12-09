@@ -282,7 +282,7 @@ int main(int argc, char* args[]) {
         isPlayingOnline = true;
         menuRunning = false;
         int port = 1234;
-        char* ip = "100.93.105.98";
+        char* ip = "10.30.42.206";
         pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(port, ip);
     });
 
@@ -413,7 +413,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
                 std::cerr << "Failed to initialize client!" << std::endl;
                 return -1;
             }
-            players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 1));
+            players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
             std::ranges::sort(school, Fish::SortByX);
             std::vector<std::thread> fish_threads;
             int fishPerThread = school.size() / std::thread::hardware_concurrency();
