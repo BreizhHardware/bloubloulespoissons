@@ -118,3 +118,18 @@ void handleClientMessage(Player& player) {
         }
     }
 }
+
+void sendKeepAlive(int clientId) {
+    std::string message = std::to_string(clientId) + ";still_alive";
+    sendMessage(client, message);
+}
+
+void startKeepAlive(int clientId) {
+    std::thread([clientId] () {
+        while (messageThreadRunning) {
+            sendKeepAlive(clientId);
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+        }
+    }).detach();
+}
+

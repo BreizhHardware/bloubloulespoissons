@@ -4,6 +4,7 @@
 
 #include "networking.h"
 std::unordered_map<int, std::pair<int, int>> playerPositions;
+std::unordered_map<int, std::chrono::time_point<std::chrono::steady_clock>> lastKeepAlive;
 
 bool initServer() {
     std::cout << "Initializing server..." << std::endl;
@@ -26,8 +27,10 @@ void acceptClients() {
         TCPsocket clientSocket = SDLNet_TCP_Accept(server);
         if (clientSocket) {
             clients.push_back(clientSocket);
-            int clientId = clients.size() - 1; // Assign a unique client ID
-            createNewPlayer(clientId); // Create a new player for the new client
+            int clientId = clients.size() - 1;
+            createNewPlayer(clientId);
+            updateKeepAlive(clientId);
+            startKeepAlive(clientId);
             std::thread clientThread([clientSocket, clientId]() {
                 while (running) {
                     std::string message = receiveMessage(clientSocket);
@@ -49,6 +52,7 @@ void acceptClients() {
                     }
                     SDL_Delay(1);
                 }
+                lastKeepAlive.erase(clientId);
                 SDLNet_TCP_Close(clientSocket);
             });
             clientThread.detach();
@@ -119,5 +123,24 @@ void createNewPlayer(int clientId) {
     std::string newPlayerMessage = "newPlayer;" + std::to_string(clientId) + ",0,0;";
     for (TCPsocket client : clients) {
         sendMessage(client, newPlayerMessage);
+    }
+}
+
+void updateKeepAlive(int clientId) {
+    lastKeepAlive[clientId] = std::chrono::steady_clock::now();
+}
+
+void checkClientAlive() {
+    auto now = std::chrono::steady_clock::now();
+    for (auto it = lastKeepAlive.begin(); it != lastKeepAlive.end();) {
+        if (std::chrono::duration_cast<std::chrono::seconds>(now - it->second).count() > 5) {
+            std::cerr << "Client " << it->first << " is not responding. Removing..." << std::endl;
+            SDLNet_TCP_Close(clients[it->first]);
+            clients.erase(clients.begin() + it->first);
+            it = lastKeepAlive.erase(it);
+        }
+        else {
+            ++it;
+        }
     }
 }

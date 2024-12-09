@@ -7,6 +7,8 @@
 #include <SDL2/SDL_net.h>
 #include <iostream>
 #include <sstream>
+#include <thread>
+#include <chrono>
 #include "../env.h"
 #include "../player.h"
 
@@ -19,6 +21,8 @@ void closeClient();
 void sendMessage(TCPsocket socket, const std::string& message);
 std::string receiveMessage(TCPsocket socket);
 void handleClientMessage(Player& player);
+void sendKeepAlive(int clientId);
+void startKeepAlive(int clientId);
 
 
 #endif //NETWORKING_CLIENT_H
