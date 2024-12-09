@@ -244,8 +244,6 @@ int main(int argc, char* args[]) {
                 menu.draw(renderer);
             }
         }
-        
-        SDL_Delay(10);
     }
     
     try {
