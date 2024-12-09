@@ -175,7 +175,7 @@ int main(int argc, char* args[]) {
         return -1;
     }
 
-    if (argc == 69) {
+    if (args[1] == "69") {
         pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(0, nullptr);
     }
 
