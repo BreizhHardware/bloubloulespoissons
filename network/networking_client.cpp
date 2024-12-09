@@ -77,7 +77,7 @@ void handleClientMessage(Player& player) {
                     while (std::getline(iss, token, ';')) {
                         int playerId, x, y;
                         sscanf(token.c_str(), "%d,%d,%d", &playerId, &x, &y);
-                        if (playerId < players.size()) {
+                        if (playerId > 0 && playerId < players.size()) {
                             players[playerId].updatePosition(x, y);
                         } else {
                             players.emplace_back(Player(x, y, 5, renderer, playerId));
@@ -86,16 +86,18 @@ void handleClientMessage(Player& player) {
                 } else if (token == "newPlayer") {
                     int playerId, x, y;
                     sscanf(token.c_str(), "%d,%d,%d", &playerId, &x, &y);
-                    players.emplace_back(Player(x, y, 5, renderer, playerId));
+                    if (playerId > 0) {
+                        players.emplace_back(Player(x, y, 5, renderer, playerId));
+                    }
                 } else {
                     int playerId = std::stoi(token);
-                    std::getline(iss, token, ';'); // Skip the "moved" part
+                    std::getline(iss, token, ';');
                     std::getline(iss, token, ';');
                     int x = std::stoi(token);
                     std::getline(iss, token, ';');
                     int y = std::stoi(token);
 
-                    if (playerId < players.size()) {
+                    if (playerId > 0 && playerId < players.size()) {
                         players[playerId].updatePosition(x, y);
                     }
                 }

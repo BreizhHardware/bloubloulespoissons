@@ -82,6 +82,10 @@ std::pair<int, int> updateCameraPosition(int clientId, int newX, int newY) {
 }
 
 void createNewPlayer(int clientId) {
+    if (clientId <= 0) {
+        std::cerr << "Invalid client ID: " << clientId << std::endl;
+        return;
+    }
     // Create a new player at a default position (e.g., 0, 0)
     Player newPlayer(0, 0, 5, renderer, clientId);
     players.push_back(newPlayer);
