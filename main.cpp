@@ -39,18 +39,6 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
 void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
 void cleanup();
 
-void updateFishRange(std::vector<Fish>& school, int start, int end, int id){
-    std::cout << "Thread updateFishRange ID : " << id << " : started" << std::endl;
-    int updateCount = 0;
-    while (running) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));
-        for (int i = start; i < end; ++i) {
-            school[i].cycle();
-        }
-        updateCount++;
-    }
-}
-
 void displayFPS(SDL_Renderer* renderer, TTF_Font* font, int fps) {
     std::string fpsText = "FPS: " + std::to_string(fps);
     SDL_Color color = {0, 255, 0}; // Green
@@ -339,7 +327,6 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
-    std::thread player_thread(playerMovementThread, std::ref(player));
     for (int i = 0; i < FISH_NUMBER ; ++i) {
         school.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 75, 75, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]);
     }
@@ -356,7 +343,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     std::thread player_thread(playerMovementThread, std::ref(players[0]));
 
     while (running) {
-        renderScene(player, kelps, rocks, corals);
+        renderScene(players, kelps, rocks, corals);
         handleQuit();
     }
     running = false;
@@ -366,13 +353,6 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     }catch(const std::system_error& e){
         std::cerr << "Exception caught 1: " << e.what() << std::endl;
     }
-    for (auto& thread : threads) {
-            try {
-                thread.join();
-            } catch (const std::system_error& e) {
-                std::cerr << "Exception caught 2: " << e.what() << std::endl;
-            }   
-        }
     try{
         if(quit_thread.joinable())
             quit_thread.join();
@@ -381,8 +361,9 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     }
     try {
       for (auto& fish_thread : fish_threads) {
-        if (fish_thread.joinable())
-            fish_thread.join();
+          if (fish_thread.joinable())
+              fish_thread.join();
+      }
     } catch (const std::system_error& e) {
         std::cerr << "Exception caught 4: " << e.what() << std::endl;
     }
@@ -408,10 +389,8 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     int fishPerThread = school.size() / std::thread::hardware_concurrency();
     int thread_id = 0;
     for (int i = 0; i < school.size(); i += fishPerThread) {
-        threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())), thread_id);
-        thread_id++;
+        threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
     }
-
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
@@ -429,7 +408,12 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
                 return -1;
             }
             players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 1));
-            std::thread fish_thread(fishMovementThread, std::ref(school));
+            std::ranges::sort(school, Fish::SortByX);
+            std::vector<std::thread> fish_threads;
+            int fishPerThread = school.size() / std::thread::hardware_concurrency();
+            for (int i = 0; i < school.size(); i += fishPerThread) {
+                fish_threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+            }
             messageThreadRunning = true;
             std::thread messageThread(handleClientMessages, std::ref(players[0]));
             std::thread playerThread(playerMovementThread, std::ref(players[0]));
@@ -450,10 +434,10 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
                 std::cerr << "Exception caught 1: " << e.what() << std::endl;
             }
             try {
-                //if (fish_thread.joinable())
-                std::cout << "Killing fish_thread..." << std::endl;
-                fish_thread.join();
-                std::cout << "fish_thread killed" << std::endl;
+                for (auto& fish_thread : fish_threads) {
+                    if (fish_thread.joinable())
+                        fish_thread.join();
+                }
             } catch (const std::system_error& e) {
                 std::cerr << "Exception caught 2: " << e.what() << std::endl;
             }
@@ -493,7 +477,12 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
                 return -1;
             }
             players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 1));
-            std::thread fish_thread(fishMovementThread, std::ref(school));
+            std::ranges::sort(school, Fish::SortByX);
+            std::vector<std::thread> fish_threads;
+            int fishPerThread = school.size() / std::thread::hardware_concurrency();
+            for (int i = 0; i < school.size(); i += fishPerThread) {
+                fish_threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+            }
             messageThreadRunning = true;
             std::thread messageThread(handleClientMessages, std::ref(players[0]));
             std::thread playerThread(playerMovementThread, std::ref(players[0]));
@@ -514,10 +503,10 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
                 std::cerr << "Exception caught 1: " << e.what() << std::endl;
             }
             try {
-                //if (fish_thread.joinable())
-                std::cout << "Killing fish_thread..." << std::endl;
-                fish_thread.join();
-                std::cout << "fish_thread killed" << std::endl;
+                for (auto& fish_thread : fish_threads) {
+                    if (fish_thread.joinable())
+                        fish_thread.join();
+                }
             } catch (const std::system_error& e) {
                 std::cerr << "Exception caught 2: " << e.what() << std::endl;
             }
