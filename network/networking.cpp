@@ -63,13 +63,29 @@ std::pair<int, int> updatePlayerPosition(int clientId, const std::string& direct
     int& newY = pos.second;
 
     if (direction == "up") {
-        newY -= 5;
+        if (newY-5 < 0) {
+            newY = 0;
+        } else {
+            newY -= 5;
+        }
     } else if (direction == "down") {
-        newY += 5;
+        if (newY+5 > ENV_HEIGHT - windowHeight) {
+            newY = ENV_HEIGHT - windowHeight;
+        } else {
+            newY += 5;
+        }
     } else if (direction == "left") {
-        newX -= 5;
+        if (newX-5 < 0) {
+            newX = 0;
+        } else {
+            newX -= 5;
+        }
     } else if (direction == "right") {
-        newX += 5;
+        if (newX+5 > ENV_WIDTH - windowWidth) {
+            newX = ENV_WIDTH - windowWidth;
+        } else {
+            newX += 5;
+        }
     }
     return {newX, newY};
 }
