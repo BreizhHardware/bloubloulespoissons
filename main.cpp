@@ -30,6 +30,7 @@ SDL_Texture* fishTextures[100]; // Adjust the size as needed
 std::vector<Fish> school;
 
 std::vector<Player> players;
+std::vector<Player> players_server;
 
 
 bool initSDL();
@@ -560,6 +561,7 @@ void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, c
     static Uint32 lastTime = 0;
     static int frameCount = 0;
     static int fps = 0;
+    //std::cout << "renderScene for " << players.size() << " players" << std::endl;
 
     const Uint32 currentTime = SDL_GetTicks64();
     frameCount++;

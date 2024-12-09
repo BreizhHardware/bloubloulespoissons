@@ -33,6 +33,7 @@ extern std::atomic<bool> running;
 extern std::atomic<bool> isPlayingOnline;
 extern std::atomic<bool> messageThreadRunning;
 extern std::vector<Player> players;
+extern std::vector<Player> players_server;
 
 bool initEnvironment(SDL_Renderer* renderer);
 std::vector<SDL_Texture*> initTexture(SDL_Renderer* renderer);

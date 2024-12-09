@@ -21,6 +21,7 @@ std::atomic<bool> running(true);
 std::atomic<bool> isPlayingOnline(false);
 std::atomic<bool> messageThreadRunning(false);
 
+
 bool initEnvironment(SDL_Renderer* renderer) {
     SDL_Surface* backgroundSurface = IMG_Load("../img/background.png");
     if (backgroundSurface == nullptr) {

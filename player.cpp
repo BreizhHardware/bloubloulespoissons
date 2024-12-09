@@ -47,6 +47,7 @@ void Player::draw(SDL_Renderer* renderer) {
     SDL_RenderCopyEx(renderer, this->playerTexture, &this->playerRect[this->currentSprite], &this->playerPosForRender, 0, nullptr, this->currentFlip);
 
     this->drawEnergyBar(renderer);
+    
 };
 
 void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth, int windowHeight) {

@@ -129,12 +129,12 @@ void createNewPlayer(int clientId) {
     }
     // Create a new player at a default position (e.g., 0, 0)
     Player newPlayer(0, 0, 5, renderer, clientId);
-    players.push_back(newPlayer);
+    players_server.push_back(newPlayer);
     playerPositions[clientId] = {0, 0}; // Initialize player position
 
     // Send the list of existing players to the new client
     std::string playerListMessage = "playerList;";
-    for (auto& player : players) {
+    for (auto& player : players_server) {
         auto [x, y] = player.getPlayerPos();
         playerListMessage += std::to_string(player.getPlayerId()) + "," + std::to_string(x) + "," + std::to_string(y) + ";";
     }
