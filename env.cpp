@@ -15,7 +15,7 @@ SDL_Renderer* renderer = nullptr;
 SDL_Window* window = nullptr;
 TTF_Font* font = nullptr;
 int fishCount = 0;
-int FISH_NUMBER = 5000;
+int FISH_NUMBER = 2500;
 std::vector<SDL_Texture*> texturesVector;
 std::atomic<bool> running(true);
 std::atomic<bool> isPlayingOnline(false);
