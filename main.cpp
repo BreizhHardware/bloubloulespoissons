@@ -35,7 +35,7 @@ std::vector<Player> players;
 bool initSDL();
 void handleQuit();
 int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(int argc, char* args[]);
-int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, char* args);
+int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, std::string args);
 void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
 void cleanup();
 
@@ -258,7 +258,7 @@ int main(int argc, char* args[]) {
         std::cout << "Host" << std::endl;
         isPlayingOnline = true;
         menuRunning = false;
-        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(0, nullptr);
+        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(0, "");
     });
 
     menu.addButton("Multi", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Join", 1024, [&menu](){
@@ -270,19 +270,19 @@ int main(int argc, char* args[]) {
     // });
 
     menu.addButton("Multi-Join", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "", 24, [](){
-        std::cout << "Text input button clicked" << std::endl;
+        std::cout << "IP input button clicked" << std::endl;
     }, true);
 
-    menu.addButton("Multi-Join", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "", 24, [](){
-        std::cout << "Text input button clicked" << std::endl;
-    }, true);
-
-    menu.addButton("Multi-Join", (windowWidth/2) - 100, (windowHeight/2 + 125) - 25, 200, 50, "Join", 1024, [&menu](){
+    menu.addButton("Multi-Join", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Join !", 1024, [&menu](){
         std::cout << "Join" << std::endl;
         isPlayingOnline = true;
         menuRunning = false;
         int port = 1234;
-        char* ip = "10.30.42.206";
+        //char* ip = "10.30.42.206";
+        // Pour l'ip récupère l'interieur du bouton IP input
+        std::vector<Button> buttons = menu.getButtons();
+        std::string ip = buttons[0].inputText;
+        std::cout << ip << std::endl;
         pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(port, ip);
     });
 
@@ -376,7 +376,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     return 0;
 }
 
-int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, char* args) {
+int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, std::string args) {
     // if (!initSDL()) {
     //     std::cerr << "Failed to initialize!" << std::endl;
     //     return -1;
@@ -401,7 +401,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     freopen("CON", "w", stderr);
 
     if (isPlayingOnline) {
-        if (argc == 0 && args == nullptr) {
+        if (argc == 0 && args == "") {
             if (!initServer()) {
                 std::cerr << "Failed to initialize server!" << std::endl;
                 return -1;
@@ -475,10 +475,10 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
                 std::cerr << "Exception caught 5: " << e.what() << std::endl;
             }
         }
-        else if (argc > 0 && argc < 65535 && args != nullptr) {
-            int port = atoi(args);
-            char* host = args;
-            if (!initClient(ip, host, 1234)) {
+        else if (argc > 0 && argc < 65535 && args != "") {
+            int port = 1234;
+            std::string host = args;
+            if (!initClient(ip, host.c_str(), 1234)) {
                 std::cerr << "Failed to initialize client!" << std::endl;
                 return -1;
             }

@@ -65,7 +65,10 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
     bool moved = false;
     if (this->energy != 0) {
         if (isPlayingOnline) {
-            moved = onlineMovement();
+            // Si une touche est préssée on appelle la fonction onlineMovement
+            if (keystate[SDL_SCANCODE_W] || keystate[SDL_SCANCODE_S] || keystate[SDL_SCANCODE_A] || keystate[SDL_SCANCODE_D]) {
+                moved = onlineMovement();
+            }
         } else {
             if (keystate[SDL_SCANCODE_W]) {
                 if (camera.getY() > 0 && tempY == this->playerBaseY) {
@@ -194,7 +197,7 @@ void Player::handleClientMessages() {
 
 bool Player::onlineMovement() {
     const Uint8* keystate = SDL_GetKeyboardState(NULL);
-    std::string message = getPlayerId() + ";move;";
+    std::string message = std::to_string(getPlayerId()) + ";move;";
     bool moved = false;
     if (keystate[SDL_SCANCODE_W]) {
         message += "up-";
