@@ -31,7 +31,7 @@ void displayNearbyPlayers(SDL_Renderer* renderer, TTF_Font* font, Player& curren
 
             // Affiche la 1ère image de playerV2-full.png
             SDL_Rect playerRect = {69, 73, 112, 117};
-            SDL_Rect playerPosForRender = {10, 20, 112, 117};
+            SDL_Rect playerPosForRender = {playerX, playerY, 112, 117};
             SDL_RenderCopy(renderer, player.getTexture(), &playerRect, &playerPosForRender);
 
             offsetY += 20;
