@@ -10,6 +10,7 @@
 #include <atomic>
 #include <cstdlib>
 #include <algorithm>
+#include <random>
 
 #include "fish.h"
 #include "decors.h"
@@ -532,6 +533,13 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
                 std::cerr << "Failed to initialize client!" << std::endl;
                 return -1;
             }
+            /*
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<> disX(0, ENV_WIDTH);
+            std::uniform_int_distribution<> disY(0, ENV_HEIGHT);
+            players.emplace_back(Player(disX(gen), disY(gen), 5, renderer, 1));
+            */
             players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 1));
             std::ranges::sort(school, Fish::SortByX);
             std::vector<std::thread> fish_threads;
@@ -657,10 +665,13 @@ void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, c
     for (auto& player : players) {
         auto [playerX, playerY] = player.getPlayerPos();
         displayPlayerCoord(renderer, font, playerX, playerY);
-        int unifiedX = player.getUnifiedX();
-        int unifiedY = player.getUnifiedY();
+    }
+
+    for (auto& player_server : players_server) {
+        int unifiedX = player_server.getUnifiedX();
+        int unifiedY = player_server.getUnifiedY();
         displayUnifiedPlayerCoord(renderer, font, unifiedX, unifiedY);
-        displayNearbyPlayers(renderer, font, player, players, 500.0);
+        displayNearbyPlayers(renderer, font, player_server, players_server, 2000.0);
     }
 
     SDL_RenderPresent(renderer);
