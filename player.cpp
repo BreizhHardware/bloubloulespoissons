@@ -183,7 +183,7 @@ void Player::handleClientMessages() {
         std::cout << "Client received: " << message << std::endl;
         if (message == "host;quit") {
             std::cout << "Host has quit. Closing client..." << std::endl;
-            running = false;
+            game_running = false;
             return;
         }
         if (message.find(";moved;") != std::string::npos) {
