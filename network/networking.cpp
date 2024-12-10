@@ -23,7 +23,7 @@ bool initServer() {
 }
 
 void acceptClients() {
-    while (running) {
+    while (game_running) {
         TCPsocket clientSocket = SDLNet_TCP_Accept(server);
         if (clientSocket) {
             clients.push_back(clientSocket);

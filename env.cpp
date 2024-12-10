@@ -18,6 +18,7 @@ int fishCount = 0;
 int FISH_NUMBER = 2500;
 std::vector<SDL_Texture*> texturesVector;
 std::atomic<bool> running(true);
+std::atomic<bool> game_running(false);
 std::atomic<bool> isPlayingOnline(false);
 std::atomic<bool> messageThreadRunning(false);
 std::atomic<bool> isHost(false);

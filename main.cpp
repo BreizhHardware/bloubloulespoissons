@@ -199,7 +199,7 @@ bool initSDL() {
 void playerMovementThread(Player& player) {
     try {
         std::cout << "Starting playerMovementThread for player " << player.getPlayerId() << std::endl;
-        while (running) {
+        while (game_running) {
             player.handlePlayerMovement(ENV_WIDTH, ENV_HEIGHT, windowWidth, windowHeight);
             std::this_thread::sleep_for(std::chrono::milliseconds(16)); // 60 FPS
         }
@@ -219,7 +219,7 @@ void handleClientMessages(Player& player) {
 
 void handleQuitThread() {
     std::cout << "handleQuitThread..." << std::endl;
-    while (running) {
+    while (game_running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         handleQuit();
     }
@@ -233,7 +233,7 @@ void HandleMenuClick(Menu& menu){
 }
 
 void updateFishRange(std::vector<Fish>& school, int start, int end){
-    while (running) {
+    while (game_running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
         {
             std::lock_guard<std::mutex> lock(mtx);
@@ -357,7 +357,9 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     // if (!initSDL()) {
     //     std::cerr << "Failed to initialize!" << std::endl;
     //     return -1;
-    // }
+    // }    
+    
+    game_running = true;
 
     std::vector<Kelp> kelps;
     std::vector<Rock> rocks;
@@ -382,11 +384,10 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
     std::thread player_thread = createThread("Player thread", playerMovementThread, std::ref(players[0]));
 
-    while (running) {
+    while (game_running) {
         renderScene(players, kelps, rocks, corals);
-        handleQuit();
+        //handleQuit();
     }
-    running = false;
     try{
         if(player_thread.joinable())
             player_thread.join();
@@ -407,6 +408,8 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     } catch (const std::system_error& e) {
         std::cerr << "Exception caught 4: " << e.what() << std::endl;
     }
+    
+    running = false;
     return 0;
 }
 
@@ -415,7 +418,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     //     std::cerr << "Failed to initialize!" << std::endl;
     //     return -1;
     // }
-
+    game_running = true;
     std::vector<Kelp> kelps;
     std::vector<Rock> rocks;
     std::vector<Coral> corals;
@@ -459,11 +462,10 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             std::thread messageThread = createThread("Message thread", handleClientMessages, std::ref(players[0]));
             std::thread playerThread = createThread("Player thread", playerMovementThread, std::ref(players[0]));
 
-            while (running) {
+            while (game_running) {
                 renderScene(players, kelps, rocks, corals);
                 SDL_Delay(10);
             }
-            running = false;
             messageThreadRunning = false;
             try{
                 //if(playerThread.joinable())
@@ -509,6 +511,8 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             } catch (const std::system_error& e) {
                 std::cerr << "Exception caught 5: " << e.what() << std::endl;
             }
+            
+            running = false;
         }
         else if (argc > 0 && argc < 65535 && args != "") {
             int port = 1234;
@@ -528,11 +532,10 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             std::thread messageThread = createThread("Message thread", handleClientMessages, std::ref(players[0]));
             std::thread playerThread = createThread("Player thread", playerMovementThread, std::ref(players[0]));
 
-            while (running) {
+            while (game_running) {
                 renderScene(players, kelps, rocks, corals);
                 SDL_Delay(10);
             }
-            running = false;
             messageThreadRunning = false;
             try{
                 //if(playerThread.joinable())
@@ -569,6 +572,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             } catch (const std::system_error& e) {
                 std::cerr << "Exception caught 4: " << e.what() << std::endl;
             }
+            running = false;
         }
     }
 
@@ -582,7 +586,7 @@ void handleQuit() {
 
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
-            running = false;
+            game_running = false;
             if (isPlayingOnline && isHost) {
                 closeServer();
             }
@@ -590,7 +594,7 @@ void handleQuit() {
     }
 
     if (keystate[SDL_SCANCODE_ESCAPE]) {
-        running = false;
+        game_running = false;
         if (isPlayingOnline && isHost) {
             closeServer();
         }
@@ -652,19 +656,60 @@ void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, c
 }
 
 void cleanup() {
-    TTF_CloseFont(font);
-    TTF_Quit();
-    SDL_DestroyTexture(backgroundTexture);
+    try {  
+        TTF_CloseFont(font);
+    }catch(const std::system_error& e){
+        std::cerr << "Exception caught for CloseFont (660): " << e.what() << std::endl;
+    }
+    try{
+        TTF_Quit();
+    }catch(const std::system_error& e){
+        std::cerr << "Exception caught for TTF_Quit (665): " << e.what() << std::endl;
+    }
+    try{
+        SDL_DestroyTexture(playerTexture);
+    }catch(const std::system_error& e){
+        std::cerr << "Exception caught for DestroyTexture (670): " << e.what() << std::endl;
+    }
     for (int i = 0; i < fishCount; ++i) {
-        SDL_DestroyTexture(fishTextures[i]);
+        try{
+            SDL_DestroyTexture(fishTextures[i]);
+        }catch(const std::system_error& e){
+            std::cerr << "Exception caught for DestroyTexture (676): " << e.what() << std::endl;
+        }
     }
     if (renderer != nullptr) {
-        SDL_DestroyRenderer(renderer);
+        try{
+            SDL_DestroyRenderer(renderer);
+        }catch(const std::system_error& e){
+            std::cerr << "Exception caught for DestroyRenderer (683): " << e.what() << std::endl;
+        }
     }
     if (window != nullptr) {
-        SDL_DestroyWindow(window);
+        try{
+            SDL_DestroyWindow(window);
+        }catch(const std::system_error& e){
+            std::cerr << "Exception caught for DestroyWindow (690): " << e.what() << std::endl;
+        }
     }
-    IMG_Quit();
-    SDLNet_Quit();
-    SDL_Quit();
+    try{
+        SDL_Quit();
+    }catch(const std::system_error& e){
+        std::cerr << "Exception caught for SDL_Quit (696): " << e.what() << std::endl;
+    }
+    try{
+        IMG_Quit();
+    }catch(const std::system_error& e){
+        std::cerr << "Exception caught for IMG_Quit (701): " << e.what() << std::endl;
+    }
+    try{
+        SDLNet_Quit();
+    }catch(const std::system_error& e){
+        std::cerr << "Exception caught for SDLNet_Quit (706): " << e.what() << std::endl;
+    }
+    try{
+        SDL_Quit();
+    }catch(const std::system_error& e){
+        std::cerr << "Exception caught for SDL_Quit (711): " << e.what() << std::endl;
+    }
 }

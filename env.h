@@ -30,6 +30,7 @@ extern int fishCount;
 extern int FISH_NUMBER;
 extern std::vector<SDL_Texture*> texturesVector;
 extern std::atomic<bool> running;
+extern std::atomic<bool> game_running;
 extern std::atomic<bool> isPlayingOnline;
 extern std::atomic<bool> messageThreadRunning;
 extern std::vector<Player> players;
