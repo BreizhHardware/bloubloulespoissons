@@ -125,7 +125,7 @@ void handleClientMessage(Player& player) {
 }
 
 void sendKeepAlive(TCPsocket serverSocket) {
-    while (true) {
+    while (game_running) {
         std::string keepAliveMessage = "keepalive";
         sendMessage(serverSocket, keepAliveMessage);
         SDL_Delay(3000); // Envoyer un message de keepalive toutes les 3 secondes
