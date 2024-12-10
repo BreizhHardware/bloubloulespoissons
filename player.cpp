@@ -234,8 +234,8 @@ bool Player::onlineMovement() {
 void Player::updatePosition(int x, int y) {
     int camX = x + windowWidth / 2;
     int camY = y + windowHeight / 2;
-    this->unifiedX = camX;
-    this->unifiedY = camY;
+    unifiedX = camX;
+    unifiedY = camY;
 }
 
 int Player::getUnifiedX() {
