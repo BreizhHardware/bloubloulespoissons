@@ -45,6 +45,8 @@ void acceptClients() {
 
                             int newX = 0, newY = 0;
                             std::tie(newX, newY) = updatePlayerPosition(clientId, direction);
+                            // Mettre à jour la position du joueur
+                            players_server[clientId].updatePosition(newX, newY);
                             std::string updatedMessage = std::to_string(clientId) + ";moved;" + std::to_string(newX) + "," + std::to_string(newY);
                             for (TCPsocket client : clients) {
                                 sendMessage(client, updatedMessage);
@@ -191,6 +193,9 @@ void handleServerMessages() {
             sscanf(message.c_str(), "%d;moved;%d,%d", &clientId, &x, &y);
             // Mettre à jour la position du joueur dans players_server
             for (auto& player : players_server) {
+                std::cout << "Player ID: " << player.getPlayerId() << std::endl;
+                std::cout << "Client ID: " << clientId << std::endl;
+                std::cout << "PlayerId == ClientId: " << (player.getPlayerId() == clientId) << std::endl;
                 if (player.getPlayerId() == clientId) {
                     player.updatePosition(x, y);
                     std::cout << "Player " << clientId << " moved to " << player.getUnifiedX() << ", " << player.getUnifiedY() << std::endl;
