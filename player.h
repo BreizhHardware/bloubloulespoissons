@@ -69,6 +69,8 @@ class Player {
         void updatePosition(int x, int y);
         int getUnifiedX();
         int getUnifiedY();
+
+        int getSpeed();
         SDL_Texture* getTexture() {
             return playerTexture;
         }

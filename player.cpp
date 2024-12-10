@@ -1,4 +1,6 @@
 #include "player.h"
+
+#include <syncstream>
 #include <tuple>
 #include "network/networking_client.h"
 #include "camera.h"
@@ -140,6 +142,8 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
         if (this->energy < 0) {
             this->energy = 0;
         }
+        unifiedX = camera.getX() + this->x;
+        unifiedY = camera.getY() + this->y;
     } else {
         Uint32 currentTime = SDL_GetTicks();
         if (currentTime - lastMoveTime >= 5000) {
@@ -152,6 +156,8 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
                 this->energy = 100.0f;
             }
         }
+        unifiedX = camera.getX() + this->x;
+        unifiedY = camera.getY() + this->y;
     }
 }
 
@@ -243,4 +249,8 @@ int Player::getUnifiedX() {
 
 int Player::getUnifiedY() {
     return unifiedY;
+}
+
+int Player::getSpeed() {
+    return playerSpeed;
 }
