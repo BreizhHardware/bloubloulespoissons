@@ -21,6 +21,7 @@
 #include "network/networking.h"
 #include "network/networking_client.h"
 
+
 std::mutex mtx;
 std::atomic<bool> menuRunning(true);
 
@@ -212,6 +213,9 @@ void updateFishRange(std::vector<Fish>& school, int start, int end){
 }
 
 int main(int argc, char* args[]) {
+
+    SDL_SetHint(SDL_HINT_VIDEO_WAYLAND_ALLOW_LIBDECOR, "0");
+
     if (!initSDL()) {
         std::cerr << "Failed to initialize!" << std::endl;
         return -1;
