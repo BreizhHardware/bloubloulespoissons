@@ -5,7 +5,7 @@
 #define sharkIMG "../img/mory.png"
 #include "shark.h"
 
-Shark::Shark(const int x, const int y, const float vx, const float vy, const int id, const int width, const int height, SDL_Renderer* renderer, const std::vector<Player> &players_list)
+Shark::Shark(const int x, const int y, const float vx, const float vy, const int id, const int width, const int height, SDL_Renderer* renderer, std::vector<Player> &players_list)
     : x(x), y(y), vx(vx), vy(vy), id(id), width(width), height(height), players_list(players_list) {
     SDL_Surface* sharkSurface = IMG_Load(sharkIMG);
     if (sharkSurface == nullptr) {

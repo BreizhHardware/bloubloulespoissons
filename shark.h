@@ -11,7 +11,7 @@
 
 class Shark {
 private:
-    const int VISUAL_RANGE = 100;
+    const int VISUAL_RANGE = 500;
     const float AVOIDANCE_FORCE = 0.05;
     const float MATCHING_FACTOR = 0.05;
     const float CENTERING_FACTOR = 0.005;
@@ -25,11 +25,11 @@ private:
     int id;
     SDL_Texture* texture;
     int width, height;
-    std::vector<Player> players_list;
+    std::vector<Player> &players_list;
 
 
 public:
-    Shark(int x, int y, float vx, float vy, int id, int width, int height, SDL_Renderer *renderer, const std::vector<Player> &players_list);
+    Shark(int x, int y, float vx, float vy, int id, int width, int height, SDL_Renderer *renderer,std::vector<Player> &players_list);
     ~Shark() = default;
 
     float getX() const { return x; };
