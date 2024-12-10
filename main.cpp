@@ -21,6 +21,19 @@
 #include "network/networking.h"
 #include "network/networking_client.h"
 
+#include <system_error>
+
+template <typename Function, typename... Args>
+std::thread createThread(std::string key, Function&& func, Args&&... args) {
+    try {
+        std::cout << "Creating thread: " << key << std::endl;
+        return std::thread(std::forward<Function>(func), std::forward<Args>(args)...);
+    } catch (const std::system_error& e) {
+        std::cerr << "Failed to create thread: " << e.what() << std::endl;
+        throw;
+    }
+}
+
 std::mutex mtx;
 std::atomic<bool> menuRunning(true);
 
@@ -237,7 +250,7 @@ int main(int argc, char* args[]) {
     menu.addPage("Multi-Join");
     menu.changePage("Main");
 
-    std::thread menu_thread(HandleMenuClick, std::ref(menu));
+    std::thread menu_thread = createThread("Menu thread", HandleMenuClick, std::ref(menu));
 
     menu.addText("Main", (windowWidth/2) - 300, 50, 600, 100, "BloubBloub les poissons", 1024);
 
