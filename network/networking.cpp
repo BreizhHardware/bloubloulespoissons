@@ -181,3 +181,22 @@ void closeServer() {
     clients.clear();
     SDLNet_TCP_Close(server);
 }
+
+void handleServerMessages() {
+    std::string message = receiveMessage(server);
+    if (!message.empty()) {
+        std::cout << "Server received: " << message << std::endl;
+        if (message.find(";moved;") != std::string::npos) {
+            int clientId, x, y;
+            sscanf(message.c_str(), "%d;moved;%d,%d", &clientId, &x, &y);
+            // Mettre à jour la position du joueur dans players_server
+            for (auto& player : players_server) {
+                if (player.getPlayerId() == clientId) {
+                    player.updatePosition(x, y);
+                    std::cout << "Player " << clientId << " moved to " << player.getUnifiedX() << ", " << player.getUnifiedY() << std::endl;
+                    break;
+                }
+            }
+        }
+    }
+}

@@ -187,10 +187,9 @@ void Player::handleClientMessages() {
             return;
         }
         if (message.find(";moved;") != std::string::npos) {
-            int clientId, UnifiedX, UnifiedY, xCam, yCam;
+            int clientId, xCam, yCam;
             sscanf(message.c_str(), "%d;moved;%d,%d", &clientId, &xCam, &yCam);
-            // Mettre à jour la position du joueur
-            if (clientId == this->playerId) {
+            if (clientId == playerId) {
                 this->setPlayerPos(750, 400);
                 Camera& camera = Camera::getInstance();
                 if (xCam >= 0 && xCam <= ENV_WIDTH - windowWidth) {
