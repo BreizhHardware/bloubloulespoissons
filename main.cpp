@@ -328,7 +328,7 @@ int main(int argc, char* args[]) {
     });
 
     //menu.addButton((windowWidth/2) - 100, (windowHeight/2 + 25) + 50, 200, 50, "Multi", 1024);
-    //std::thread quit_thread(handleQuitThread);
+    std::thread quit_thread(handleQuitThread);
 
     while (running) {
             
