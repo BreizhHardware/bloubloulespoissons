@@ -421,7 +421,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     }
 
     Shark shark(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1,0, 150, 150, renderer,players);
-    std::thread shark_thread(updateShark, std::ref(shark));
+    //std::thread shark_thread(updateShark, std::ref(shark));
 
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);

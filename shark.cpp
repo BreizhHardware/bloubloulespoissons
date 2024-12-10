@@ -52,9 +52,8 @@ void Shark::checkNeighborhood(Player& player, float &xpos_avg, float &ypos_avg, 
 
 void Shark::cycle() {
     int neighboring_player = 0;
-    float xvel_avg = 0, yvel_avg = 0, xpos_avg = 0, ypos_avg = 0, close_dx = 0, close_dy = 0;
+    float xvel_avg = 0, yvel_avg = 0, xpos_avg = 0, ypos_avg = 0;
     std::cout << "Shark x: " << x << " y: " << y << std::endl;
-    std::cout.flush();
     for (auto& player : players_list) {
         if (isInView(player)) {
             std::cout << "Player x: " << player.getUnifiedX() << " y: " << player.getUnifiedY() << std::endl;
