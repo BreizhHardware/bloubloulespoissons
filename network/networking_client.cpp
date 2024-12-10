@@ -37,6 +37,8 @@ void sendMessage(TCPsocket socket, const std::string& message) {
     int result = SDLNet_TCP_Send(socket, &len, sizeof(len));
     if (result < sizeof(len)) {
         std::cerr << "SDLNet_TCP_Send failed: " << SDLNet_GetError() << std::endl;
+        std::cerr << "Closing the game ..." << std::endl;
+        game_running = false;
         return;
     }
 
@@ -124,15 +126,18 @@ void handleClientMessage(Player& player) {
     }
 }
 
-void sendKeepAlive(int clientId) {
-    std::string message = std::to_string(clientId) + ";still_alive";
-    sendMessage(client, message);
+void sendKeepAlive(TCPsocket serverSocket) {
+    while (game_running) {
+        std::string keepAliveMessage = "keepalive";
+        sendMessage(serverSocket, keepAliveMessage);
+        SDL_Delay(3000); // Envoyer un message de keepalive toutes les 3 secondes
+    }
 }
 
-void startKeepAlive(int clientId) {
-    std::thread([clientId] () {
+void startKeepAlive(TCPsocket serverSocket) {
+    std::thread([serverSocket] () {
         while (messageThreadRunning) {
-            sendKeepAlive(clientId);
+            sendKeepAlive(serverSocket);
             std::this_thread::sleep_for(std::chrono::seconds(5));
         }
     }).detach();

@@ -10,6 +10,7 @@
 #include <atomic>
 #include <cstdlib>
 #include <algorithm>
+#include <random>
 
 #include "fish.h"
 #include "decors.h"
@@ -23,6 +24,8 @@
 #include "shark.h"
 
 
+#include <system_error>
+
 std::mutex mtx;
 std::atomic<bool> menuRunning(true);
 
@@ -31,14 +34,57 @@ SDL_Texture* playerTexture = nullptr;
 SDL_Texture* fishTextures[100]; // Adjust the size as needed
 std::vector<Fish> school;
 std::vector<Player> players;
+std::vector<Player> players_server;
 
+struct ThreadInfo {
+    std::thread::id id;
+    std::string functionName;
+};
+
+std::vector<ThreadInfo> threadInfos;
 
 bool initSDL();
 void handleQuit();
+
 int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(int argc, char* args[]);
 int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, char* args);
 void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals,Shark& shark );
+
 void cleanup();
+void closeGame();
+void displayFPS(SDL_Renderer* renderer, TTF_Font* font, int fps);
+void displayPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int playerX, int playerY);
+void displayUnifiedPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int unifiedX, int unifiedY);
+void displayPlayerCount(SDL_Renderer* renderer, TTF_Font* font, int playerCount);
+void playerMovementThread(Player& player);
+void handleClientMessages(Player& player);
+void handleQuitThread();
+void HandleMenuClick(Menu& menu);
+void updateFishRange(std::vector<Fish>& school, int start, int end);
+int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(int argc, char* args[]);
+int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, std::string args);
+
+template <typename Function, typename... Args>
+std::thread createThread(std::string key, Function&& func, Args&&... args) {
+    try {
+        std::cout << "Creating thread: " << key << std::endl;
+        std::thread thread([key, func = std::forward<Function>(func), ...args = std::forward<Args>(args)]() mutable {
+            ThreadInfo info;
+            info.id = std::this_thread::get_id();
+            info.functionName = key;
+            {
+                std::lock_guard<std::mutex> lock(mtx);
+                threadInfos.push_back(info);
+            }
+            func(std::forward<Args>(args)...);
+            std::cout << "ThreadID = " << info.id << " ThreadFunction = " << info.functionName << std::endl;
+        });
+        return thread;
+    } catch (const std::system_error& e) {
+        std::cerr << "Failed to create thread: " << e.what() << std::endl;
+        throw;
+    }
+}
 
 void displayFPS(SDL_Renderer* renderer, TTF_Font* font, int fps) {
     std::string fpsText = "FPS: " + std::to_string(fps);
@@ -167,13 +213,16 @@ bool initSDL() {
 }
 
 void playerMovementThread(Player& player) {
-    int pId = player.getPlayerId();
-    std::cout << "starting playerMovementThread for player " << pId << "..." << std::endl;
-    while (running) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        player.handlePlayerMovement(ENV_WIDTH, ENV_HEIGHT, windowWidth, windowHeight);
+    try {
+        std::cout << "Starting playerMovementThread for player " << player.getPlayerId() << std::endl;
+        while (game_running) {
+            player.handlePlayerMovement(ENV_WIDTH, ENV_HEIGHT, windowWidth, windowHeight);
+            std::this_thread::sleep_for(std::chrono::milliseconds(16)); // 60 FPS
+        }
+        std::cout << "Exiting playerMovementThread for player " << player.getPlayerId() << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Exception in playerMovementThread: " << e.what() << std::endl;
     }
-    std::cout << "playerMovementThread for player " << pId << " ended" << std::endl;
 }
 
 void handleClientMessages(Player& player) {
@@ -186,7 +235,7 @@ void handleClientMessages(Player& player) {
 
 void handleQuitThread() {
     std::cout << "handleQuitThread..." << std::endl;
-    while (running) {
+    while (game_running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         handleQuit();
     }
@@ -200,7 +249,7 @@ void HandleMenuClick(Menu& menu){
 }
 
 void updateFishRange(std::vector<Fish>& school, int start, int end){
-    while (running) {
+    while (game_running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
         {
             std::lock_guard<std::mutex> lock(mtx);
@@ -251,7 +300,7 @@ int main(int argc, char* args[]) {
     menu.addPage("Multi-Join");
     menu.changePage("Main");
 
-    std::thread menu_thread(HandleMenuClick, std::ref(menu));
+    std::thread menu_thread = createThread("Menu thread", HandleMenuClick, std::ref(menu));
 
     menu.addText("Main", (windowWidth/2) - 300, 50, 600, 100, "BloubBloub les poissons", 1024);
 
@@ -264,7 +313,7 @@ int main(int argc, char* args[]) {
         
     });
 
-    menu.addButton("Main", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Multi", 1024, [&menu](){
+    menu.addButton("Main", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Multi (WIP)", 1024, [&menu](){
         std::cout << "Multi" << std::endl;
         menu.changePage("Multi");
     });
@@ -273,7 +322,7 @@ int main(int argc, char* args[]) {
         std::cout << "Host" << std::endl;
         isPlayingOnline = true;
         menuRunning = false;
-        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(0, nullptr);
+        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(0, "");
     });
 
     menu.addButton("Multi", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Join", 1024, [&menu](){
@@ -285,19 +334,19 @@ int main(int argc, char* args[]) {
     // });
 
     menu.addButton("Multi-Join", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "", 24, [](){
-        std::cout << "Text input button clicked" << std::endl;
+        std::cout << "IP input button clicked" << std::endl;
     }, true);
 
-    menu.addButton("Multi-Join", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "", 24, [](){
-        std::cout << "Text input button clicked" << std::endl;
-    }, true);
-
-    menu.addButton("Multi-Join", (windowWidth/2) - 100, (windowHeight/2 + 125) - 25, 200, 50, "Join", 1024, [&menu](){
+    menu.addButton("Multi-Join", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Join !", 1024, [&menu](){
         std::cout << "Join" << std::endl;
         isPlayingOnline = true;
         menuRunning = false;
         int port = 1234;
-        char* ip = "100.93.105.98";
+        //char* ip = "10.30.42.206";
+        // Pour l'ip récupère l'interieur du bouton IP input
+        std::vector<Button> buttons = menu.getButtons();
+        std::string ip = buttons[0].inputText;
+        std::cout << ip << std::endl;
         pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(port, ip);
     });
 
@@ -309,7 +358,7 @@ int main(int argc, char* args[]) {
     });
 
     //menu.addButton((windowWidth/2) - 100, (windowHeight/2 + 25) + 50, 200, 50, "Multi", 1024);
-    //std::thread quit_thread(handleQuitThread);
+    std::thread quit_thread(handleQuitThread);
 
     while (running) {
             
@@ -327,8 +376,9 @@ int main(int argc, char* args[]) {
     } catch (const std::system_error& e) {
         std::cerr << "Exception caught: " << e.what() << std::endl;
     }
-    
-    cleanup();
+    if (!isPlayingOnline) {
+        cleanup();
+    }
     //pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(argc, args);
     return 0;
 }
@@ -339,6 +389,8 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     //     std::cerr << "Failed to initialize!" << std::endl;
     //     return -1;
     // }
+
+    game_running = true;
 
     std::vector<Kelp> kelps;
     std::vector<Rock> rocks;
@@ -355,22 +407,23 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     std::vector<std::thread> fish_threads;
     int fishPerThread = school.size() / std::thread::hardware_concurrency();
     for (int i = 0; i < school.size(); i += fishPerThread) {
-        fish_threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+        fish_threads.emplace_back(createThread("Fish thread", updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size()))));
     }
-    std::thread quit_thread(handleQuitThread);
+    std::thread quit_thread = createThread("Quit thread", handleQuitThread);
   
       // Offline
     players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
-    std::thread player_thread(playerMovementThread, std::ref(players[0]));
+    std::thread player_thread = createThread("Player thread", playerMovementThread, std::ref(players[0]));
+
 
     Shark shark(0, 0, 0.1, 0.1,0, 150, 150, renderer,players);
     std::thread shark_thread(updateShark, std::ref(shark));
 
-    while (running) {
-        renderScene(players, kelps, rocks, corals, shark);
-        handleQuit();
+    while (game_running) {
+        renderScene(players, kelps, rocks, corals);
+        //handleQuit();
+
     }
-    running = false;
     try{
         if(player_thread.joinable())
             player_thread.join();
@@ -391,21 +444,23 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     } catch (const std::system_error& e) {
         std::cerr << "Exception caught 4: " << e.what() << std::endl;
     }
+
     try {
         if (shark_thread.joinable())
             shark_thread.join();
     } catch (const std::system_error& e) {
         std::cerr << "Exception caught 5: " << e.what() << std::endl;
     }
+    running = false;
     return 0;
 }
 
-int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, char* args) {
+int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, std::string args) {
     // if (!initSDL()) {
     //     std::cerr << "Failed to initialize!" << std::endl;
     //     return -1;
     // }
-
+    game_running = true;
     std::vector<Kelp> kelps;
     std::vector<Rock> rocks;
     std::vector<Coral> corals;
@@ -419,7 +474,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     int fishPerThread = school.size() / std::thread::hardware_concurrency();
     int thread_id = 0;
     for (int i = 0; i < school.size(); i += fishPerThread) {
-        threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+        threads.emplace_back(createThread("Fish thread", updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size()))));
     }
 
     Shark shark(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1,0, 150, 150, renderer,players);
@@ -429,34 +484,34 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     freopen("CON", "w", stderr);
 
     if (isPlayingOnline) {
-        if (argc == 0 && args == nullptr) {
+        if (argc == 0 && args == "") {
             if (!initServer()) {
                 std::cerr << "Failed to initialize server!" << std::endl;
                 return -1;
             }
-            std::thread acceptThread(acceptClients);
-            acceptThread.detach();
+            isHost = true;
+            std::cout << "isHost: " << isHost << std::endl;
+            std::thread acceptThread = createThread("Accept thread", acceptClients);
             IPaddress ip;
             if (!initClient(ip, "localhost", 1234)) {
                 std::cerr << "Failed to initialize client!" << std::endl;
                 return -1;
             }
-            players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 1));
+            players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
             std::ranges::sort(school, Fish::SortByX);
             std::vector<std::thread> fish_threads;
             int fishPerThread = school.size() / std::thread::hardware_concurrency();
             for (int i = 0; i < school.size(); i += fishPerThread) {
-                fish_threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+                fish_threads.emplace_back(createThread("Fish thread", updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size()))));
             }
             messageThreadRunning = true;
-            std::thread messageThread(handleClientMessages, std::ref(players[0]));
-            std::thread playerThread(playerMovementThread, std::ref(players[0]));
+            std::thread messageThread = createThread("Message thread", handleClientMessages, std::ref(players[0]));
+            std::thread playerThread = createThread("Player thread", playerMovementThread, std::ref(players[0]));
 
             while (running) {
                 renderScene(players, kelps, rocks, corals,shark);
                 SDL_Delay(10);
             }
-            running = false;
             messageThreadRunning = false;
             try{
                 //if(playerThread.joinable())
@@ -502,30 +557,38 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             } catch (const std::system_error& e) {
                 std::cerr << "Exception caught 5: " << e.what() << std::endl;
             }
+
+            running = false;
         }
-        else if (argc > 0 && argc < 65535 && args != nullptr) {
-            int port = atoi(args);
-            char* host = args;
-            if (!initClient(ip, host, 1234)) {
+        else if (argc > 0 && argc < 65535 && args != "") {
+            int port = 1234;
+            std::string host = args;
+            if (!initClient(ip, host.c_str(), 1234)) {
                 std::cerr << "Failed to initialize client!" << std::endl;
                 return -1;
             }
+            /*
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<> disX(0, ENV_WIDTH);
+            std::uniform_int_distribution<> disY(0, ENV_HEIGHT);
+            players.emplace_back(Player(disX(gen), disY(gen), 5, renderer, 1));
+            */
             players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 1));
             std::ranges::sort(school, Fish::SortByX);
             std::vector<std::thread> fish_threads;
             int fishPerThread = school.size() / std::thread::hardware_concurrency();
             for (int i = 0; i < school.size(); i += fishPerThread) {
-                fish_threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+                fish_threads.emplace_back(createThread("Fish thread", updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size()))));
             }
             messageThreadRunning = true;
-            std::thread messageThread(handleClientMessages, std::ref(players[0]));
-            std::thread playerThread(playerMovementThread, std::ref(players[0]));
+            std::thread messageThread = createThread("Message thread", handleClientMessages, std::ref(players[0]));
+            std::thread playerThread = createThread("Player thread", playerMovementThread, std::ref(players[0]));
 
             while (running) {
                 renderScene(players, kelps, rocks, corals,shark);
                 SDL_Delay(10);
             }
-            running = false;
             messageThreadRunning = false;
             try{
                 //if(playerThread.joinable())
@@ -562,6 +625,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             } catch (const std::system_error& e) {
                 std::cerr << "Exception caught 4: " << e.what() << std::endl;
             }
+            running = false;
         }
     }
 
@@ -575,12 +639,18 @@ void handleQuit() {
 
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
-            running = false;
+            if (isPlayingOnline && isHost) {
+                closeServer();
+            }
+            game_running = false;
         }
     }
 
     if (keystate[SDL_SCANCODE_ESCAPE]) {
-        running = false;
+        if (isPlayingOnline && isHost) {
+            closeServer();
+        }
+        game_running = false;
     }
 }
 
@@ -588,6 +658,7 @@ void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, c
     static Uint32 lastTime = 0;
     static int frameCount = 0;
     static int fps = 0;
+    //std::cout << "renderScene for " << players.size() << " players" << std::endl;
 
     const Uint32 currentTime = SDL_GetTicks64();
     frameCount++;
@@ -630,29 +701,88 @@ void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, c
     for (auto& player : players) {
         auto [playerX, playerY] = player.getPlayerPos();
         displayPlayerCoord(renderer, font, playerX, playerY);
-        int unifiedX = player.getUnifiedX();
-        int unifiedY = player.getUnifiedY();
+    }
+
+    for (auto& player_server : players_server) {
+        int unifiedX = player_server.getUnifiedX();
+        int unifiedY = player_server.getUnifiedY();
         displayUnifiedPlayerCoord(renderer, font, unifiedX, unifiedY);
-        displayNearbyPlayers(renderer, font, player, players, 500.0);
+        displayNearbyPlayers(renderer, font, player_server, players_server, 500.0);
     }
 
     SDL_RenderPresent(renderer);
 }
 
 void cleanup() {
-    TTF_CloseFont(font);
-    TTF_Quit();
-    SDL_DestroyTexture(backgroundTexture);
+    try {
+        if (font != nullptr) {
+            TTF_CloseFont(font);
+            font = nullptr;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for CloseFont: " << e.what() << std::endl;
+    }
+
+    try {
+        TTF_Quit();
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for TTF_Quit: " << e.what() << std::endl;
+    }
+
+    try {
+        if (playerTexture != nullptr) {
+            SDL_DestroyTexture(playerTexture);
+            playerTexture = nullptr;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for DestroyTexture (playerTexture): " << e.what() << std::endl;
+    }
+
     for (int i = 0; i < fishCount; ++i) {
-        SDL_DestroyTexture(fishTextures[i]);
+        try {
+            if (fishTextures[i] != nullptr) {
+                SDL_DestroyTexture(fishTextures[i]);
+                fishTextures[i] = nullptr;
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "Exception caught for DestroyTexture (fishTextures[" << i << "]): " << e.what() << std::endl;
+        }
     }
-    if (renderer != nullptr) {
-        SDL_DestroyRenderer(renderer);
+
+    try {
+        if (renderer != nullptr) {
+            SDL_DestroyRenderer(renderer);
+            renderer = nullptr;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for DestroyRenderer: " << e.what() << std::endl;
     }
-    if (window != nullptr) {
-        SDL_DestroyWindow(window);
+
+    try {
+        if (window != nullptr) {
+            SDL_DestroyWindow(window);
+            window = nullptr;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for DestroyWindow: " << e.what() << std::endl;
     }
-    IMG_Quit();
-    SDLNet_Quit();
-    SDL_Quit();
+
+    try {
+        SDL_Quit();
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for SDL_Quit: " << e.what() << std::endl;
+    }
+
+    try {
+        IMG_Quit();
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for IMG_Quit: " << e.what() << std::endl;
+    }
+
+    try {
+        SDLNet_Quit();
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for SDLNet_Quit: " << e.what() << std::endl;
+    }
 }
+

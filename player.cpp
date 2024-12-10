@@ -49,6 +49,7 @@ void Player::draw(SDL_Renderer* renderer) {
     SDL_RenderCopyEx(renderer, this->playerTexture, &this->playerRect[this->currentSprite], &this->playerPosForRender, 0, nullptr, this->currentFlip);
 
     this->drawEnergyBar(renderer);
+    
 };
 
 void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth, int windowHeight) {
@@ -67,7 +68,9 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
     bool moved = false;
     if (this->energy != 0) {
         if (isPlayingOnline) {
-            moved = onlineMovement();
+            if (keystate[SDL_SCANCODE_W] || keystate[SDL_SCANCODE_S] || keystate[SDL_SCANCODE_A] || keystate[SDL_SCANCODE_D]) {
+                moved = onlineMovement();
+            }
         } else {
             if (keystate[SDL_SCANCODE_W]) {
                 if (camera.getY() > 0 && tempY == this->playerBaseY) {
@@ -144,7 +147,11 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
     } else {
         Uint32 currentTime = SDL_GetTicks();
         if (currentTime - lastMoveTime >= 5000) {
-            this->energy += 0.2f;
+            if (this->energy > 50.0f) {
+                this->energy += 0.4f; // Récupération plus rapide si l'énergie est élevée
+            } else {
+                this->energy += 0.2f; // Récupération plus lente si l'énergie est faible
+            }
             if (this->energy > 100.0f) {
                 this->energy = 100.0f;
             }
@@ -180,11 +187,15 @@ void Player::handleClientMessages() {
     std::string message = receiveMessage(client);
     if (!message.empty()) {
         std::cout << "Client received: " << message << std::endl;
+        if (message == "host;quit") {
+            std::cout << "Host has quit. Closing client..." << std::endl;
+            game_running = false;
+            return;
+        }
         if (message.find(";moved;") != std::string::npos) {
-            int clientId, UnifiedX, UnifiedY, xCam, yCam;
+            int clientId, xCam, yCam;
             sscanf(message.c_str(), "%d;moved;%d,%d", &clientId, &xCam, &yCam);
-            // Update the player's position
-            if (clientId == this->playerId) {
+            if (clientId == playerId) {
                 this->setPlayerPos(750, 400);
                 Camera& camera = Camera::getInstance();
                 if (xCam >= 0 && xCam <= ENV_WIDTH - windowWidth) {
@@ -200,10 +211,9 @@ void Player::handleClientMessages() {
 
 bool Player::onlineMovement() {
     const Uint8* keystate = SDL_GetKeyboardState(NULL);
-    std::string message = std::to_string(this->playerId) + ";move;";
+    std::string message = std::to_string(getPlayerId()) + ";move;";
     bool moved = false;
     if (keystate[SDL_SCANCODE_W]) {
-        //std::string message = std::to_string(this->playerId) + ";move;up";
         message += "up-";
         moved = true;
     }
@@ -229,8 +239,8 @@ bool Player::onlineMovement() {
 void Player::updatePosition(int x, int y) {
     int camX = x + windowWidth / 2;
     int camY = y + windowHeight / 2;
-    this->unifiedX = camX;
-    this->unifiedY = camY;
+    unifiedX = camX;
+    unifiedY = camY;
 }
 
 int Player::getUnifiedX() {

@@ -163,3 +163,8 @@ void Menu::addPage(std::string title){
     page.title = title;
     pages.push_back(page);
 }
+
+
+std::vector<Button> Menu::getButtons(){
+    return pages[currentPage].buttons;
+}

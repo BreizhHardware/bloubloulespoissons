@@ -23,26 +23,30 @@ bool initServer() {
 }
 
 void acceptClients() {
-    while (running) {
+    while (game_running) {
         TCPsocket clientSocket = SDLNet_TCP_Accept(server);
         if (clientSocket) {
             clients.push_back(clientSocket);
             int clientId = clients.size() - 1;
             createNewPlayer(clientId);
             updateKeepAlive(clientId);
-            startKeepAlive(clientId);
             std::thread clientThread([clientSocket, clientId]() {
+                std::thread keepAliveThread(sendKeepAlive, clientSocket);
+                keepAliveThread.detach();
                 while (running) {
                     std::string message = receiveMessage(clientSocket);
                     if (!message.empty()) {
                         std::cout << "Server received: " << message << std::endl;
-                        if (message.find(";move;") != std::string::npos) {
+                        if (message == "keepalive") {
+                            updateKeepAlive(clientId);
+                        } else if (message.find(";move;") != std::string::npos) {
                             char direction[20];
                             sscanf(message.c_str(), "%d;move;%s", &clientId, &direction);
 
-                            int newX = 0, newY = 0, newUnifedX = 0, newUnifedY = 0;
-                            std::cout << "Client " << clientId << " moved " << direction << std::endl;
+                            int newX = 0, newY = 0;
                             std::tie(newX, newY) = updatePlayerPosition(clientId, direction);
+                            // Mettre à jour la position du joueur
+                            players_server[clientId].updatePosition(newX, newY);
                             std::string updatedMessage = std::to_string(clientId) + ";moved;" + std::to_string(newX) + "," + std::to_string(newY);
                             for (TCPsocket client : clients) {
                                 sendMessage(client, updatedMessage);
@@ -124,18 +128,18 @@ std::pair<int, int> updatePlayerPosition(int clientId, const std::string& direct
 }
 
 void createNewPlayer(int clientId) {
-    if (clientId <= 0) {
+    if (clientId < 0) {
         std::cerr << "Invalid client ID: " << clientId << std::endl;
         return;
     }
     // Create a new player at a default position (e.g., 0, 0)
     Player newPlayer(0, 0, 5, renderer, clientId);
-    players.push_back(newPlayer);
+    players_server.push_back(newPlayer);
     playerPositions[clientId] = {0, 0}; // Initialize player position
 
     // Send the list of existing players to the new client
     std::string playerListMessage = "playerList;";
-    for (auto& player : players) {
+    for (auto& player : players_server) {
         auto [x, y] = player.getPlayerPos();
         playerListMessage += std::to_string(player.getPlayerId()) + "," + std::to_string(x) + "," + std::to_string(y) + ";";
     }
@@ -159,10 +163,45 @@ void checkClientAlive() {
             std::cerr << "Client " << it->first << " is not responding. Removing..." << std::endl;
             SDLNet_TCP_Close(clients[it->first]);
             clients.erase(clients.begin() + it->first);
+            playerPositions.erase(it->first); // Supprimer la position du joueur
             it = lastKeepAlive.erase(it);
-        }
-        else {
+        } else {
             ++it;
+        }
+    }
+}
+
+void closeServer() {
+    std::string quitMessage = "host;quit";
+    for (TCPsocket client : clients) {
+        sendMessage(client, quitMessage);
+    }
+    // Fermer les sockets et nettoyer les ressources
+    for (TCPsocket client : clients) {
+        SDLNet_TCP_Close(client);
+    }
+    clients.clear();
+    SDLNet_TCP_Close(server);
+}
+
+void handleServerMessages() {
+    std::string message = receiveMessage(server);
+    if (!message.empty()) {
+        std::cout << "Server received: " << message << std::endl;
+        if (message.find(";moved;") != std::string::npos) {
+            int clientId, x, y;
+            sscanf(message.c_str(), "%d;moved;%d,%d", &clientId, &x, &y);
+            // Mettre à jour la position du joueur dans players_server
+            for (auto& player : players_server) {
+                std::cout << "Player ID: " << player.getPlayerId() << std::endl;
+                std::cout << "Client ID: " << clientId << std::endl;
+                std::cout << "PlayerId == ClientId: " << (player.getPlayerId() == clientId) << std::endl;
+                if (player.getPlayerId() == clientId) {
+                    player.updatePosition(x, y);
+                    std::cout << "Player " << clientId << " moved to " << player.getUnifiedX() << ", " << player.getUnifiedY() << std::endl;
+                    break;
+                }
+            }
         }
     }
 }

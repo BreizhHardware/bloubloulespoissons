@@ -75,6 +75,8 @@ class Menu {
         void addText(std::string page, int x, int y, int w, int h, std::string text, int size);
 
         void addPage(std::string title);
+
+        std::vector<Button> getButtons();
 };
 
 #endif
