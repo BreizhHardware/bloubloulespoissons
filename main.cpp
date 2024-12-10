@@ -20,6 +20,7 @@
 #include "menu.h"
 #include "network/networking.h"
 #include "network/networking_client.h"
+#include "shark.h"
 
 
 std::mutex mtx;
@@ -29,7 +30,6 @@ std::mutex coutMutex;
 SDL_Texture* playerTexture = nullptr;
 SDL_Texture* fishTextures[100]; // Adjust the size as needed
 std::vector<Fish> school;
-
 std::vector<Player> players;
 
 
@@ -37,7 +37,7 @@ bool initSDL();
 void handleQuit();
 int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(int argc, char* args[]);
 int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, char* args);
-void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
+void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals,Shark& shark );
 void cleanup();
 
 void displayFPS(SDL_Renderer* renderer, TTF_Font* font, int fps) {
@@ -212,6 +212,13 @@ void updateFishRange(std::vector<Fish>& school, int start, int end){
     }
 }
 
+void updateShark(Shark &shark) {
+    while (running) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        shark.cycle();
+    }
+}
+
 int main(int argc, char* args[]) {
 
     SDL_SetHint(SDL_HINT_VIDEO_WAYLAND_ALLOW_LIBDECOR, "0");
@@ -352,8 +359,12 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
     std::thread player_thread(playerMovementThread, std::ref(players[0]));
 
+    Shark shark(0, 0, 0.1, 0.1,0, 75, 75, renderer,players);
+    //std::thread shark_thread(updateShark, std::ref(shark));
+
     while (running) {
-        renderScene(players, kelps, rocks, corals);
+        shark.cycle();
+        renderScene(players, kelps, rocks, corals, shark);
         handleQuit();
     }
     running = false;
@@ -377,6 +388,13 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     } catch (const std::system_error& e) {
         std::cerr << "Exception caught 4: " << e.what() << std::endl;
     }
+    /*
+    try {
+        if (shark_thread.joinable())
+            shark_thread.join();
+    } catch (const std::system_error& e) {
+        std::cerr << "Exception caught 5: " << e.what() << std::endl;
+    }*/
     return 0;
 }
 
@@ -401,6 +419,10 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     for (int i = 0; i < school.size(); i += fishPerThread) {
         threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
     }
+
+    Shark shark(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1,0, 150, 150, renderer,players);
+    std::thread shark_thread(updateShark, std::ref(shark));
+
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
@@ -429,7 +451,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             std::thread playerThread(playerMovementThread, std::ref(players[0]));
 
             while (running) {
-                renderScene(players, kelps, rocks, corals);
+                renderScene(players, kelps, rocks, corals,shark);
                 SDL_Delay(10);
             }
             running = false;
@@ -498,7 +520,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             std::thread playerThread(playerMovementThread, std::ref(players[0]));
 
             while (running) {
-                renderScene(players, kelps, rocks, corals);
+                renderScene(players, kelps, rocks, corals,shark);
                 SDL_Delay(10);
             }
             running = false;
@@ -560,7 +582,7 @@ void handleQuit() {
     }
 }
 
-void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals) {
+void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals,Shark& shark) {
     static Uint32 lastTime = 0;
     static int frameCount = 0;
     static int fps = 0;
@@ -599,6 +621,8 @@ void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, c
     for (auto& player : players) {
         player.draw(renderer);
     }
+
+    shark.draw(renderer);
 
     displayFPS(renderer, font, fps);
     for (auto& player : players) {

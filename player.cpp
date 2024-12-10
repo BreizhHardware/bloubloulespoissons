@@ -1,4 +1,6 @@
 #include "player.h"
+
+#include <syncstream>
 #include <tuple>
 #include "network/networking_client.h"
 #include "camera.h"
@@ -233,4 +235,8 @@ int Player::getUnifiedX() {
 
 int Player::getUnifiedY() {
     return unifiedY;
+}
+
+int Player::getSpeed() {
+    return playerSpeed;
 }
