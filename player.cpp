@@ -143,7 +143,11 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
     } else {
         Uint32 currentTime = SDL_GetTicks();
         if (currentTime - lastMoveTime >= 5000) {
-            this->energy += 0.2f;
+            if (this->energy > 50.0f) {
+                this->energy += 0.4f; // Récupération plus rapide si l'énergie est élevée
+            } else {
+                this->energy += 0.2f; // Récupération plus lente si l'énergie est faible
+            }
             if (this->energy > 100.0f) {
                 this->energy = 100.0f;
             }
