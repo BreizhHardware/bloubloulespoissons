@@ -2,7 +2,7 @@
 // Created by cfouche on 09/12/24.
 //
 
-#define sharkIMG "../img/mory.png"
+#define sharkIMG "../img/shark.png"
 #include "shark.h"
 
 Shark::Shark(const int x, const int y, const float vx, const float vy, const int id, const int width, const int height, SDL_Renderer* renderer, std::vector<Player> &players_list)

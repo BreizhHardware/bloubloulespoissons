@@ -16,7 +16,7 @@ private:
     const float MATCHING_FACTOR = 0.05;
     const float CENTERING_FACTOR = 0.005;
     const float TURN_FACTOR = 0.3;
-    const float MAX_SPEED = 4;
+    const float MAX_SPEED = 8;
     const float MIN_SPEED = 0.6;
     const float BIASVALUE = 0.001;
 

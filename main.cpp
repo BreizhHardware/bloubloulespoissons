@@ -239,6 +239,10 @@ int main(int argc, char* args[]) {
         });
         pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(0, nullptr);
         timer_thread.join();
+    }else if (argc > 1 && std::string(args[1]) == "80085") {
+        isPlayingOnline = true;
+        menuRunning = false;
+        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(0, nullptr);
     }
 
     Menu menu(renderer);
@@ -359,11 +363,10 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
     std::thread player_thread(playerMovementThread, std::ref(players[0]));
 
-    Shark shark(0, 0, 0.1, 0.1,0, 75, 75, renderer,players);
-    //std::thread shark_thread(updateShark, std::ref(shark));
+    Shark shark(0, 0, 0.1, 0.1,0, 150, 150, renderer,players);
+    std::thread shark_thread(updateShark, std::ref(shark));
 
     while (running) {
-        shark.cycle();
         renderScene(players, kelps, rocks, corals, shark);
         handleQuit();
     }
@@ -388,13 +391,12 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     } catch (const std::system_error& e) {
         std::cerr << "Exception caught 4: " << e.what() << std::endl;
     }
-    /*
     try {
         if (shark_thread.joinable())
             shark_thread.join();
     } catch (const std::system_error& e) {
         std::cerr << "Exception caught 5: " << e.what() << std::endl;
-    }*/
+    }
     return 0;
 }
 
@@ -421,7 +423,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     }
 
     Shark shark(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1,0, 150, 150, renderer,players);
-    //std::thread shark_thread(updateShark, std::ref(shark));
+    std::thread shark_thread(updateShark, std::ref(shark));
 
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
