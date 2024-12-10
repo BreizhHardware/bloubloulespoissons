@@ -23,17 +23,6 @@
 
 #include <system_error>
 
-template <typename Function, typename... Args>
-std::thread createThread(std::string key, Function&& func, Args&&... args) {
-    try {
-        std::cout << "Creating thread: " << key << std::endl;
-        return std::thread(std::forward<Function>(func), std::forward<Args>(args)...);
-    } catch (const std::system_error& e) {
-        std::cerr << "Failed to create thread: " << e.what() << std::endl;
-        throw;
-    }
-}
-
 std::mutex mtx;
 std::atomic<bool> menuRunning(true);
 
@@ -45,6 +34,12 @@ std::vector<Fish> school;
 std::vector<Player> players;
 std::vector<Player> players_server;
 
+struct ThreadInfo {
+    std::thread::id id;
+    std::string functionName;
+};
+
+std::vector<ThreadInfo> threadInfos;
 
 bool initSDL();
 void handleQuit();
@@ -52,6 +47,28 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
 int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, std::string args);
 void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
 void cleanup();
+
+template <typename Function, typename... Args>
+std::thread createThread(std::string key, Function&& func, Args&&... args) {
+    try {
+        std::cout << "Creating thread: " << key << std::endl;
+        std::thread thread([key, func = std::forward<Function>(func), ...args = std::forward<Args>(args)]() mutable {
+            ThreadInfo info;
+            info.id = std::this_thread::get_id();
+            info.functionName = key;
+            {
+                std::lock_guard<std::mutex> lock(mtx);
+                threadInfos.push_back(info);
+            }
+            func(std::forward<Args>(args)...);
+            std::cout << "ThreadID = " << info.id << " ThreadFunction = " << info.functionName << std::endl;
+        });
+        return thread;
+    } catch (const std::system_error& e) {
+        std::cerr << "Failed to create thread: " << e.what() << std::endl;
+        throw;
+    }
+}
 
 void displayFPS(SDL_Renderer* renderer, TTF_Font* font, int fps) {
     std::string fpsText = "FPS: " + std::to_string(fps);
@@ -180,13 +197,16 @@ bool initSDL() {
 }
 
 void playerMovementThread(Player& player) {
-    int pId = player.getPlayerId();
-    std::cout << "starting playerMovementThread for player " << pId << "..." << std::endl;
-    while (running) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        player.handlePlayerMovement(ENV_WIDTH, ENV_HEIGHT, windowWidth, windowHeight);
+    try {
+        std::cout << "Starting playerMovementThread for player " << player.getPlayerId() << std::endl;
+        while (running) {
+            player.handlePlayerMovement(ENV_WIDTH, ENV_HEIGHT, windowWidth, windowHeight);
+            std::this_thread::sleep_for(std::chrono::milliseconds(16)); // 60 FPS
+        }
+        std::cout << "Exiting playerMovementThread for player " << player.getPlayerId() << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Exception in playerMovementThread: " << e.what() << std::endl;
     }
-    std::cout << "playerMovementThread for player " << pId << " ended" << std::endl;
 }
 
 void handleClientMessages(Player& player) {
@@ -354,13 +374,13 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     std::vector<std::thread> fish_threads;
     int fishPerThread = school.size() / std::thread::hardware_concurrency();
     for (int i = 0; i < school.size(); i += fishPerThread) {
-        fish_threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+        fish_threads.emplace_back(createThread("Fish thread", updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size()))));
     }
-    std::thread quit_thread(handleQuitThread);
+    std::thread quit_thread = createThread("Quit thread", handleQuitThread);
   
       // Offline
     players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
-    std::thread player_thread(playerMovementThread, std::ref(players[0]));
+    std::thread player_thread = createThread("Player thread", playerMovementThread, std::ref(players[0]));
 
     while (running) {
         renderScene(players, kelps, rocks, corals);
@@ -409,7 +429,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     int fishPerThread = school.size() / std::thread::hardware_concurrency();
     int thread_id = 0;
     for (int i = 0; i < school.size(); i += fishPerThread) {
-        threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+        threads.emplace_back(createThread("Fish thread", updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size()))));
     }
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
@@ -421,7 +441,8 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
                 return -1;
             }
             isHost = true;
-            std::thread acceptThread(acceptClients);
+            std::cout << "isHost: " << isHost << std::endl;
+            std::thread acceptThread = createThread("Accept thread", acceptClients);
             IPaddress ip;
             if (!initClient(ip, "localhost", 1234)) {
                 std::cerr << "Failed to initialize client!" << std::endl;
@@ -432,11 +453,11 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             std::vector<std::thread> fish_threads;
             int fishPerThread = school.size() / std::thread::hardware_concurrency();
             for (int i = 0; i < school.size(); i += fishPerThread) {
-                fish_threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+                fish_threads.emplace_back(createThread("Fish thread", updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size()))));
             }
             messageThreadRunning = true;
-            std::thread messageThread(handleClientMessages, std::ref(players[0]));
-            std::thread playerThread(playerMovementThread, std::ref(players[0]));
+            std::thread messageThread = createThread("Message thread", handleClientMessages, std::ref(players[0]));
+            std::thread playerThread = createThread("Player thread", playerMovementThread, std::ref(players[0]));
 
             while (running) {
                 renderScene(players, kelps, rocks, corals);
@@ -501,11 +522,11 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             std::vector<std::thread> fish_threads;
             int fishPerThread = school.size() / std::thread::hardware_concurrency();
             for (int i = 0; i < school.size(); i += fishPerThread) {
-                fish_threads.emplace_back(updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size())));
+                fish_threads.emplace_back(createThread("Fish thread", updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size()))));
             }
             messageThreadRunning = true;
-            std::thread messageThread(handleClientMessages, std::ref(players[0]));
-            std::thread playerThread(playerMovementThread, std::ref(players[0]));
+            std::thread messageThread = createThread("Message thread", handleClientMessages, std::ref(players[0]));
+            std::thread playerThread = createThread("Player thread", playerMovementThread, std::ref(players[0]));
 
             while (running) {
                 renderScene(players, kelps, rocks, corals);
