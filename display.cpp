@@ -11,7 +11,7 @@ double calculateDistance(int x1, int y1, int x2, int y2) {
 void displayNearbyPlayers(SDL_Renderer* renderer, TTF_Font* font, Player& currentPlayer, std::vector<Player>& players, double threshold) {
     int currentX = currentPlayer.getUnifiedX();
     int currentY = currentPlayer.getUnifiedY();
-    int offsetY = 90; // Starting Y position for displaying nearby players
+    int offsetY = 90;
 
     for (auto& player : players) {
         if (&player == &currentPlayer) continue; // Skip the current player
