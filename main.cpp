@@ -43,10 +43,20 @@ std::vector<ThreadInfo> threadInfos;
 
 bool initSDL();
 void handleQuit();
-int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(int argc, char* args[]);
-int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, std::string args);
 void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals);
 void cleanup();
+void closeGame();
+void displayFPS(SDL_Renderer* renderer, TTF_Font* font, int fps);
+void displayPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int playerX, int playerY);
+void displayUnifiedPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int unifiedX, int unifiedY);
+void displayPlayerCount(SDL_Renderer* renderer, TTF_Font* font, int playerCount);
+void playerMovementThread(Player& player);
+void handleClientMessages(Player& player);
+void handleQuitThread();
+void HandleMenuClick(Menu& menu);
+void updateFishRange(std::vector<Fish>& school, int start, int end);
+int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(int argc, char* args[]);
+int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, std::string args);
 
 template <typename Function, typename... Args>
 std::thread createThread(std::string key, Function&& func, Args&&... args) {
@@ -728,3 +738,4 @@ void cleanup() {
         std::cerr << "Exception caught for SDLNet_Quit: " << e.what() << std::endl;
     }
 }
+
