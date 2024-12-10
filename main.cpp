@@ -671,7 +671,7 @@ void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, c
         int unifiedX = player_server.getUnifiedX();
         int unifiedY = player_server.getUnifiedY();
         displayUnifiedPlayerCoord(renderer, font, unifiedX, unifiedY);
-        displayNearbyPlayers(renderer, font, player_server, players_server, 2000.0);
+        displayNearbyPlayers(renderer, font, player_server, players_server, 500.0);
     }
 
     SDL_RenderPresent(renderer);
