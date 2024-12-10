@@ -168,3 +168,16 @@ void checkClientAlive() {
         }
     }
 }
+
+void closeServer() {
+    std::string quitMessage = "host;quit";
+    for (TCPsocket client : clients) {
+        sendMessage(client, quitMessage);
+    }
+    // Fermer les sockets et nettoyer les ressources
+    for (TCPsocket client : clients) {
+        SDLNet_TCP_Close(client);
+    }
+    clients.clear();
+    SDLNet_TCP_Close(server);
+}

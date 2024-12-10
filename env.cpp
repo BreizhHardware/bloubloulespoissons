@@ -20,6 +20,7 @@ std::vector<SDL_Texture*> texturesVector;
 std::atomic<bool> running(true);
 std::atomic<bool> isPlayingOnline(false);
 std::atomic<bool> messageThreadRunning(false);
+std::atomic<bool> isHost(false);
 
 
 bool initEnvironment(SDL_Renderer* renderer) {

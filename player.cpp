@@ -66,7 +66,6 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
     bool moved = false;
     if (this->energy != 0) {
         if (isPlayingOnline) {
-            // Si une touche est préssée on appelle la fonction onlineMovement
             if (keystate[SDL_SCANCODE_W] || keystate[SDL_SCANCODE_S] || keystate[SDL_SCANCODE_A] || keystate[SDL_SCANCODE_D]) {
                 moved = onlineMovement();
             }
@@ -178,10 +177,15 @@ void Player::handleClientMessages() {
     std::string message = receiveMessage(client);
     if (!message.empty()) {
         std::cout << "Client received: " << message << std::endl;
+        if (message == "host;quit") {
+            std::cout << "Host has quit. Closing client..." << std::endl;
+            running = false;
+            return;
+        }
         if (message.find(";moved;") != std::string::npos) {
             int clientId, UnifiedX, UnifiedY, xCam, yCam;
             sscanf(message.c_str(), "%d;moved;%d,%d", &clientId, &xCam, &yCam);
-            // Update the player's position
+            // Mettre à jour la position du joueur
             if (clientId == this->playerId) {
                 this->setPlayerPos(750, 400);
                 Camera& camera = Camera::getInstance();

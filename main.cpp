@@ -407,8 +407,8 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
                 std::cerr << "Failed to initialize server!" << std::endl;
                 return -1;
             }
+            isHost = true;
             std::thread acceptThread(acceptClients);
-            acceptThread.detach();
             IPaddress ip;
             if (!initClient(ip, "localhost", 1234)) {
                 std::cerr << "Failed to initialize client!" << std::endl;
@@ -549,11 +549,17 @@ void handleQuit() {
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
             running = false;
+            if (isPlayingOnline && isHost) {
+                closeServer();
+            }
         }
     }
 
     if (keystate[SDL_SCANCODE_ESCAPE]) {
         running = false;
+        if (isPlayingOnline && isHost) {
+            closeServer();
+        }
     }
 }
 

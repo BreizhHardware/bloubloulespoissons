@@ -21,5 +21,6 @@ std::pair<int, int> updatePlayerPosition(int clientId, const std::string& direct
 void createNewPlayer(int clientId);
 void updateKeepAlive(int clientId);
 void checkClientAlive();
+void closeServer();
 
 #endif //NETWORKING_H
