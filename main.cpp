@@ -657,59 +657,73 @@ void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, c
 
 void cleanup() {
     try {
-        TTF_CloseFont(font);
-    }catch(const std::system_error& e){
-        std::cerr << "Exception caught for CloseFont (660): " << e.what() << std::endl;
+        if (font != nullptr) {
+            TTF_CloseFont(font);
+            font = nullptr;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for CloseFont: " << e.what() << std::endl;
     }
-    try{
+
+    try {
         TTF_Quit();
-    }catch(const std::system_error& e){
-        std::cerr << "Exception caught for TTF_Quit (665): " << e.what() << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for TTF_Quit: " << e.what() << std::endl;
     }
-    try{
-        SDL_DestroyTexture(playerTexture);
-    }catch(const std::system_error& e){
-        std::cerr << "Exception caught for DestroyTexture (670): " << e.what() << std::endl;
+
+    try {
+        if (playerTexture != nullptr) {
+            SDL_DestroyTexture(playerTexture);
+            playerTexture = nullptr;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for DestroyTexture (playerTexture): " << e.what() << std::endl;
     }
+
     for (int i = 0; i < fishCount; ++i) {
-        try{
-            SDL_DestroyTexture(fishTextures[i]);
-        }catch(const std::system_error& e){
-            std::cerr << "Exception caught for DestroyTexture (676): " << e.what() << std::endl;
+        try {
+            if (fishTextures[i] != nullptr) {
+                SDL_DestroyTexture(fishTextures[i]);
+                fishTextures[i] = nullptr;
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "Exception caught for DestroyTexture (fishTextures[" << i << "]): " << e.what() << std::endl;
         }
     }
-    if (renderer != nullptr) {
-        try{
+
+    try {
+        if (renderer != nullptr) {
             SDL_DestroyRenderer(renderer);
-        }catch(const std::system_error& e){
-            std::cerr << "Exception caught for DestroyRenderer (683): " << e.what() << std::endl;
+            renderer = nullptr;
         }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for DestroyRenderer: " << e.what() << std::endl;
     }
-    if (window != nullptr) {
-        try{
+
+    try {
+        if (window != nullptr) {
             SDL_DestroyWindow(window);
-        }catch(const std::system_error& e){
-            std::cerr << "Exception caught for DestroyWindow (690): " << e.what() << std::endl;
+            window = nullptr;
         }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for DestroyWindow: " << e.what() << std::endl;
     }
-    try{
+
+    try {
         SDL_Quit();
-    }catch(const std::system_error& e){
-        std::cerr << "Exception caught for SDL_Quit (696): " << e.what() << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for SDL_Quit: " << e.what() << std::endl;
     }
-    try{
+
+    try {
         IMG_Quit();
-    }catch(const std::system_error& e){
-        std::cerr << "Exception caught for IMG_Quit (701): " << e.what() << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for IMG_Quit: " << e.what() << std::endl;
     }
-    try{
+
+    try {
         SDLNet_Quit();
-    }catch(const std::system_error& e){
-        std::cerr << "Exception caught for SDLNet_Quit (706): " << e.what() << std::endl;
-    }
-    try{
-        SDL_Quit();
-    }catch(const std::system_error& e){
-        std::cerr << "Exception caught for SDL_Quit (711): " << e.what() << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for SDLNet_Quit: " << e.what() << std::endl;
     }
 }
