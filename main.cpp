@@ -587,18 +587,18 @@ void handleQuit() {
 
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
-            game_running = false;
             if (isPlayingOnline && isHost) {
                 closeServer();
             }
+            game_running = false;
         }
     }
 
     if (keystate[SDL_SCANCODE_ESCAPE]) {
-        game_running = false;
         if (isPlayingOnline && isHost) {
             closeServer();
         }
+        game_running = false;
     }
 }
 
