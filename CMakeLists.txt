@@ -49,3 +49,7 @@ if (WIN32)
     endif()
     target_link_libraries(bloubloulespoissons ws2_32)
 endif()
+
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+endif()
