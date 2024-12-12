@@ -101,16 +101,16 @@ void Menu::draw(SDL_Renderer* renderer) {
 
         bool hover = false;
         for (Button& button : pages[currentPage].buttons) {
-            drawRoundedRectWithGradient(
-                renderer,
-                button.rect,
-                button.borderRadius,
-                button.startGradientColor,
-                button.endGradientColor,
-                button.gradientWidth
-            );
+            // Activer le blending pour l'arrière-plan du bouton
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+            SDL_SetRenderDrawColor(renderer, button.bgColor.r, button.bgColor.g, button.bgColor.b, button.bgColor.a);
+            SDL_RenderFillRect(renderer, &button.rect);
 
-            drawRoundedRect(renderer, button.rect, button.borderRadius, button.bgColor);
+            // Dessiner la bordure du bouton
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+            SDL_SetRenderDrawColor(renderer, button.borderColor.r, button.borderColor.g, button.borderColor.b, button.borderColor.a);
+            SDL_Rect borderRect = {button.rect.x - button.borderWidth, button.rect.y - button.borderWidth, button.rect.w + 2 * button.borderWidth, button.rect.h + 2 * button.borderWidth};
+            SDL_RenderDrawRect(renderer, &borderRect);
 
             SDL_RenderCopy(renderer, button.txt, nullptr, &button.txtRect);
 
@@ -221,7 +221,7 @@ void Menu::addButton(std::string page, int x, int y, int w, int h, std::string t
             int textHeight = h / 1.5;
             button.txtRect = {x + (w / 2) - (textWidth / 2), y + (h / 2) - (textHeight / 2), textWidth, textHeight};
             button.fontColor = {255, 255, 255};
-            button.bgColor = {0, 0, 0, 33}; // Fond noir avec opacité de 13%
+            button.bgColor = {0, 0, 0, 75}; // Fond noir avec opacité de 13%
             button.borderColor = {40, 120, 122, 255}; // Couleur de la bordure
             button.borderWidth = 5; // Largeur de la bordure
             button.borderRadius = 17; // Rayon de la bordure
