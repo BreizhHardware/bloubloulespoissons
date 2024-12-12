@@ -166,7 +166,7 @@ bool initSDL() {
         return false;
     }
 
-    SDL_Surface* iconSurface = IMG_Load("../img/mory.png");
+    SDL_Surface* iconSurface = IMG_Load("../img/logo.png");
     if(iconSurface == nullptr) {
         std::cerr << "Erreur de chargement de l'icône: " << IMG_GetError() << std::endl;
     } else {
