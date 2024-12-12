@@ -36,7 +36,6 @@ void Shark::draw(SDL_Renderer *renderer) {
 }
 
 bool Shark::isInView(Player& player) {
-    std::cout.flush();
     return player.getUnifiedX() >= x - VISUAL_RANGE && player.getUnifiedX() <= x + VISUAL_RANGE && player.getUnifiedY() >= y - VISUAL_RANGE && player.getUnifiedY() <= y + VISUAL_RANGE;
 }
 

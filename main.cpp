@@ -260,7 +260,7 @@ void updateFishRange(std::vector<Fish>& school, int start, int end){
 }
 
 void updateShark(Shark &shark) {
-    while (running) {
+    while (game_running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
         shark.cycle();
     }
@@ -356,7 +356,7 @@ int main(int argc, char* args[]) {
     });
 
     //menu.addButton((windowWidth/2) - 100, (windowHeight/2 + 25) + 50, 200, 50, "Multi", 1024);
-    std::thread quit_thread(handleQuitThread);
+    std::thread quit_thread = createThread("Quit thread", handleQuitThread);
 
     while (running) {
             
@@ -373,6 +373,12 @@ int main(int argc, char* args[]) {
             menu_thread.join();
     } catch (const std::system_error& e) {
         std::cerr << "Exception caught: " << e.what() << std::endl;
+    }
+    try{
+        if(quit_thread.joinable())
+            quit_thread.join();
+    }catch(const std::system_error& e){
+        std::cerr << "Exception caught 2: " << e.what() << std::endl;
     }
     if (!isPlayingOnline) {
         cleanup();
@@ -407,7 +413,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     for (int i = 0; i < school.size(); i += fishPerThread) {
         fish_threads.emplace_back(createThread("Fish thread", updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size()))));
     }
-    std::thread quit_thread = createThread("Quit thread", handleQuitThread);
+    //std::thread quit_thread = createThread("Quit thread", handleQuitThread);
   
       // Offline
     players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
@@ -415,7 +421,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
 
 
     Shark shark(0, 0, 0.1, 0.1,0, 150, 150, renderer,players);
-    std::thread shark_thread(updateShark, std::ref(shark));
+    std::thread shark_thread = createThread("Shark thread",updateShark, std::ref(shark));
 
     while (game_running) {
         renderScene(players, kelps, rocks, corals, shark);
@@ -423,18 +429,15 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
 
     }
     try{
-        if(player_thread.joinable())
+        if(player_thread.joinable()){
+            std::cout << "Killing playerThread.." << std::endl;
             player_thread.join();
+        }
     }catch(const std::system_error& e){
         std::cerr << "Exception caught 1: " << e.what() << std::endl;
     }
-    try{
-        if(quit_thread.joinable())
-            quit_thread.join();
-    }catch(const std::system_error& e){
-        std::cerr << "Exception caught 3: " << e.what() << std::endl;
-    }
     try {
+      std::cout << "Killing fish_threads..." << std::endl;
       for (auto& fish_thread : fish_threads) {
           if (fish_thread.joinable())
               fish_thread.join();
@@ -444,11 +447,14 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     }
 
     try {
-        if (shark_thread.joinable())
+        if (shark_thread.joinable()){
+            std::cout << "Killing shark_thread..." << std::endl;
             shark_thread.join();
+        }
     } catch (const std::system_error& e) {
         std::cerr << "Exception caught 5: " << e.what() << std::endl;
     }
+    std::cout << "All threads killed" << std::endl;
     running = false;
     return 0;
 }
@@ -476,7 +482,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     }
 
     Shark shark(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1,0, 150, 150, renderer,players);
-    std::thread shark_thread(updateShark, std::ref(shark));
+    std::thread shark_thread = createThread("Shark", updateShark, std::ref(shark));
 
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
@@ -506,7 +512,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             std::thread messageThread = createThread("Message thread", handleClientMessages, std::ref(players[0]));
             std::thread playerThread = createThread("Player thread", playerMovementThread, std::ref(players[0]));
 
-            while (running) {
+            while (game_running) {
                 renderScene(players, kelps, rocks, corals,shark);
                 SDL_Delay(10);
             }
