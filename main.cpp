@@ -24,6 +24,8 @@
 #include "network/networking_client.h"
 #include "shark.h"
 
+#include "event.h"
+
 
 #include <system_error>
 
@@ -195,7 +197,7 @@ bool initSDL() {
         return false;
     }
 
-    SDL_Surface* iconSurface = IMG_Load("../img/mory.png");
+    SDL_Surface* iconSurface = IMG_Load("../img/logo.png");
     if(iconSurface == nullptr) {
         std::cerr << "Erreur de chargement de l'icône: " << IMG_GetError() << std::endl;
     } else {
@@ -306,6 +308,14 @@ void updateShark(Shark &shark) {
     }
 }
 
+void onPlayerLost(Menu &menu){
+    menuRunning = true;
+    menu.changePage("Main");
+    menu.show();
+}
+
+EventHandler eventHandler;
+
 int main(int argc, char* args[]) {
 
     SDL_SetHint(SDL_HINT_VIDEO_WAYLAND_ALLOW_LIBDECOR, "0");
@@ -315,16 +325,22 @@ int main(int argc, char* args[]) {
         return -1;
     }
 
+
     Menu menu(renderer);
     menu.addPage("Main");
     menu.addPage("Multi");
     menu.addPage("Multi-Join");
     menu.changePage("Main");
 
+    
+    eventHandler.registerEvent("playerLost", onPlayerLost, std::ref(menu));
+
     std::thread menu_thread = createThread("Menu thread", HandleMenuClick, std::ref(menu));
     std::thread quit_thread = createThread("Quit thread", handleQuitThread);
 
     menu.addText("Main", (windowWidth/2) - 300, 50, 600, 100, "BloubBloub les poissons", 1024);
+
+    menu.addImage("Main", (windowWidth/2) - 100, 150, 200, 200, "../img/logo.png");
 
     menu.addText("Multi-Join", (windowWidth/2) - 100, 50, 200, 100, "Join", 1024);
 
@@ -507,7 +523,8 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
         std::cerr << "Exception caught 5: " << e.what() << std::endl;
     }
     std::cout << "All threads killed" << std::endl;
-    running = false;
+    // running = false;
+    eventHandler.triggerEvent("playerLost");
     return 0;
 }
 
@@ -614,7 +631,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
                 std::cerr << "Exception caught 5: " << e.what() << std::endl;
             }
 
-            running = false;
+            eventHandler.triggerEvent("playerLost");
         }
         else if (argc > 0 && argc < 65535 && args != "") {
             int port = 1234;
@@ -674,7 +691,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             } catch (const std::system_error& e) {
                 std::cerr << "Exception caught 4: " << e.what() << std::endl;
             }
-            running = false;
+            eventHandler.triggerEvent("playerLost");
         }
     }
 

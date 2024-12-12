@@ -18,6 +18,12 @@ struct Button {
     std::function<void()> callback;
     bool isTextInput = false;
     std::string inputText;
+    SDL_Color borderColor;
+    int borderWidth;
+    int borderRadius;
+    SDL_Color startGradientColor;
+    SDL_Color endGradientColor;
+    int gradientWidth; 
 };
 
 struct Text {
@@ -27,12 +33,21 @@ struct Text {
     SDL_Rect txtRect;
 };
 
+struct ImagePage {
+    SDL_Texture* image;
+    SDL_Rect rect;
+};
 
 struct Page {
     std::string title;
     std::vector<Button> buttons;
     std::vector<Text> texts;
+    std::vector<ImagePage> images;
 };
+
+
+void drawRoundedRectWithGradient(SDL_Renderer* renderer, SDL_Rect rect, int radius, SDL_Color startColor, SDL_Color endColor, int gradientWidth);
+void drawRoundedRect(SDL_Renderer* renderer, SDL_Rect rect, int radius, SDL_Color color);
 
 class Menu {
     private:
@@ -75,6 +90,8 @@ class Menu {
         void addText(std::string page, int x, int y, int w, int h, std::string text, int size);
 
         void addPage(std::string title);
+
+        void addImage(std::string page, int x, int y, int w, int h, std::string path);
 
         std::vector<Button> getButtons();
 };
