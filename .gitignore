@@ -54,6 +54,8 @@ cmake-build-fedora
 cmake-build-fedora/
 cmake-build-debug-wsl
 cmake-build-debug-wsl/
+cmake-build-release-mingw
+cmake-build-release-mingw/
 
 # .vscode folder
 .vscode/
