@@ -22,6 +22,7 @@ std::atomic<bool> game_running(false);
 std::atomic<bool> isPlayingOnline(false);
 std::atomic<bool> messageThreadRunning(false);
 std::atomic<bool> isHost(false);
+EventHandler eventHandler;
 
 
 void resetAll(){

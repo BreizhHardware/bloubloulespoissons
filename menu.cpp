@@ -291,3 +291,31 @@ void Menu::addImage(std::string page, int x, int y, int w, int h, std::string pa
         }
     }
 }
+
+void Menu::drawLost(SDL_Renderer* renderer) {
+    // Charger l'image perdu.png
+    SDL_Surface* lostSurface = IMG_Load("../img/perdu.png");
+    if (lostSurface == nullptr) {
+        std::cerr << "Erreur de chargement de l'image perdu.png: " << IMG_GetError() << std::endl;
+        return;
+    }
+    SDL_Texture* lostTexture = SDL_CreateTextureFromSurface(renderer, lostSurface);
+    SDL_FreeSurface(lostSurface);
+
+    // Définir la transparence (alpha) de l'image
+    SDL_SetTextureBlendMode(lostTexture, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureAlphaMod(lostTexture, 128); // 128 pour 50% de transparence
+
+    // Obtenir les dimensions de la fenêtre
+    int windowWidth, windowHeight;
+    SDL_GetRendererOutputSize(renderer, &windowWidth, &windowHeight);
+
+    // Définir le rectangle de destination pour l'image
+    SDL_Rect destRect = {0, 0, windowWidth, windowHeight};
+
+    // Dessiner l'image
+    SDL_RenderCopy(renderer, lostTexture, nullptr, &destRect);
+
+    // Détruire la texture après utilisation
+    SDL_DestroyTexture(lostTexture);
+}

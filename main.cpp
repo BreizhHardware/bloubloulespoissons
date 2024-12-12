@@ -309,13 +309,20 @@ void updateShark(Shark &shark) {
 }
 
 void onPlayerLost(Menu &menu){
+    //Affiche drawLost par dessus le jeu
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
+    menu.drawLost(renderer);
+    SDL_RenderPresent(renderer);
+    Mix_Chunk* deathSound = Mix_LoadWAV("../sounds/death.wav");
+    Mix_PlayChannel(-1, deathSound, 0);
+    std::this_thread::sleep_for(std::chrono::seconds(8));
+    Mix_FreeChunk(deathSound);
     menuRunning = true;
     menu.changePage("Main");
     menu.show();
     resetAll();
 }
-
-EventHandler eventHandler;
 
 int main(int argc, char* args[]) {
 
