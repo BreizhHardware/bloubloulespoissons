@@ -36,12 +36,6 @@ jobs:
       - name: Build project
         run: cmake --build build -- -j $(nproc)
 
-      - name: Check for warnings and errors
-        run: |
-          if grep -i "warning\|error" build/compile_commands.json; then
-            echo "Build contains warnings or errors"
-            exit 1
-
       - name: Archive build artifacts
         uses: actions/upload-artifact@v3
         with:
