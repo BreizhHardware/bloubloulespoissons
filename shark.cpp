@@ -5,6 +5,8 @@
 #define sharkIMG "../img/shark.png"
 #include "shark.h"
 
+#include "network/networking.h"
+
 Shark::Shark(const int x, const int y, const float vx, const float vy, const int id, const int width, const int height, SDL_Renderer* renderer, std::vector<Player> &players_list)
     : x(x), y(y), vx(vx), vy(vy), id(id), width(width), height(height), players_list(players_list) {
     SDL_Surface* sharkSurface = IMG_Load(sharkIMG);
@@ -34,7 +36,6 @@ void Shark::draw(SDL_Renderer *renderer) {
 }
 
 bool Shark::isInView(Player& player) {
-    std::cout << "Player x: " << player.getUnifiedX() << " y: " << player.getUnifiedY() << std::endl;
     std::cout.flush();
     return player.getUnifiedX() >= x - VISUAL_RANGE && player.getUnifiedX() <= x + VISUAL_RANGE && player.getUnifiedY() >= y - VISUAL_RANGE && player.getUnifiedY() <= y + VISUAL_RANGE;
 }
@@ -53,10 +54,8 @@ void Shark::checkNeighborhood(Player& player, float &xpos_avg, float &ypos_avg, 
 void Shark::cycle() {
     int neighboring_player = 0;
     float xvel_avg = 0, yvel_avg = 0, xpos_avg = 0, ypos_avg = 0;
-    std::cout << "Shark x: " << x << " y: " << y << std::endl;
     for (auto& player : players_list) {
         if (isInView(player)) {
-            std::cout << "Player x: " << player.getUnifiedX() << " y: " << player.getUnifiedY() << std::endl;
             checkNeighborhood(player, xpos_avg, ypos_avg, xvel_avg, yvel_avg, neighboring_player);
         }
     }
@@ -80,4 +79,7 @@ void Shark::cycle() {
     x += vx;
     y += vy;
 
+    if (isPlayingOnline && isHost) {
+        sendSharkPosition(client, id, x, y);
+    }
 }

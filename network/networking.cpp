@@ -205,3 +205,9 @@ void handleServerMessages() {
         }
     }
 }
+
+void sendSharkPosition(TCPsocket socket, int sharkId, int x, int y) {
+    std::string message = std::to_string(sharkId) + ";shark_moved;" + std::to_string(x) + "," + std::to_string(y);
+    sendMessage(socket, message);
+    SDL_Delay(16);
+}

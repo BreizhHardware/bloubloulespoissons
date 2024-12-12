@@ -23,5 +23,6 @@ void updateKeepAlive(int clientId);
 void checkClientAlive();
 void closeServer();
 void handleServerMessages();
+void sendSharkPosition(TCPsocket socket, int sharkId, int x, int y);
 
 #endif //NETWORKING_H
