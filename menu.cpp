@@ -21,8 +21,24 @@ void Menu::draw(SDL_Renderer* renderer) {
 
         bool hover = false;
         for (Button& button : pages[currentPage].buttons) {
+            // Dessiner le fond du bouton avec opacité
             SDL_SetRenderDrawColor(renderer, button.bgColor.r, button.bgColor.g, button.bgColor.b, button.bgColor.a);
             SDL_RenderFillRect(renderer, &button.rect);
+
+            // Dessiner la bordure du bouton
+            SDL_SetRenderDrawColor(renderer, button.borderColor.r, button.borderColor.g, button.borderColor.b, button.borderColor.a);
+            SDL_Rect borderRect = {button.rect.x - button.borderWidth, button.rect.y - button.borderWidth, button.rect.w + 2 * button.borderWidth, button.rect.h + 2 * button.borderWidth};
+            SDL_RenderDrawRect(renderer, &borderRect);
+
+            // Dessiner les coins arrondis
+            for (int w = 0; w < button.borderWidth; ++w) {
+                SDL_RenderDrawLine(renderer, button.rect.x - w, button.rect.y - w + button.borderRadius, button.rect.x - w, button.rect.y + button.rect.h + w - button.borderRadius);
+                SDL_RenderDrawLine(renderer, button.rect.x + button.rect.w + w, button.rect.y - w + button.borderRadius, button.rect.x + button.rect.w + w, button.rect.y + button.rect.h + w - button.borderRadius);
+                SDL_RenderDrawLine(renderer, button.rect.x - w + button.borderRadius, button.rect.y - w, button.rect.x + button.rect.w + w - button.borderRadius, button.rect.y - w);
+                SDL_RenderDrawLine(renderer, button.rect.x - w + button.borderRadius, button.rect.y + button.rect.h + w, button.rect.x + button.rect.w + w - button.borderRadius, button.rect.y + button.rect.h + w);
+            }
+
+            // Dessiner le texte du bouton
             SDL_RenderCopy(renderer, button.txt, nullptr, &button.txtRect);
 
             if (button.isTextInput) {
@@ -112,22 +128,25 @@ void Menu::changePage(std::string title){
     }
 }
 
-void Menu::addButton(std::string page, int x, int y, int w, int h, std::string text, int size, std::function<void()> callback, bool isTextInput){
-    for(Page& p : pages){
-        if(p.title == page){
+void Menu::addButton(std::string page, int x, int y, int w, int h, std::string text, int size, std::function<void()> callback, bool isTextInput) {
+    for (Page& p : pages) {
+        if (p.title == page) {
             TTF_Font* font_txt = TTF_OpenFont("../fonts/arial.ttf", size);
             if (font_txt == nullptr) {
                 std::cerr << "Erreur de chargement de la police: " << TTF_GetError() << std::endl;
             }
             Button button;
             button.rect = {x, y, w, h};
-            int textWidth = w/2;
-            int textHeight = h/1.5;
-            button.txtRect = {x + (w/2) - (textWidth/2), y + (h/2) - (textHeight/2), textWidth, textHeight};
+            int textWidth = w / 2;
+            int textHeight = h / 1.5;
+            button.txtRect = {x + (w / 2) - (textWidth / 2), y + (h / 2) - (textHeight / 2), textWidth, textHeight};
             button.fontColor = {255, 255, 255};
-            button.bgColor = {0, 0, 255, 255};
+            button.bgColor = {0, 0, 0, 33}; // Fond noir avec opacité de 13%
+            button.borderColor = {40, 120, 122, 255}; // Couleur de la bordure
+            button.borderWidth = 5; // Largeur de la bordure
+            button.borderRadius = 17; // Rayon de la bordure
             button.isTextInput = isTextInput;
-            
+
             SDL_Surface* textSurface = TTF_RenderText_Solid(font_txt, text.c_str(), button.fontColor);
             SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
             SDL_FreeSurface(textSurface);

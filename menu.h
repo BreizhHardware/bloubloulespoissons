@@ -18,6 +18,9 @@ struct Button {
     std::function<void()> callback;
     bool isTextInput = false;
     std::string inputText;
+    SDL_Color borderColor;
+    int borderWidth;
+    int borderRadius;
 };
 
 struct Text {
