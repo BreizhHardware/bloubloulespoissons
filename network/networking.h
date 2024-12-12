@@ -10,6 +10,7 @@
 #include "../env.h"
 #include "networking_client.h"
 #include "../player.h"
+#include "../shark.h"
 
 inline IPaddress ip;
 inline TCPsocket server;

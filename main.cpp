@@ -486,7 +486,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
         threads.emplace_back(createThread("Fish thread", updateFishRange, std::ref(school), i, std::min(i + fishPerThread, static_cast<int>(school.size()))));
     }
 
-    Shark shark(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1,0, 150, 150, renderer,players);
+    Shark shark(0, 0, 0.1, 0.1,0, 150, 150, renderer,players);
     std::thread shark_thread = createThread("Shark", updateShark, std::ref(shark));
 
     freopen("CON", "w", stdout);

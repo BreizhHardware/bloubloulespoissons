@@ -31,6 +31,7 @@ private:
 
     Mix_Chunk* sharkSound;
     std::chrono::steady_clock::time_point lastSoundTime;
+    std::chrono::steady_clock::time_point lastSendTime;
 
 
 public:
@@ -50,6 +51,7 @@ public:
 
     bool isInView(Player& player);
     void checkNeighborhood(Player& player, float &xpos_avg, float &ypos_avg, float &xvel_avg, float &yvel_avg, int &neighboring_player);
+    void updatePosition(int newX, int newY);
 
 };
 

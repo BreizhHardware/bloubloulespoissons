@@ -93,7 +93,10 @@ void Shark::cycle() {
     }
 
     if (isPlayingOnline && isHost) {
-        sendSharkPosition(client, id, x, y);
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSendTime).count() >= 100) {
+            sendSharkPosition(client, id, x, y);
+            lastSendTime = now;
+        }
     }
 }
 
@@ -107,4 +110,9 @@ Shark::~Shark() {
         Mix_FreeChunk(sharkSound);
         sharkSound = nullptr;
     }
+}
+
+void Shark::updatePosition(int newX, int newY) {
+    x = newX;
+    y = newY;
 }

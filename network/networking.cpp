@@ -30,7 +30,10 @@ void acceptClients() {
             int clientId = clients.size() - 1;
             createNewPlayer(clientId);
             updateKeepAlive(clientId);
-            std::thread clientThread([clientSocket, clientId]() {
+
+            Shark shark(0, 0, 0.1, 0.1,0, 150, 150, renderer,players_server);
+            shark.updatePosition(0, 0);
+            std::thread clientThread([clientSocket, clientId, &shark]() {
                 std::thread keepAliveThread(sendKeepAlive, clientSocket);
                 keepAliveThread.detach();
                 while (running) {
@@ -48,6 +51,14 @@ void acceptClients() {
                             // Mettre à jour la position du joueur
                             players_server[clientId].updatePosition(newX, newY);
                             std::string updatedMessage = std::to_string(clientId) + ";moved;" + std::to_string(newX) + "," + std::to_string(newY);
+                            for (TCPsocket client : clients) {
+                                sendMessage(client, updatedMessage);
+                            }
+                        } else if (message.find(";shark_moved;") != std::string::npos) {
+                            int sharkId, x, y;
+                            sscanf(message.c_str(), "%d;shark_moved;%d,%d", &sharkId, &x, &y);
+                            shark.updatePosition(x, y);
+                            std::string updatedMessage = std::to_string(sharkId) + ";shark_moved;" + std::to_string(x) + "," + std::to_string(y);
                             for (TCPsocket client : clients) {
                                 sendMessage(client, updatedMessage);
                             }
@@ -209,5 +220,4 @@ void handleServerMessages() {
 void sendSharkPosition(TCPsocket socket, int sharkId, int x, int y) {
     std::string message = std::to_string(sharkId) + ";shark_moved;" + std::to_string(x) + "," + std::to_string(y);
     sendMessage(socket, message);
-    SDL_Delay(16);
 }
