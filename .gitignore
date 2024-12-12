@@ -50,3 +50,10 @@ cmake-build-release-clang
 cmake-build-release-clang/
 cmake-build-release-gcc
 cmake-build-release-gcc/
+cmake-build-fedora
+cmake-build-fedora/
+cmake-build-debug-wsl
+cmake-build-debug-wsl/
+
+# .vscode folder
+.vscode/

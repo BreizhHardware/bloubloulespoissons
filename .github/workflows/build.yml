@@ -1,0 +1,41 @@
+name: Build and Test
+
+on:
+  pull_request:
+    branches:
+      - main
+      - online
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up C++ environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc g++ build-essential
+
+      - name: Install SDL2 dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-net-dev libsdl2-mixer-dev
+
+      - name: Create build directory
+        run: mkdir build
+
+      - name: Configure CMake
+        run: cmake -S . -B build
+
+      - name: Build project
+        run: cmake --build build -- -j $(nproc)
+
+      - name: Check for warnings and errors
+        run: |
+          if grep -i "warning\|error" build/compile_commands.json; then
+            echo "Build contains warnings or errors"
+            exit 1
+          fi
