@@ -146,7 +146,7 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
         unifiedY = camera.getY() + this->y;
     } else {
         Uint32 currentTime = SDL_GetTicks();
-        if (currentTime - lastMoveTime >= 5000) {
+        if (currentTime - lastMoveTime >= 1000) {
             if (this->energy > 50.0f) {
                 this->energy += 0.4f; // Récupération plus rapide si l'énergie est élevée
             } else {
