@@ -309,12 +309,20 @@ void updateShark(Shark &shark) {
 }
 
 void onPlayerLost(Menu &menu){
+    //Affiche drawLost par dessus le jeu
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
+    menu.drawLost(renderer);
+    SDL_RenderPresent(renderer);
+    Mix_Chunk* deathSound = Mix_LoadWAV("../sounds/death.wav");
+    Mix_PlayChannel(-1, deathSound, 0);
+    std::this_thread::sleep_for(std::chrono::seconds(8));
+    Mix_FreeChunk(deathSound);
     menuRunning = true;
     menu.changePage("Main");
     menu.show();
+    resetAll();
 }
-
-EventHandler eventHandler;
 
 int main(int argc, char* args[]) {
 
@@ -472,8 +480,18 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
 
-    for (int i = 0; i < FISH_NUMBER ; ++i) {
-        school.emplace_back(rand() % ENV_WIDTH, rand() % ENV_HEIGHT, 0.1, 0.1, school, i, 75, 75, renderer, rand() % 2 == 0 ? 1 : 0, fishTextures[rand() % fishCount]);
+    for (int i = 0; i < FISH_NUMBER; ++i) {
+        int x = rand() % ENV_WIDTH;
+        int y = rand() % ENV_HEIGHT;
+        double speedX = 0.1;
+        double speedY = 0.1;
+        std::cout << fishCount << std::endl;
+        int textureIndex = rand() % fishCount;
+        int gender = rand() % 2 == 0 ? 1 : 0;
+
+        std::cout << "Creating fish " << i << " at (" << x << ", " << y << ") with texture " << textureIndex << " and gender " << gender << std::endl;
+
+        school.emplace_back(x, y, speedX, speedY, school, i, 75, 75, renderer, gender, fishTextures[textureIndex]);
     }
     std::ranges::sort(school, Fish::SortByX);
     std::vector<std::thread> fish_threads;
@@ -524,6 +542,8 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     }
     std::cout << "All threads killed" << std::endl;
     // running = false;
+    school.empty();
+    players.clear();
     eventHandler.triggerEvent("playerLost");
     return 0;
 }
@@ -630,7 +650,8 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             } catch (const std::system_error& e) {
                 std::cerr << "Exception caught 5: " << e.what() << std::endl;
             }
-
+            school.empty();
+            players.clear();
             eventHandler.triggerEvent("playerLost");
         }
         else if (argc > 0 && argc < 65535 && args != "") {
@@ -691,6 +712,8 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             } catch (const std::system_error& e) {
                 std::cerr << "Exception caught 4: " << e.what() << std::endl;
             }
+            school.empty();
+            players.clear();
             eventHandler.triggerEvent("playerLost");
         }
     }

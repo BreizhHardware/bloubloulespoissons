@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "event.h"
 
 class Player;
 
@@ -36,8 +37,11 @@ extern std::atomic<bool> messageThreadRunning;
 extern std::vector<Player> players;
 extern std::vector<Player> players_server;
 extern std::atomic<bool> isHost;
+extern EventHandler eventHandler;
 
 bool initEnvironment(SDL_Renderer* renderer);
 std::vector<SDL_Texture*> initTexture(SDL_Renderer* renderer);
+
+void resetAll();
 
 #endif // ENV_H

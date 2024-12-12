@@ -94,6 +94,8 @@ class Menu {
         void addImage(std::string page, int x, int y, int w, int h, std::string path);
 
         std::vector<Button> getButtons();
+
+        void drawLost(SDL_Renderer* renderer);
 };
 
 #endif

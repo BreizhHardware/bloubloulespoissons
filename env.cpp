@@ -22,6 +22,17 @@ std::atomic<bool> game_running(false);
 std::atomic<bool> isPlayingOnline(false);
 std::atomic<bool> messageThreadRunning(false);
 std::atomic<bool> isHost(false);
+EventHandler eventHandler;
+
+
+void resetAll(){
+    game_running = false;
+    isPlayingOnline = false;
+    messageThreadRunning = false;
+    isHost = false;
+    players.empty();
+    players_server.empty();
+}
 
 
 bool initEnvironment(SDL_Renderer* renderer) {

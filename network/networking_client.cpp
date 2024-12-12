@@ -37,8 +37,10 @@ void sendMessage(TCPsocket socket, const std::string& message) {
     int result = SDLNet_TCP_Send(socket, &len, sizeof(len));
     if (result < sizeof(len)) {
         std::cerr << "SDLNet_TCP_Send failed: " << SDLNet_GetError() << std::endl;
-        std::cerr << "Closing the game ..." << std::endl;
-        game_running = false;
+        //std::cerr << "Closing the game ..." << std::endl;
+        //game_running = false;
+        std::cout << "Return to menu..." << std::endl;
+        eventHandler.triggerEvent("playerLost");
         return;
     }
 
