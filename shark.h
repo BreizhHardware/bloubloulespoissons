@@ -8,6 +8,8 @@
 #include <vector>
 #include "player.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+#include <chrono>
 
 class Shark {
 private:
@@ -27,10 +29,13 @@ private:
     int width, height;
     std::vector<Player> &players_list;
 
+    Mix_Chunk* sharkSound;
+    std::chrono::steady_clock::time_point lastSoundTime;
+
 
 public:
     Shark(int x, int y, float vx, float vy, int id, int width, int height, SDL_Renderer *renderer,std::vector<Player> &players_list);
-    ~Shark() = default;
+    ~Shark();
 
     float getX() const { return x; };
     float getY() const { return y; };

@@ -2,6 +2,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_net.h>
+#include <SDL2/SDL_mixer.h>
 #include <iostream>
 #include <vector>
 #include <future>
@@ -148,6 +149,10 @@ bool initSDL() {
     }
     if (SDLNet_Init() < 0) {
         std::cerr << "SDLNet could not initialize! SDLNet_Error: " << SDLNet_GetError() << std::endl;
+        return false;
+    }
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        std::cerr << "SDL_mixer could not initialize! SDL_mixer Error: " << Mix_GetError() << std::endl;
         return false;
     }
 
@@ -772,12 +777,6 @@ void cleanup() {
     }
 
     try {
-        SDL_Quit();
-    } catch (const std::exception& e) {
-        std::cerr << "Exception caught for SDL_Quit: " << e.what() << std::endl;
-    }
-
-    try {
         IMG_Quit();
     } catch (const std::exception& e) {
         std::cerr << "Exception caught for IMG_Quit: " << e.what() << std::endl;
@@ -787,6 +786,18 @@ void cleanup() {
         SDLNet_Quit();
     } catch (const std::exception& e) {
         std::cerr << "Exception caught for SDLNet_Quit: " << e.what() << std::endl;
+    }
+
+    try {
+        Mix_CloseAudio();
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for Mix_CloseAudio: " << e.what() << std::endl;
+    }
+
+    try {
+        SDL_Quit();
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for SDL_Quit: " << e.what() << std::endl;
     }
 }
 
