@@ -4,7 +4,11 @@ project(bloubloulespoissons)
 set(CMAKE_CXX_STANDARD 23)
 
 # Ajouter le chemin de la bibliothèque SDL2
-set(CMAKE_PREFIX_PATH "C:/SDL2")
+if (WIN32)
+    set(CMAKE_PREFIX_PATH "C:/SDL2")
+else()
+    set(CMAKE_PREFIX_PATH "/usr/local/lib/cmake/SDL2")
+endif()
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
@@ -32,7 +36,6 @@ add_executable(bloubloulespoissons main.cpp fish.cpp decors.cpp
         shark.h
 )
 
-# Lier SDL2 et SDL2_image
 target_link_libraries(bloubloulespoissons ${SDL2_LIBRARIES} -lSDL2_image -lSDL2_ttf -lSDL2_net -lSDL2_mixer)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
