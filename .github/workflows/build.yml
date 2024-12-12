@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: fedora-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -16,11 +16,13 @@ jobs:
 
       - name: Set up C++ environment
         run: |
-          sudo dnf install -y gcc gcc-c++ cmake make
+          sudo apt-get update
+          sudo apt-get install -y gcc g++ build-essential
 
       - name: Install SDL2 dependencies
         run: |
-          sudo dnf install -y SDL2 SDL2-devel SDL2_image SDL2_image-devel SDL2_ttf SDL2_ttf-devel SDL2_net SDL2_net-devel SDL2_mixer SDL2_mixer-devel
+          sudo apt-get update
+          sudo apt-get install -y libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-net-dev libsdl2-mixer-dev
 
       - name: Clean build directory
         run: rm -rf build
