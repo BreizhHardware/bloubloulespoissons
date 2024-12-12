@@ -66,7 +66,7 @@ jobs:
         with:
           name: Release ${{ steps.generate_release_tag.outputs.next_release_tag }}
           tag_name: ${{ steps.generate_release_tag.outputs.next_release_tag }}
-          files: build/**
+          files: build/bloubloulespoissons
           generate_release_notes: true
           token: ${{secrets.GH_TOKEN}}
         env:
