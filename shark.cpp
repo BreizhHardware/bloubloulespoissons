@@ -17,6 +17,12 @@ Shark::Shark(const int x, const int y, const float vx, const float vy, const int
         SDL_FreeSurface(sharkSurface);
     }
 
+    sharkSound = Mix_LoadWAV("../sounds/shark.wav");
+    if (sharkSound == nullptr) {
+        std::cerr << "Erreur de chargement du son du requin: " << Mix_GetError() << std::endl;
+    }
+
+    lastSoundTime = std::chrono::steady_clock::now();
 }
 
 void Shark::draw(SDL_Renderer *renderer) {
@@ -79,7 +85,27 @@ void Shark::cycle() {
     x += vx;
     y += vy;
 
+    auto now = std::chrono::steady_clock::now();
+    if (std::chrono::duration_cast<std::chrono::seconds>(now - lastSoundTime).count() > 15) {
+        if (sharkSound != nullptr) {
+            Mix_PlayChannel(-1, sharkSound, 0);
+        }
+        lastSoundTime = now;
+    }
+
     if (isPlayingOnline && isHost) {
         sendSharkPosition(client, id, x, y);
+    }
+}
+
+Shark::~Shark() {
+    if (texture) {
+        SDL_DestroyTexture(texture);
+        texture = nullptr;
+    }
+
+    if (sharkSound) {
+        Mix_FreeChunk(sharkSound);
+        sharkSound = nullptr;
     }
 }
