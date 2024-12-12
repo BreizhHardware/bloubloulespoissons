@@ -1,14 +1,18 @@
 #include "menu.h"
 
-void Menu::draw(SDL_Renderer* renderer){
+void Menu::draw(SDL_Renderer* renderer) {
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, backgroundTxt, nullptr, &backgroundRect);
-    if(pages.size() > 0){
-        if(currentPage == -1 && pages.size() > 0){
+    if (pages.size() > 0) {
+        if (currentPage == -1 && pages.size() > 0) {
             currentPage = 0;
         }
 
-        for(Text& text : pages[currentPage].texts){
+        for (ImagePage image : pages[currentPage].images) {
+            SDL_RenderCopy(renderer, image.image, nullptr, &image.rect);
+        }
+
+        for (Text& text : pages[currentPage].texts) {
             SDL_RenderCopy(renderer, text.txt, nullptr, &text.rect);
         }
 
@@ -16,13 +20,12 @@ void Menu::draw(SDL_Renderer* renderer){
         SDL_GetMouseState(&mouseX, &mouseY);
 
         bool hover = false;
-        for(Button& button : pages[currentPage].buttons){
+        for (Button& button : pages[currentPage].buttons) {
             SDL_SetRenderDrawColor(renderer, button.bgColor.r, button.bgColor.g, button.bgColor.b, button.bgColor.a);
             SDL_RenderFillRect(renderer, &button.rect);
             SDL_RenderCopy(renderer, button.txt, nullptr, &button.txtRect);
 
             if (button.isTextInput) {
-                // Afficher le texte saisi
                 TTF_Font* font_txt = TTF_OpenFont("../fonts/arial.ttf", 24);
                 SDL_Surface* textSurface = TTF_RenderText_Solid(font_txt, button.inputText.c_str(), button.fontColor);
                 SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
@@ -167,4 +170,21 @@ void Menu::addPage(std::string title){
 
 std::vector<Button> Menu::getButtons(){
     return pages[currentPage].buttons;
+}
+
+void Menu::addImage(std::string page, int x, int y, int w, int h, std::string path) {
+    for (Page& p : pages) {
+        if (p.title == page) {
+            SDL_Surface* imageSurface = IMG_Load(path.c_str());
+            if (imageSurface == nullptr) {
+                std::cerr << "Erreur de chargement de l'image: " << IMG_GetError() << std::endl;
+                return;
+            }
+            SDL_Texture* imageTexture = SDL_CreateTextureFromSurface(renderer, imageSurface);
+            SDL_FreeSurface(imageSurface);
+            SDL_Rect imageRect = {x, y, w, h};
+
+            p.images.push_back(ImagePage(imageTexture, imageRect));
+        }
+    }
 }

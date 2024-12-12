@@ -27,11 +27,16 @@ struct Text {
     SDL_Rect txtRect;
 };
 
+struct ImagePage {
+    SDL_Texture* image;
+    SDL_Rect rect;
+};
 
 struct Page {
     std::string title;
     std::vector<Button> buttons;
     std::vector<Text> texts;
+    std::vector<ImagePage> images;
 };
 
 class Menu {
@@ -75,6 +80,8 @@ class Menu {
         void addText(std::string page, int x, int y, int w, int h, std::string text, int size);
 
         void addPage(std::string title);
+
+        void addImage(std::string page, int x, int y, int w, int h, std::string path);
 
         std::vector<Button> getButtons();
 };

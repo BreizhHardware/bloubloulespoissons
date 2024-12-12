@@ -326,6 +326,8 @@ int main(int argc, char* args[]) {
 
     menu.addText("Main", (windowWidth/2) - 300, 50, 600, 100, "BloubBloub les poissons", 1024);
 
+    menu.addImage("Main", (windowWidth/2) - 100, 150, 200, 200, "../img/logo.png");
+
     menu.addText("Multi-Join", (windowWidth/2) - 100, 50, 200, 100, "Join", 1024);
 
     menu.addButton("Main", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Solo", 1024, [](){

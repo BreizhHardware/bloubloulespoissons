@@ -55,4 +55,5 @@ endif()
 # Options pour la liaison statique en mode release
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+    target_sources(bloubloulespoissons PRIVATE resource.rc)
 endif()
