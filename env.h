@@ -40,4 +40,6 @@ extern std::atomic<bool> isHost;
 bool initEnvironment(SDL_Renderer* renderer);
 std::vector<SDL_Texture*> initTexture(SDL_Renderer* renderer);
 
+void resetAll();
+
 #endif // ENV_H
