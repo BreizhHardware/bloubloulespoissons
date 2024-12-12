@@ -280,23 +280,6 @@ int main(int argc, char* args[]) {
         return -1;
     }
 
-    if (argc > 1 && std::string(args[1]) == "69") {
-        std::cout << "69" << std::endl;
-        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(0, nullptr);
-    }else if (argc > 1 && std::string(args[1]) == "420") {
-        std::cout << "420" << std::endl;
-        std::thread timer_thread([](){
-            std::this_thread::sleep_for(std::chrono::seconds(10));
-            running = false;
-        });
-        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(0, nullptr);
-        timer_thread.join();
-    }else if (argc > 1 && std::string(args[1]) == "80085") {
-        isPlayingOnline = true;
-        menuRunning = false;
-        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(0, "");
-    }
-
     Menu menu(renderer);
     menu.addPage("Main");
     menu.addPage("Multi");
@@ -359,6 +342,24 @@ int main(int argc, char* args[]) {
     menu.addButton("Multi", (windowWidth/2) - 100, windowHeight/2 + 125, 200, 50, "Retour", 1024, [&menu](){
          menu.changePage("Main");
     });
+
+    if (argc > 1 && std::string(args[1]) == "69") {
+        std::cout << "69" << std::endl;
+        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(0, nullptr);
+    }else if (argc > 1 && std::string(args[1]) == "420") {
+        std::cout << "420" << std::endl;
+        std::thread timer_thread([](){
+            std::this_thread::sleep_for(std::chrono::seconds(10));
+            game_running = false;
+        });
+        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(0, nullptr);
+        timer_thread.join();
+    }else if (argc > 1 && std::string(args[1]) == "80085") {
+        isPlayingOnline = true;
+        menuRunning = false;
+        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(0, "");
+    }
+
 
     //menu.addButton((windowWidth/2) - 100, (windowHeight/2 + 25) + 50, 200, 50, "Multi", 1024);
     std::thread quit_thread = createThread("Quit thread", handleQuitThread);
