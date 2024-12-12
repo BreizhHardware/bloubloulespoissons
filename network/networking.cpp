@@ -30,7 +30,6 @@ void acceptClients() {
             int clientId = clients.size() - 1;
             createNewPlayer(clientId);
             updateKeepAlive(clientId);
-
             Shark shark(0, 0, 0.1, 0.1,0, 150, 150, renderer,players_server);
             shark.updatePosition(0, 0);
             std::thread clientThread([clientSocket, clientId, &shark]() {
@@ -39,6 +38,7 @@ void acceptClients() {
                 while (running) {
                     std::string message = receiveMessage(clientSocket);
                     if (!message.empty()) {
+                        message = processReceivedData(message);
                         std::cout << "Server received: " << message << std::endl;
                         if (message == "keepalive") {
                             updateKeepAlive(clientId);
@@ -220,4 +220,14 @@ void handleServerMessages() {
 void sendSharkPosition(TCPsocket socket, int sharkId, int x, int y) {
     std::string message = std::to_string(sharkId) + ";shark_moved;" + std::to_string(x) + "," + std::to_string(y);
     sendMessage(socket, message);
+}
+
+std::string processReceivedData(const std::string& data) {
+    std::string filteredData;
+    for (char c : data) {
+        if (std::isalnum(c) || c == ';' || c == '-' || c == '_' || std::isalpha(c)) {
+            filteredData += c;
+        }
+    }
+    return filteredData;
 }

@@ -25,5 +25,6 @@ void checkClientAlive();
 void closeServer();
 void handleServerMessages();
 void sendSharkPosition(TCPsocket socket, int sharkId, int x, int y);
+std::string processReceivedData(const std::string& data);
 
 #endif //NETWORKING_H
