@@ -31,7 +31,7 @@ jobs:
         run: mkdir build
 
       - name: Configure CMake
-        run: cmake -S . -B build
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build project
         run: cmake --build build -- -j $(nproc)
