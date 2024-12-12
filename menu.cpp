@@ -70,9 +70,14 @@ void Menu::draw(SDL_Renderer* renderer) {
     SDL_RenderPresent(renderer);
 }
 
-void Menu::handleClickedButton(){
+void Menu::handleClickedButton() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT) {
+            running = false;
+            return;
+        }
+
         if (event.type == SDL_MOUSEBUTTONDOWN) {
             int mouseX, mouseY;
             SDL_GetMouseState(&mouseX, &mouseY);
@@ -90,7 +95,7 @@ void Menu::handleClickedButton(){
                     }
                 }
             }
-        }else if (event.type == SDL_TEXTINPUT) {
+        } else if (event.type == SDL_TEXTINPUT) {
             if (activeTextInputIndex != -1) {
                 Button& button = pages[currentPage].buttons[activeTextInputIndex];
                 if (button.isTextInput) {
