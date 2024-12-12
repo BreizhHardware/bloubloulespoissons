@@ -40,6 +40,7 @@ std::vector<Player> players_server;
 struct ThreadInfo {
     std::thread::id id;
     std::string functionName;
+    bool isRunning;
 };
 
 std::vector<ThreadInfo> threadInfos;
@@ -62,6 +63,7 @@ void HandleMenuClick(Menu& menu);
 void updateFishRange(std::vector<Fish>& school, int start, int end);
 int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(int argc, char* args[]);
 int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, std::string args);
+void checkThreads();
 
 template <typename Function, typename... Args>
 std::thread createThread(std::string key, Function&& func, Args&&... args) {
@@ -71,17 +73,44 @@ std::thread createThread(std::string key, Function&& func, Args&&... args) {
             ThreadInfo info;
             info.id = std::this_thread::get_id();
             info.functionName = key;
+            info.isRunning = true;
             {
                 std::lock_guard<std::mutex> lock(mtx);
                 threadInfos.push_back(info);
             }
-            func(std::forward<Args>(args)...);
-            std::cout << "ThreadID = " << info.id << " ThreadFunction = " << info.functionName << std::endl;
+            try {
+                func(std::forward<Args>(args)...);
+            } catch (const std::exception& e) {
+                std::cerr << "Exception in thread " << key << ": " << e.what() << std::endl;
+            } catch (...) {
+                std::cerr << "Unknown exception in thread " << key << std::endl;
+            }
+            {
+                std::lock_guard<std::mutex> lock(mtx);
+                for (auto& threadInfo : threadInfos) {
+                    if (threadInfo.id == std::this_thread::get_id()) {
+                        threadInfo.isRunning = false;
+                        break;
+                    }
+                }
+            }
+            std::cout << "ThreadID = " << info.id << " ThreadFunction = " << info.functionName << " finished" << std::endl;
         });
         return thread;
     } catch (const std::system_error& e) {
         std::cerr << "Failed to create thread: " << e.what() << std::endl;
         throw;
+    }
+}
+
+void checkThreads() {
+    std::lock_guard<std::mutex> lock(mtx);
+    for (const auto& threadInfo : threadInfos) {
+        if (threadInfo.isRunning) {
+            std::cout << "Thread " << threadInfo.functionName << " (ID: " << threadInfo.id << ") is still running." << std::endl;
+        } else {
+            std::cout << "Thread " << threadInfo.functionName << " (ID: " << threadInfo.id << ") has stopped." << std::endl;
+        }
     }
 }
 
@@ -246,8 +275,14 @@ void handleQuitThread() {
 };
 
 void HandleMenuClick(Menu& menu){
-    while (running) {
-        menu.handleClickedButton();
+    try {
+        while (menuRunning) {
+            menu.handleClickedButton();
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception in HandleMenuClick: " << e.what() << std::endl;
+    } catch (...) {
+        std::cerr << "Unknown exception in HandleMenuClick" << std::endl;
     }
 }
 
@@ -287,6 +322,7 @@ int main(int argc, char* args[]) {
     menu.changePage("Main");
 
     std::thread menu_thread = createThread("Menu thread", HandleMenuClick, std::ref(menu));
+    std::thread quit_thread = createThread("Quit thread", handleQuitThread);
 
     menu.addText("Main", (windowWidth/2) - 300, 50, 600, 100, "BloubBloub les poissons", 1024);
 
@@ -362,7 +398,6 @@ int main(int argc, char* args[]) {
 
 
     //menu.addButton((windowWidth/2) - 100, (windowHeight/2 + 25) + 50, 200, 50, "Multi", 1024);
-    std::thread quit_thread = createThread("Quit thread", handleQuitThread);
 
     while (running) {
             
@@ -373,22 +408,33 @@ int main(int argc, char* args[]) {
             }
         }
     }
-    
+
+    std::cout << "Check Threads 1" << std::endl;
+    checkThreads();
     try {
-        if (menu_thread.joinable())
+        menuRunning = false;
+        if (menu_thread.joinable()) {
+            menuRunning = false;
             menu_thread.join();
+        }
     } catch (const std::system_error& e) {
         std::cerr << "Exception caught: " << e.what() << std::endl;
     }
+    checkThreads();
     try{
         if(quit_thread.joinable())
             quit_thread.join();
     }catch(const std::system_error& e){
         std::cerr << "Exception caught 2: " << e.what() << std::endl;
     }
+
     if (!isPlayingOnline) {
         cleanup();
     }
+
+    std::cout << "Check Threads 2" << std::endl;
+    checkThreads();
+
     //pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(argc, args);
     return 0;
 }
