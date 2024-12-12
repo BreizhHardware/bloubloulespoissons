@@ -46,6 +46,8 @@ class Player {
         Player(int x, int y, int playerSpeed, SDL_Renderer* renderer, int playerId) : x(x), y(y), playerBaseX(x), playerBaseY(y), playerSpeed(playerSpeed), playerId(playerId) {
             playerPosForRender.x = x;
             playerPosForRender.y = y;
+            unifiedX = x + windowWidth / 2;
+            unifiedY = y + windowHeight / 2;
 
             SDL_Surface* playerSurface = IMG_Load(playerIMG);
             if (playerSurface == nullptr) {
