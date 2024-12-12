@@ -379,8 +379,6 @@ int main(int argc, char* args[]) {
          menu.changePage("Main");
     });
 
-    std::thread quit_thread = createThread("Quit thread", handleQuitThread);
-
     if (argc > 1 && std::string(args[1]) == "69") {
         std::cout << "69" << std::endl;
         pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(0, nullptr);
