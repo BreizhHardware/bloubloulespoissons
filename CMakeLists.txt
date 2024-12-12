@@ -14,6 +14,7 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_net REQUIRED)
+find_package(SDL2_mixer REQUIRED)
 
 include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS} ${SDL2_NET_INCLUDE_DIRS})
 
@@ -36,7 +37,8 @@ add_executable(bloubloulespoissons main.cpp fish.cpp decors.cpp
         shark.h
 )
 
-target_link_libraries(bloubloulespoissons ${SDL2_LIBRARIES} -lSDL2_image -lSDL2_ttf -lSDL2_net -lSDL2_mixer)
+# Lier SDL2 et SDL2_image
+target_link_libraries(bloubloulespoissons ${SDL2_LIBRARIES} SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_net::SDL2_net SDL2_mixer::SDL2_mixer)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
@@ -48,4 +50,9 @@ if (WIN32)
         set_target_properties(bloubloulespoissons PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
     endif()
     target_link_libraries(bloubloulespoissons ws2_32)
+endif()
+
+# Options pour la liaison statique en mode release
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 endif()

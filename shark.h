@@ -21,6 +21,7 @@ private:
     const float MAX_SPEED = 3;
     const float MIN_SPEED = 0.6;
     const float BIASVALUE = 0.001;
+    const int HITBOX = 50;
 
     float x, y;
     float vx, vy;
@@ -42,6 +43,7 @@ public:
     float getY() const { return y; };
     float getVx() const { return vx; };
     float getVy() const { return vy; };
+    int getHITBOX() const { return HITBOX; };
 
 
 
@@ -52,6 +54,7 @@ public:
     bool isInView(Player& player);
     void checkNeighborhood(Player& player, float &xpos_avg, float &ypos_avg, float &xvel_avg, float &yvel_avg, int &neighboring_player);
     void updatePosition(int newX, int newY);
+    void checkCollision(Player& player);
 
 };
 
