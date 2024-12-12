@@ -21,6 +21,9 @@ struct Button {
     SDL_Color borderColor;
     int borderWidth;
     int borderRadius;
+    SDL_Color startGradientColor;
+    SDL_Color endGradientColor;
+    int gradientWidth; 
 };
 
 struct Text {
@@ -41,6 +44,10 @@ struct Page {
     std::vector<Text> texts;
     std::vector<ImagePage> images;
 };
+
+
+void drawRoundedRectWithGradient(SDL_Renderer* renderer, SDL_Rect rect, int radius, SDL_Color startColor, SDL_Color endColor, int gradientWidth);
+void drawRoundedRect(SDL_Renderer* renderer, SDL_Rect rect, int radius, SDL_Color color);
 
 class Menu {
     private:

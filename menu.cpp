@@ -1,8 +1,88 @@
 #include "menu.h"
 
+
+void drawRoundedRectWithGradient(SDL_Renderer* renderer, SDL_Rect rect, int radius, SDL_Color startColor, SDL_Color endColor, int gradientWidth) {
+    for (int i = 0; i < gradientWidth; i++) {
+        Uint8 r = startColor.r + i * (endColor.r - startColor.r) / gradientWidth;
+        Uint8 g = startColor.g + i * (endColor.g - startColor.g) / gradientWidth;
+        Uint8 b = startColor.b + i * (endColor.b - startColor.b) / gradientWidth;
+        Uint8 a = startColor.a + i * (endColor.a - startColor.a) / gradientWidth;
+
+        SDL_Color gradientColor = {r, g, b, a};
+
+        SDL_SetRenderDrawColor(renderer, gradientColor.r, gradientColor.g, gradientColor.b, gradientColor.a);
+        SDL_Rect gradientRect = {
+            rect.x - i,
+            rect.y - i,
+            rect.w + 2 * i,
+            rect.h + 2 * i
+        };
+
+        auto drawRoundedCorners = [&](int x, int y, int r) {
+            for (int dy = -r; dy <= r; dy++) {
+                for (int dx = -r; dx <= r; dx++) {
+                    if (dx * dx + dy * dy <= r * r) {
+                        SDL_RenderDrawPoint(renderer, x + dx, y + dy);
+                    }
+                }
+            }
+        };
+
+        drawRoundedCorners(gradientRect.x + radius, gradientRect.y + radius, radius); 
+        drawRoundedCorners(gradientRect.x + gradientRect.w - radius, gradientRect.y + radius, radius); 
+        drawRoundedCorners(gradientRect.x + radius, gradientRect.y + gradientRect.h - radius, radius);
+        drawRoundedCorners(gradientRect.x + gradientRect.w - radius, gradientRect.y + gradientRect.h - radius, radius);
+
+        SDL_Rect top = {gradientRect.x + radius, gradientRect.y, gradientRect.w - 2 * radius, radius};
+        SDL_Rect bottom = {gradientRect.x + radius, gradientRect.y + gradientRect.h - radius, gradientRect.w - 2 * radius, radius};
+        SDL_Rect left = {gradientRect.x, gradientRect.y + radius, radius, gradientRect.h - 2 * radius};
+        SDL_Rect right = {gradientRect.x + gradientRect.w - radius, gradientRect.y + radius, radius, gradientRect.h - 2 * radius};
+        SDL_Rect center = {gradientRect.x + radius, gradientRect.y + radius, gradientRect.w - 2 * radius, gradientRect.h - 2 * radius};
+
+        SDL_RenderDrawRect(renderer, &top);
+        SDL_RenderDrawRect(renderer, &bottom);
+        SDL_RenderDrawRect(renderer, &left);
+        SDL_RenderDrawRect(renderer, &right);
+    }
+}
+
+void drawRoundedRect(SDL_Renderer* renderer, SDL_Rect rect, int radius, SDL_Color color) {
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+
+    auto drawRoundedCorners = [&](int x, int y, int r) {
+        for (int dy = -r; dy <= r; dy++) {
+            for (int dx = -r; dx <= r; dx++) {
+                if (dx * dx + dy * dy <= r * r) {
+                    SDL_RenderDrawPoint(renderer, x + dx, y + dy);
+                }
+            }
+        }
+    };
+
+    drawRoundedCorners(rect.x + radius, rect.y + radius, radius);
+    drawRoundedCorners(rect.x + rect.w - radius, rect.y + radius, radius);
+    drawRoundedCorners(rect.x + radius, rect.y + rect.h - radius, radius);
+    drawRoundedCorners(rect.x + rect.w - radius, rect.y + rect.h - radius, radius);
+
+    SDL_Rect top = {rect.x + radius, rect.y, rect.w - 2 * radius, radius};
+    SDL_Rect bottom = {rect.x + radius, rect.y + rect.h - radius, rect.w - 2 * radius, radius};
+    SDL_Rect left = {rect.x, rect.y + radius, radius, rect.h - 2 * radius};
+    SDL_Rect right = {rect.x + rect.w - radius, rect.y + radius, radius, rect.h - 2 * radius};
+    SDL_Rect center = {rect.x + radius, rect.y + radius, rect.w - 2 * radius, rect.h - 2 * radius};
+
+    SDL_RenderFillRect(renderer, &top);
+    SDL_RenderFillRect(renderer, &bottom);
+    SDL_RenderFillRect(renderer, &left);
+    SDL_RenderFillRect(renderer, &right);
+    SDL_RenderFillRect(renderer, &center);
+}
+
+
+
 void Menu::draw(SDL_Renderer* renderer) {
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, backgroundTxt, nullptr, &backgroundRect);
+
     if (pages.size() > 0) {
         if (currentPage == -1 && pages.size() > 0) {
             currentPage = 0;
@@ -21,24 +101,17 @@ void Menu::draw(SDL_Renderer* renderer) {
 
         bool hover = false;
         for (Button& button : pages[currentPage].buttons) {
-            // Dessiner le fond du bouton avec opacité
-            SDL_SetRenderDrawColor(renderer, button.bgColor.r, button.bgColor.g, button.bgColor.b, button.bgColor.a);
-            SDL_RenderFillRect(renderer, &button.rect);
+            drawRoundedRectWithGradient(
+                renderer,
+                button.rect,
+                button.borderRadius,
+                button.startGradientColor,
+                button.endGradientColor,
+                button.gradientWidth
+            );
 
-            // Dessiner la bordure du bouton
-            SDL_SetRenderDrawColor(renderer, button.borderColor.r, button.borderColor.g, button.borderColor.b, button.borderColor.a);
-            SDL_Rect borderRect = {button.rect.x - button.borderWidth, button.rect.y - button.borderWidth, button.rect.w + 2 * button.borderWidth, button.rect.h + 2 * button.borderWidth};
-            SDL_RenderDrawRect(renderer, &borderRect);
+            drawRoundedRect(renderer, button.rect, button.borderRadius, button.bgColor);
 
-            // Dessiner les coins arrondis
-            for (int w = 0; w < button.borderWidth; ++w) {
-                SDL_RenderDrawLine(renderer, button.rect.x - w, button.rect.y - w + button.borderRadius, button.rect.x - w, button.rect.y + button.rect.h + w - button.borderRadius);
-                SDL_RenderDrawLine(renderer, button.rect.x + button.rect.w + w, button.rect.y - w + button.borderRadius, button.rect.x + button.rect.w + w, button.rect.y + button.rect.h + w - button.borderRadius);
-                SDL_RenderDrawLine(renderer, button.rect.x - w + button.borderRadius, button.rect.y - w, button.rect.x + button.rect.w + w - button.borderRadius, button.rect.y - w);
-                SDL_RenderDrawLine(renderer, button.rect.x - w + button.borderRadius, button.rect.y + button.rect.h + w, button.rect.x + button.rect.w + w - button.borderRadius, button.rect.y + button.rect.h + w);
-            }
-
-            // Dessiner le texte du bouton
             SDL_RenderCopy(renderer, button.txt, nullptr, &button.txtRect);
 
             if (button.isTextInput) {
@@ -69,6 +142,8 @@ void Menu::draw(SDL_Renderer* renderer) {
 
     SDL_RenderPresent(renderer);
 }
+
+
 
 void Menu::handleClickedButton() {
     SDL_Event event;
@@ -157,6 +232,10 @@ void Menu::addButton(std::string page, int x, int y, int w, int h, std::string t
             SDL_FreeSurface(textSurface);
             button.txt = textTexture;
             button.callback = callback;
+            button.startGradientColor = {40, 120, 122, 255};
+            button.endGradientColor = {55, 171, 189, 255};
+            button.gradientWidth = 10;
+
             p.buttons.push_back(button);
             TTF_CloseFont(font_txt);
         }
