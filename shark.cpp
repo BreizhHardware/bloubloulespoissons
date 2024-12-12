@@ -55,6 +55,12 @@ void Shark::checkNeighborhood(Player& player, float &xpos_avg, float &ypos_avg, 
     }
 }
 
+void Shark::checkCollision(Player& player) {
+    if (player.getUnifiedX() + player.getHITBOX() >= x - HITBOX && player.getUnifiedX() - player.getHITBOX()  <= x + HITBOX && player.getUnifiedY() + player.getHITBOX() >= y - HITBOX && player.getUnifiedY() - player.getHITBOX() <= y + HITBOX) {
+       game_running = false;
+    }
+}
+
 
 void Shark::cycle() {
     int neighboring_player = 0;
@@ -62,6 +68,7 @@ void Shark::cycle() {
     for (auto& player : players_list) {
         if (isInView(player)) {
             checkNeighborhood(player, xpos_avg, ypos_avg, xvel_avg, yvel_avg, neighboring_player);
+            checkCollision(player);
         }
     }
     if (neighboring_player > 0) {
