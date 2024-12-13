@@ -741,6 +741,17 @@ void handleQuit() {
         }
         game_running = false;
     }
+
+    if (keystate[SDL_SCANCODE_M]) {
+        soundMuted = !soundMuted;
+        if (soundMuted) {
+            Mix_Volume(-1, 0);
+            Mix_VolumeMusic(0);
+        } else {
+            Mix_Volume(-1, MIX_MAX_VOLUME);
+            Mix_VolumeMusic(MIX_MAX_VOLUME);
+        }
+    }
 }
 
 void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals,Shark& shark) {

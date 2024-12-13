@@ -38,6 +38,7 @@ extern std::vector<Player> players;
 extern std::vector<Player> players_server;
 extern std::atomic<bool> isHost;
 extern EventHandler eventHandler;
+extern std::atomic<bool> soundMuted;
 
 bool initEnvironment(SDL_Renderer* renderer);
 std::vector<SDL_Texture*> initTexture(SDL_Renderer* renderer);
