@@ -7,6 +7,10 @@ set(CMAKE_SYSTEM_PROCESSOR powerpc)
 set(DEVKITPRO $ENV{DEVKITPRO})
 set(DEVKITPPC $ENV{DEVKITPPC})
 
+set(CMAKE_PREFIX_PATH "/opt/devkitpro/portlibs/wiiu")
+include_directories(/opt/devkitpro/portlibs/wiiu/include/SDL2)
+link_directories(/opt/devkitpro/portlibs/wiiu/lib)
+
 # Configurer les bibliothèques SDL2 pour Wii U
 include_directories(
         ${DEVKITPRO}/portlibs/ppc/include
