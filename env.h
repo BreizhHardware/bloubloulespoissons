@@ -5,6 +5,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 #include <iostream>
 #include <vector>
 #include <dirent.h>
@@ -38,6 +39,11 @@ extern std::vector<Player> players;
 extern std::vector<Player> players_server;
 extern std::atomic<bool> isHost;
 extern EventHandler eventHandler;
+extern std::atomic<bool> soundMuted;
+extern Mix_Music* backgroundMusic;
+extern Mix_Music* menuMusic;
+extern int MUSIC_CHANNEL;
+extern int SOUND_CHANNEL;
 
 bool initEnvironment(SDL_Renderer* renderer);
 std::vector<SDL_Texture*> initTexture(SDL_Renderer* renderer);

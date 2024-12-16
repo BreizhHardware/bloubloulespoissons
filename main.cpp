@@ -187,6 +187,15 @@ bool initSDL() {
         return false;
     }
 
+    Mix_AllocateChannels(16);
+
+    // Charger la musique du menu
+    menuMusic = Mix_LoadMUS("../sounds/Menu.wav");
+    if (menuMusic == nullptr) {
+        std::cerr << "Erreur de chargement de la musique du menu: " << Mix_GetError() << std::endl;
+        return false;
+    }
+
     window = SDL_CreateWindow("BloubBloub les poissons",
                               SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED,
@@ -423,6 +432,14 @@ int main(int argc, char* args[]) {
 
     //menu.addButton((windowWidth/2) - 100, (windowHeight/2 + 25) + 50, 200, 50, "Multi", 1024);
 
+    menuMusic = Mix_LoadMUS("../sounds/Menu.wav");
+    if (menuMusic != nullptr) {
+        Mix_VolumeMusic(MIX_MAX_VOLUME / 4);
+        if (Mix_PlayMusic(menuMusic, -1) == -1) {
+            std::cerr << "Erreur de lecture de la musique du menu: " << Mix_GetError() << std::endl;
+        }
+    }
+
     while (running) {
             
         handleQuit();
@@ -471,6 +488,20 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     // }
 
     game_running = true;
+
+    Mix_HaltMusic();
+
+    backgroundMusic = Mix_LoadMUS("../sounds/Playing.wav");
+    if (backgroundMusic == nullptr) {
+        std::cerr << "Erreur de chargement de la musique: " << Mix_GetError() << std::endl;
+        return false;
+    }
+    Mix_VolumeMusic(MIX_MAX_VOLUME / 4);
+    if (Mix_PlayMusic(backgroundMusic, -1) == -1) {
+        std::cerr << "Erreur de lecture de la musique: " << Mix_GetError() << std::endl;
+        return false;
+    }
+    Mix_PlayMusic(backgroundMusic, -1);
 
     std::vector<Kelp> kelps;
     std::vector<Rock> rocks;
@@ -554,6 +585,21 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     //     return -1;
     // }
     game_running = true;
+
+    Mix_HaltMusic();
+
+    backgroundMusic = Mix_LoadMUS("../sounds/Playing.wav");
+    if (backgroundMusic == nullptr) {
+        std::cerr << "Erreur de chargement de la musique: " << Mix_GetError() << std::endl;
+        return false;
+    }
+    Mix_VolumeMusic(MIX_MAX_VOLUME / 4);
+    if (Mix_PlayMusic(backgroundMusic, -1) == -1) {
+        std::cerr << "Erreur de lecture de la musique: " << Mix_GetError() << std::endl;
+        return false;
+    }
+    Mix_PlayMusic(backgroundMusic, -1);
+
     std::vector<Kelp> kelps;
     std::vector<Rock> rocks;
     std::vector<Coral> corals;
@@ -741,6 +787,17 @@ void handleQuit() {
         }
         game_running = false;
     }
+
+    if (keystate[SDL_SCANCODE_M]) {
+        soundMuted = !soundMuted;
+        if (soundMuted) {
+            Mix_Volume(-1, 0);
+            Mix_VolumeMusic(0);
+        } else {
+            Mix_Volume(-1, MIX_MAX_VOLUME);
+            Mix_VolumeMusic(MIX_MAX_VOLUME);
+        }
+    }
 }
 
 void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals,Shark& shark) {
@@ -843,6 +900,24 @@ void cleanup() {
         }
     } catch (const std::exception& e) {
         std::cerr << "Exception caught for DestroyWindow: " << e.what() << std::endl;
+    }
+
+    try {
+        if (backgroundMusic != nullptr) {
+            Mix_FreeMusic(backgroundMusic);
+            backgroundMusic = nullptr;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for FreeMusic: " << e.what() << std::endl;
+    }
+
+    try {
+        if (menuMusic != nullptr) {
+            Mix_FreeMusic(menuMusic);
+            menuMusic = nullptr;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught for FreeMusic (menuMusic): " << e.what() << std::endl;
     }
 
     try {

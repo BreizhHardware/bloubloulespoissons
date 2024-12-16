@@ -23,6 +23,11 @@ std::atomic<bool> isPlayingOnline(false);
 std::atomic<bool> messageThreadRunning(false);
 std::atomic<bool> isHost(false);
 EventHandler eventHandler;
+std::atomic<bool> soundMuted(false);
+Mix_Music* backgroundMusic = nullptr;
+Mix_Music* menuMusic = nullptr;
+int MUSIC_CHANNEL = 0;
+int SOUND_CHANNEL = 1;
 
 
 void resetAll(){
