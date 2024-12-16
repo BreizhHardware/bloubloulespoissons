@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 3.18)
-project(bloubloulespoissons)
 
-# Configurer le compilateur pour la Wii U
-set(CMAKE_SYSTEM_NAME Generic)
-set(CMAKE_SYSTEM_PROCESSOR powerpc)
-set(DEVKITPRO $ENV{DEVKITPRO})
-set(DEVKITPPC $ENV{DEVKITPPC})
-set(CMAKE_TOOLCHAIN_FILE "$ENV{DEVKITPRO}/cmake/devkitPPC.cmake")
+# Définir les chemins de DEVKITPRO et DEVKITPPC
+set(DEVKITPRO "/opt/devkitpro")
+set(DEVKITPPC "/opt/devkitpro/devkitPPC")
+
+# Configurer le projet et les chemins de compilation
+project(bloubloulespoissons)
 
 # Définir les chemins pour Wii U
 set(CMAKE_PREFIX_PATH "${DEVKITPRO}/portlibs/wiiu")
