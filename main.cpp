@@ -1,7 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL_net.h>
 #include <SDL2/SDL_mixer.h>
 #include <iostream>
 #include <vector>
@@ -174,10 +173,6 @@ void displayPlayerCount(SDL_Renderer* renderer, TTF_Font* font, int playerCount)
 bool initSDL() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
-        return false;
-    }
-    if (SDLNet_Init() < 0) {
-        std::cerr << "SDLNet could not initialize! SDLNet_Error: " << SDLNet_GetError() << std::endl;
         return false;
     }
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
@@ -873,12 +868,6 @@ void cleanup() {
         IMG_Quit();
     } catch (const std::exception& e) {
         std::cerr << "Exception caught for IMG_Quit: " << e.what() << std::endl;
-    }
-
-    try {
-        SDLNet_Quit();
-    } catch (const std::exception& e) {
-        std::cerr << "Exception caught for SDLNet_Quit: " << e.what() << std::endl;
     }
 
     try {
