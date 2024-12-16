@@ -16,8 +16,8 @@ link_directories("${DEVKITPRO}/portlibs/wiiu/lib" "${DEVKITPRO}/portlibs/ppc/lib
 set(CMAKE_CXX_STANDARD 23)
 
 # Set PowerPC compilation flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32 -mcpu=750 -mhard-float")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 -mcpu=750 -mhard-float")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32 ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 ")
 
 # Find SDL2 manually
 set(SDL2_LIBRARIES "${DEVKITPRO}/portlibs/wiiu/lib/libSDL2.a")
