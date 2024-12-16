@@ -1,16 +1,15 @@
 cmake_minimum_required(VERSION 3.18)
 
 # Define DEVKITPRO and DEVKITPPC paths
-set(DEVKITPRO "C:/devkitpro")
-set(DEVKITPPC "C:/devkitpro/devkitPPC")
+set(DEVKITPRO "/opt/devkitpro")
+set(DEVKITPPC "/opt/devkitpro/devkitPPC")
 
 # Project configuration
 project(bloubloulespoissons)
 
 # Define paths for Wii U
-set(CMAKE_PREFIX_PATH "${DEVKITPRO}/portlibs/wiiu" "${DEVKITPRO}/portlibs/ppc" "${DEVKITPRO}/portlibs/wiiu/lib/cmake/SDL2")
-
-include_directories("${DEVKITPRO}/portlibs/wiiu/include" "${DEVKITPRO}/portlibs/wiiu/include/SDL2" "${DEVKITPRO}/portlibs/ppc/include")
+set(CMAKE_PREFIX_PATH "${DEVKITPRO}/portlibs/wiiu" "${DEVKITPRO}/portlibs/ppc")
+include_directories("${DEVKITPRO}/portlibs/wiiu/include" "${DEVKITPRO}/portlibs/wiiu/include/SDL2")
 link_directories("${DEVKITPRO}/portlibs/wiiu/lib" "${DEVKITPRO}/portlibs/ppc/lib")
 
 # Specify C++ standard
@@ -20,12 +19,9 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32 -mcpu=750 -meabi -mhard-float")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 -mcpu=750 -meabi -mhard-float")
 
-# Find SDL2 packages
-find_package(SDL2 REQUIRED)
-find_package(SDL2_image REQUIRED)
-find_package(SDL2_ttf REQUIRED)
-find_package(SDL2_net REQUIRED)
-find_package(SDL2_mixer REQUIRED)
+# Find SDL2 manually
+set(SDL2_LIBRARIES "${DEVKITPRO}/portlibs/wiiu/lib/libSDL2.a")
+set(SDL2_INCLUDE_DIRS "${DEVKITPRO}/portlibs/wiiu/include/SDL2")
 
 # Define source files
 add_executable(bloubloulespoissons
@@ -40,16 +36,13 @@ add_executable(bloubloulespoissons
 )
 
 # Link with SDL2 libraries
+target_include_directories(bloubloulespoissons PUBLIC ${SDL2_INCLUDE_DIRS})
 target_link_libraries(bloubloulespoissons
-        SDL2::SDL2
-        SDL2_image::SDL2_image
-        SDL2_ttf::SDL2_ttf
-        SDL2_net::SDL2_net
-        SDL2_mixer::SDL2_mixer
-        "${DEVKITPRO}/portlibs/ppc/lib/libogg.la"
-        "${DEVKITPRO}/portlibs/ppc/lib/libvorbisenc.la"
-        "${DEVKITPRO}/portlibs/ppc/lib/libpng.la"
-        m  # Add the math library
+        ${SDL2_LIBRARIES}
+        "${DEVKITPRO}/portlibs/ppc/lib/libogg.a"
+        "${DEVKITPRO}/portlibs/ppc/lib/libvorbisenc.a"
+        "${DEVKITPRO}/portlibs/ppc/lib/libpng.a"
+        m
 )
 
 # Compilation options
