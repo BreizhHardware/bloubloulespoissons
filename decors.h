@@ -4,7 +4,7 @@
 
 #ifndef DECORS_H
 #define DECORS_H
-#include <SDL2/SDL_render.h>
+//#include <SDL2/SDL_render.h>
 #include <SDL2/SDL_image.h>
 #include <ctime>
 #include <cstdlib>
