@@ -24,6 +24,8 @@ std::atomic<bool> messageThreadRunning(false);
 std::atomic<bool> isHost(false);
 EventHandler eventHandler;
 std::atomic<bool> soundMuted(false);
+Mix_Music* backgroundMusic = nullptr;
+Mix_Music* menuMusic = nullptr;
 
 
 void resetAll(){
