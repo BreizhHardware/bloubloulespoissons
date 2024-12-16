@@ -38,14 +38,13 @@ add_executable(bloubloulespoissons
 
 # Liens avec les bibliothèques Wii U
 target_link_libraries(bloubloulespoissons
-        sdl2
-        sdl2_image
-        sdl2_ttf
-        sdl2_mixer
-        png
-        ogc
-        vorbisidec
-        m
+        ${DEVKITPRO}/portlibs/wiiu/lib/libSDL2.a
+        ${DEVKITPRO}/portlibs/wiiu/lib/libSDL2_image.a
+        ${DEVKITPRO}/portlibs/wiiu/lib/libSDL2_ttf.a
+        ${DEVKITPRO}/portlibs/wiiu/lib/libSDL2_mixer.a
+        ${DEVKITPRO}/portlibs/wiiu/lib/libogg.a
+        ${DEVKITPRO}/portlibs/wiiu/lib/libvorbisidec.a
+        ${DEVKITPRO}/portlibs/wiiu/lib/libpng.a
 )
 
 # Options de compilation
