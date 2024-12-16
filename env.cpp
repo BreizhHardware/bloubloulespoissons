@@ -19,9 +19,6 @@ int FISH_NUMBER = 2500;
 std::vector<SDL_Texture*> texturesVector;
 std::atomic<bool> running(true);
 std::atomic<bool> game_running(false);
-std::atomic<bool> isPlayingOnline(false);
-std::atomic<bool> messageThreadRunning(false);
-std::atomic<bool> isHost(false);
 EventHandler eventHandler;
 std::atomic<bool> soundMuted(false);
 Mix_Music* backgroundMusic = nullptr;
@@ -32,11 +29,7 @@ int SOUND_CHANNEL = 1;
 
 void resetAll(){
     game_running = false;
-    isPlayingOnline = false;
-    messageThreadRunning = false;
-    isHost = false;
     players.empty();
-    players_server.empty();
 }
 
 

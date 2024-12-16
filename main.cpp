@@ -20,8 +20,6 @@
 #include "env.h"
 #include "player.h"
 #include "menu.h"
-#include "network/networking.h"
-#include "network/networking_client.h"
 #include "shark.h"
 
 #include "event.h"
@@ -268,6 +266,7 @@ void playerMovementThread(Player& player) {
     }
 }
 
+/*
 void handleClientMessages(Player& player) {
     std::cout << "messageThread started..." << std::endl;
     while (messageThreadRunning) {
@@ -275,7 +274,7 @@ void handleClientMessages(Player& player) {
     }
     std::cout << "messageThread ended" << std::endl;
 }
-
+*/
 void handleQuitThread() {
     std::cout << "handleQuitThread..." << std::endl;
     while (game_running) {
@@ -359,57 +358,10 @@ int main(int argc, char* args[]) {
 
     menu.addImage("Main", (windowWidth/2) - 100, 150, 200, 200, "../img/logo.png");
 
-    menu.addText("Multi-Join", (windowWidth/2) - 100, 50, 200, 100, "Join", 1024);
-
     menu.addButton("Main", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Solo", 1024, [](){
         std::cout << "SOlo" << std::endl;
         menuRunning = false;
         pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(0, nullptr);
-        
-    });
-
-    menu.addButton("Main", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Multi (WIP)", 1024, [&menu](){
-        std::cout << "Multi" << std::endl;
-        menu.changePage("Multi");
-    });
-
-    menu.addButton("Multi", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Host", 1024, [&menu](){
-        std::cout << "Host" << std::endl;
-        isPlayingOnline = true;
-        menuRunning = false;
-        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(0, "");
-    });
-
-    menu.addButton("Multi", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Join", 1024, [&menu](){
-        menu.changePage("Multi-Join");
-    });
-
-    // menu.addButton("Multi", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "Retour", 1024, [&menu](){
-    //     menu.changePage("Main");
-    // });
-
-    menu.addButton("Multi-Join", (windowWidth/2) - 100, windowHeight/2 - 25, 200, 50, "", 24, [](){
-        std::cout << "IP input button clicked" << std::endl;
-    }, true);
-
-    menu.addButton("Multi-Join", (windowWidth/2) - 100, (windowHeight/2 + 75) - 25, 200, 50, "Join !", 1024, [&menu](){
-        std::cout << "Join" << std::endl;
-        isPlayingOnline = true;
-        menuRunning = false;
-        int port = 1234;
-        //char* ip = "10.30.42.206";
-        // Pour l'ip récupère l'interieur du bouton IP input
-        std::vector<Button> buttons = menu.getButtons();
-        std::string ip = buttons[0].inputText;
-        std::cout << ip << std::endl;
-        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(port, ip);
-    });
-
-    menu.addButton("Multi-Join", (windowWidth/2) - 100, windowHeight/2 + 125, 200, 50, "Retour", 1024, [&menu](){
-         menu.changePage("Multi");
-    });
-    menu.addButton("Multi", (windowWidth/2) - 100, windowHeight/2 + 125, 200, 50, "Retour", 1024, [&menu](){
-         menu.changePage("Main");
     });
 
     if (argc > 1 && std::string(args[1]) == "69") {
@@ -423,10 +375,6 @@ int main(int argc, char* args[]) {
         });
         pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(0, nullptr);
         timer_thread.join();
-    }else if (argc > 1 && std::string(args[1]) == "80085") {
-        isPlayingOnline = true;
-        menuRunning = false;
-        pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(0, "");
     }
 
 
@@ -468,10 +416,7 @@ int main(int argc, char* args[]) {
     }catch(const std::system_error& e){
         std::cerr << "Exception caught 2: " << e.what() << std::endl;
     }
-
-    if (!isPlayingOnline) {
-        cleanup();
-    }
+    cleanup();
 
     std::cout << "Check Threads 2" << std::endl;
     checkThreads();
@@ -578,7 +523,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     eventHandler.triggerEvent("playerLost");
     return 0;
 }
-
+/*
 int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, std::string args) {
     // if (!initSDL()) {
     //     std::cerr << "Failed to initialize!" << std::endl;
@@ -766,7 +711,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
 
     return 0;
 }
-
+*/
 
 void handleQuit() {
     SDL_Event event;
@@ -774,17 +719,21 @@ void handleQuit() {
 
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
+            /*
             if (isPlayingOnline && isHost) {
                 closeServer();
             }
+            */
             game_running = false;
         }
     }
 
     if (keystate[SDL_SCANCODE_ESCAPE]) {
+        /*
         if (isPlayingOnline && isHost) {
             closeServer();
         }
+        */
         game_running = false;
     }
 

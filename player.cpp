@@ -67,13 +67,8 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
 
     bool moved = false;
     if (this->energy != 0) {
-        if (isPlayingOnline) {
-            if (keystate[SDL_SCANCODE_W] || keystate[SDL_SCANCODE_S] || keystate[SDL_SCANCODE_A] || keystate[SDL_SCANCODE_D]) {
-                moved = onlineMovement();
-            }
-        } else {
-            if (keystate[SDL_SCANCODE_W]) {
-                if (camera.getY() > 0 && tempY == this->playerBaseY) {
+        if (keystate[SDL_SCANCODE_W]) {
+            if (camera.getY() > 0 && tempY == this->playerBaseY) {
                     camera.move(0, -speed);
                     unifiedX = camera.getX() + this->x;
                 } else if (tempY > 0) {
@@ -131,7 +126,6 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
 
             this->updatePlayerPos(tempX, tempY);
         }
-    }
     if (moved) {
         lastMoveTime = SDL_GetTicks();
         if (!isSprinting) {
@@ -182,7 +176,7 @@ void Player::setPlayerPos(int x, int y) {
     this->playerPosForRender.x = x;
     this->playerPosForRender.y = y;
 }
-
+/*
 void Player::handleClientMessages() {
     std::string message = receiveMessage(client);
     if (!message.empty()) {
@@ -235,7 +229,7 @@ bool Player::onlineMovement() {
     }
     return false;
 }
-
+*/
 void Player::updatePosition(int x, int y) {
     int camX = x + windowWidth / 2;
     int camY = y + windowHeight / 2;

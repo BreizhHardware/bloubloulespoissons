@@ -28,8 +28,6 @@ add_executable(bloubloulespoissons
         env.cpp env.h
         player.cpp player.h
         menu.cpp menu.h
-        network/networking.cpp network/networking.h
-        network/networking_client.cpp network/networking_client.h
         display.cpp display.h
         shark.cpp shark.h
 )

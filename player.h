@@ -38,7 +38,7 @@ class Player {
             {528, 73, 112, 117}
         };
         Uint32 lastMoveTime;
-        bool onlineMovement();
+        //bool onlineMovement();
         int unifiedX = 0;
         int unifiedY = 0;
         int HITBOX = 50;
@@ -68,7 +68,7 @@ class Player {
         bool checkCollision(SDL_Rect fishRect);
         int getPlayerId();
         void setPlayerPos(int x, int y);
-        void handleClientMessages();
+        //void handleClientMessages();
         void updatePosition(int x, int y);
         int getUnifiedX();
         int getUnifiedY();
