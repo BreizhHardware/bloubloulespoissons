@@ -26,6 +26,8 @@ EventHandler eventHandler;
 std::atomic<bool> soundMuted(false);
 Mix_Music* backgroundMusic = nullptr;
 Mix_Music* menuMusic = nullptr;
+int MUSIC_CHANNEL = 0;
+int SOUND_CHANNEL = 1;
 
 
 void resetAll(){

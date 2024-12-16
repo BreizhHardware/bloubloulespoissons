@@ -187,6 +187,9 @@ bool initSDL() {
         return false;
     }
 
+    Mix_AllocateChannels(16);
+
+    // Charger la musique du menu
     menuMusic = Mix_LoadMUS("../sounds/Menu.wav");
     if (menuMusic == nullptr) {
         std::cerr << "Erreur de chargement de la musique du menu: " << Mix_GetError() << std::endl;
@@ -430,14 +433,11 @@ int main(int argc, char* args[]) {
     //menu.addButton((windowWidth/2) - 100, (windowHeight/2 + 25) + 50, 200, 50, "Multi", 1024);
 
     menuMusic = Mix_LoadMUS("../sounds/Menu.wav");
-    if (menuMusic == nullptr) {
-        std::cerr << "Erreur de chargement de la musique du menu: " << Mix_GetError() << std::endl;
-        return false;
-    }
-    Mix_VolumeMusic(MIX_MAX_VOLUME / 4);
-    if (Mix_PlayMusic(menuMusic, -1) == -1) {
-        std::cerr << "Erreur de lecture de la musique du menu: " << Mix_GetError() << std::endl;
-        return false;
+    if (menuMusic != nullptr) {
+        Mix_VolumeMusic(MIX_MAX_VOLUME / 4);
+        if (Mix_PlayMusic(menuMusic, -1) == -1) {
+            std::cerr << "Erreur de lecture de la musique du menu: " << Mix_GetError() << std::endl;
+        }
     }
 
     while (running) {
@@ -446,11 +446,6 @@ int main(int argc, char* args[]) {
         if (menuRunning){
             if (menu.isShown()) { 
                 menu.draw(renderer);
-            }
-        }
-        else {
-            if (Mix_PlayingMusic()) {
-                Mix_HaltMusic();
             }
         }
     }
@@ -493,6 +488,8 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     // }
 
     game_running = true;
+
+    Mix_HaltMusic();
 
     backgroundMusic = Mix_LoadMUS("../sounds/Playing.wav");
     if (backgroundMusic == nullptr) {
@@ -588,6 +585,8 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     //     return -1;
     // }
     game_running = true;
+
+    Mix_HaltMusic();
 
     backgroundMusic = Mix_LoadMUS("../sounds/Playing.wav");
     if (backgroundMusic == nullptr) {

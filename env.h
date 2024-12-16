@@ -42,6 +42,8 @@ extern EventHandler eventHandler;
 extern std::atomic<bool> soundMuted;
 extern Mix_Music* backgroundMusic;
 extern Mix_Music* menuMusic;
+extern int MUSIC_CHANNEL;
+extern int SOUND_CHANNEL;
 
 bool initEnvironment(SDL_Renderer* renderer);
 std::vector<SDL_Texture*> initTexture(SDL_Renderer* renderer);
