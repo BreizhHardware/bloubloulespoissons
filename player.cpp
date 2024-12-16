@@ -2,7 +2,6 @@
 
 #include <syncstream>
 #include <tuple>
-#include "network/networking_client.h"
 #include "camera.h"
 
 void Player::updatePlayerPos(int x, int y) {
