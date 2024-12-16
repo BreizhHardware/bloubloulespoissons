@@ -6,20 +6,12 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR powerpc)
 set(DEVKITPRO $ENV{DEVKITPRO})
 set(DEVKITPPC $ENV{DEVKITPPC})
+set(CMAKE_TOOLCHAIN_FILE "$ENV{DEVKITPRO}/cmake/devkitPPC.cmake")
 
-set(CMAKE_PREFIX_PATH "/opt/devkitpro/portlibs/wiiu")
-include_directories(/opt/devkitpro/portlibs/wiiu/include/SDL2)
-link_directories(/opt/devkitpro/portlibs/wiiu/lib)
-
-# Configurer les bibliothèques SDL2 pour Wii U
-include_directories(
-        ${DEVKITPRO}/portlibs/ppc/include
-        ${DEVKITPRO}/libogc/include
-)
-link_directories(
-        ${DEVKITPRO}/portlibs/ppc/lib
-        ${DEVKITPRO}/libogc/lib/wiiu
-)
+# Définir les chemins pour Wii U
+set(CMAKE_PREFIX_PATH "${DEVKITPRO}/portlibs/wiiu")
+include_directories(${DEVKITPRO}/portlibs/wiiu/include/SDL2)
+link_directories(${DEVKITPRO}/portlibs/wiiu/lib)
 
 # Spécifier le standard C++ à utiliser
 set(CMAKE_CXX_STANDARD 23)
@@ -38,13 +30,13 @@ add_executable(bloubloulespoissons
 
 # Liens avec les bibliothèques Wii U
 target_link_libraries(bloubloulespoissons
-        ${DEVKITPRO}/portlibs/wiiu/lib/libSDL2.a
-        ${DEVKITPRO}/portlibs/wiiu/lib/libSDL2_image.a
-        ${DEVKITPRO}/portlibs/wiiu/lib/libSDL2_ttf.a
-        ${DEVKITPRO}/portlibs/wiiu/lib/libSDL2_mixer.a
-        ${DEVKITPRO}/portlibs/wiiu/lib/libogg.a
-        ${DEVKITPRO}/portlibs/wiiu/lib/libvorbisidec.a
-        ${DEVKITPRO}/portlibs/wiiu/lib/libpng.a
+        SDL2
+        SDL2_image
+        SDL2_ttf
+        SDL2_mixer
+        ogg
+        vorbisidec
+        png
 )
 
 # Options de compilation
