@@ -54,7 +54,9 @@ target_link_libraries(bloubloulespoissons
         "${DEVKITPRO}/portlibs/ppc/lib/libvorbisenc.a"
         "${DEVKITPRO}/portlibs/ppc/lib/libpng.a"
         m
-        # Retirer les bibliothèques manquantes (wiiload, GX2, procui)
+        wiiload
+        GX2
+        procui
 )
 
 # Options de compilation
