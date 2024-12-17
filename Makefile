@@ -18,7 +18,7 @@ CXX := $(DEVKITPPC)/bin/powerpc-eabi-g++
 CXXFLAGS := -O2 -g -std=c++23 -m32 -Wall
 
 # Fichiers sources et objets
-SRCS := main.cpp camera.cpp decors.cpp display.cpp env.cpp fish.cpp menu.cpp player.cpp shark.cpp input.cpp
+SRCS := main.cpp camera.cpp decors.cpp display.cpp env.cpp fish.cpp menu.cpp player.cpp shark.cpp
 OBJS := $(SRCS:.cpp=.o)
 
 # Cible finale
