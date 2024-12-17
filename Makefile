@@ -5,10 +5,12 @@ DEVKITPPC ?= $(DEVKITPRO)/devkitPPC
 # Chemins des bibliothèques et des fichiers d'inclusion
 INCLUDES := -I$(DEVKITPRO)/portlibs/wiiu/include \
             -I$(DEVKITPRO)/portlibs/wiiu/include/SDL2 \
-            -I$(DEVKITPRO)/wut/include
+            -I$(DEVKITPRO)/wut/include \
+            -I/usr/include/harfbuzz
 
 LIBS := -L$(DEVKITPRO)/portlibs/wiiu/lib \
         -L$(DEVKITPRO)/wut/lib \
+        -L/usr/lib/x86_64-linux-gnu \  # Ajouter ce chemin
         -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lm -lwut -lfreetype -lharfbuzz
 
 # Compilateurs
