@@ -5,15 +5,15 @@ DEVKITPPC ?= $(DEVKITPRO)/devkitPPC
 # Chemins des bibliothèques et des fichiers d'inclusion
 INCLUDES := -I$(DEVKITPRO)/portlibs/wiiu/include \
             -I$(DEVKITPRO)/portlibs/wiiu/include/SDL2 \
-            -I$(DEVKITPRO)/wut/include \
-            -I/usr/include/harfbuzz
+            -I$(DEVKITPRO)/portlibs/wiiu/include \
+            -I$(DEVKITPRO)/portlibs/ppc/include \
+            -I$(DEVKITPRO)/portlibs/ppc/include/freetype2 \
+            -I$(DEVKITPRO)/portlibs/ppc/include/harfbuzz
 
 LIBS := -L$(DEVKITPRO)/portlibs/wiiu/lib \
-        -L$(DEVKITPRO)/wut/lib \
-        -L/usr/lib/x86_64-linux-gnu \
+        -L$(DEVKITPRO)/portlibs/ppc/lib \
         -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lm -lwut \
-	    -lfreetype -lharfbuzz \
-	    -lfreetype.so.6 -lharfbuzz.so.0
+        -lfreetype -lharfbuzz
 
 # Compilateurs
 CXX := $(DEVKITPPC)/bin/powerpc-eabi-g++
