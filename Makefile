@@ -14,7 +14,6 @@ LD := $(DEVKITPPC)/bin/powerpc-eabi-ld
 # Options de compilation
 CFLAGS := -O2 -g -std=gnu11 -m32
 CXXFLAGS := $(CFLAGS) -std=c++23
-LDFLAGS := -specs=rp2040.specs
 
 # Fichiers sources et objets
 SRCS := main.cpp camera.cpp decors.cpp display.cpp env.cpp fish.cpp menu.cpp player.cpp shark.cpp
@@ -27,7 +26,7 @@ TARGET := bloubloulespoissons.elf
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CXX) $(LDFLAGS) -o $@ $^ $(LIBS)
+	$(CXX) -o $@ $^ $(LIBS)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
