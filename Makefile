@@ -15,7 +15,8 @@ LIBS := -L$(DEVKITPRO)/portlibs/wiiu/lib \
         -L$(DEVKITPRO)/wut/lib \
         -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lm \
         -lfreetype -lharfbuzz \
-        -lwut  # Ajout de WUT pour lier la bibliothèque GX2
+        -lwut \
+        -lmpg123 -lmodplug -liconv
 
 # Compilateurs
 CXX := $(DEVKITPPC)/bin/powerpc-eabi-g++
