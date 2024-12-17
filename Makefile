@@ -9,7 +9,7 @@ INCLUDES := -I$(DEVKITPRO)/portlibs/wiiu/include \
 
 LIBS := -L$(DEVKITPRO)/portlibs/wiiu/lib \
         -L$(DEVKITPRO)/wut/lib \
-        -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lm -lGX2 -lvpad -lwut
+        -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lm -lwut
 
 # Compilateurs
 CXX := $(DEVKITPPC)/bin/powerpc-eabi-g++
