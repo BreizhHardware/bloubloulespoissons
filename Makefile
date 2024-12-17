@@ -11,9 +11,9 @@ INCLUDES := -I$(DEVKITPRO)/portlibs/wiiu/include \
 LIBS := -L$(DEVKITPRO)/portlibs/wiiu/lib \
         -L$(DEVKITPRO)/wut/lib \
         -L/usr/lib/x86_64-linux-gnu \  # Ajouter ce chemin
-		-lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lm -lwut \
-		-lfreetype -lharfbuzz \
-		-lfreetype.so.6 -lharfbuzz.so.0  # Spécifie les versions des bibliothèques
+        -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lm -lwut \
+        -lfreetype -lharfbuzz \
+        -lfreetype.so.6 -lharfbuzz.so.0  # Spécifie les versions des bibliothèques
 
 # Compilateurs
 CXX := $(DEVKITPPC)/bin/powerpc-eabi-g++
