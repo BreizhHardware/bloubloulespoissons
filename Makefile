@@ -7,12 +7,15 @@ INCLUDES := -I$(DEVKITPRO)/portlibs/wiiu/include \
             -I$(DEVKITPRO)/portlibs/wiiu/include/SDL2 \
             -I$(DEVKITPRO)/portlibs/ppc/include \
             -I$(DEVKITPRO)/portlibs/ppc/include/freetype2 \
-            -I$(DEVKITPRO)/portlibs/ppc/include/harfbuzz
+            -I$(DEVKITPRO)/portlibs/ppc/include/harfbuzz \
+            -I$(DEVKITPRO)/wut/include
 
 LIBS := -L$(DEVKITPRO)/portlibs/wiiu/lib \
         -L$(DEVKITPRO)/portlibs/ppc/lib \
+        -L$(DEVKITPRO)/wut/lib \
         -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lm \
-        -lfreetype -lharfbuzz
+        -lfreetype -lharfbuzz \
+        -lwut  # Ajout de WUT pour lier la bibliothèque GX2
 
 # Compilateurs
 CXX := $(DEVKITPPC)/bin/powerpc-eabi-g++
