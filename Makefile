@@ -6,6 +6,7 @@ DEVKITPPC ?= $(DEVKITPRO)/devkitPPC
 INCLUDES := -I$(DEVKITPRO)/portlibs/wiiu/include \
             -I$(DEVKITPRO)/portlibs/wiiu/include/SDL2 \
             -I$(DEVKITPRO)/portlibs/wiiu/include \
+            -I$(DEVKITPRO)/wut/include \
             -I$(DEVKITPRO)/portlibs/ppc/include \
             -I$(DEVKITPRO)/portlibs/ppc/include/freetype2 \
             -I$(DEVKITPRO)/portlibs/ppc/include/harfbuzz
