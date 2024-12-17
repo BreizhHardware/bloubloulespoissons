@@ -1,26 +1,36 @@
-# DevkitPro and DevkitARM path
+# Chemins des outils devkitPro et devkitPPC
 DEVKITPRO ?= /opt/devkitpro
-DEVKITARM ?= $(DEVKITPRO)/devkitARM
+DEVKITPPC ?= $(DEVKITPRO)/devkitPPC
 
-# Project name
-TARGET := bloubloulespoissons
-BUILD := build
-SOURCES := .
-INCLUDES := .
+# Chemins des bibliothèques
+INCLUDES := -I$(DEVKITPRO)/portlibs/wiiu/include -I$(DEVKITPRO)/portlibs/wiiu/include/SDL2
+LIBS := -L$(DEVKITPRO)/portlibs/wiiu/lib -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_net -lSDL2_mixer -lm -lwiiload -lGX2 -lprocui
 
-# Libraries
-LIBS := -lSDL2 -lSDL2_image -lSDL2_ttf
+# Compilateurs
+CC := $(DEVKITPPC)/bin/powerpc-eabi-gcc
+CXX := $(DEVKITPPC)/bin/powerpc-eabi-g++
+LD := $(DEVKITPPC)/bin/powerpc-eabi-ld
 
-# Compiler and linker settings
-ARCH := -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
-CFLAGS := -g -O2 -Wall -mword-relocations $(ARCH) -I$(DEVKITPRO)/libctru/include -I$(INCLUDES)
-LDFLAGS := -L$(DEVKITPRO)/libctru/lib $(LIBS)
+# Options de compilation
+CFLAGS := -O2 -g -std=gnu11 -m32
+CXXFLAGS := $(CFLAGS) -std=c++23
+LDFLAGS := -specs=rp2040.specs
 
-# Rules
-all: $(BUILD)/$(TARGET).3dsx
+# Fichiers sources et objets
+SRCS := main.cpp camera.cpp decors.cpp display.cpp env.cpp fish.cpp menu.cpp player.cpp shark.cpp
+OBJS := $(SRCS:.cpp=.o)
 
-$(BUILD)/$(TARGET).3dsx: $(BUILD)/$(TARGET).elf
-	3dsxtool $(BUILD)/$(TARGET).elf $@
+# Cible finale
+TARGET := bloubloulespoissons.elf
 
-$(BUILD)/$(TARGET).elf: $(SOURCES)/*.cpp
-	$(DEVKITARM)/bin/arm-none-eabi-g++ $(CFLAGS) -o $@ $^ $(LDFLAGS)
+# Règles
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CXX) $(LDFLAGS) -o $@ $^ $(LIBS)
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+
+clean:
+	rm -f $(OBJS) $(TARGET)
