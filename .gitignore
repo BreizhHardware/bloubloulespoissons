@@ -56,6 +56,8 @@ cmake-build-debug-wsl
 cmake-build-debug-wsl/
 cmake-build-release-mingw
 cmake-build-release-mingw/
+cmake-build-debug-msys2
+cmake-build-debug-msys2/
 
 # .vscode folder
 .vscode/
