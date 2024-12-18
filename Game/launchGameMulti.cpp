@@ -11,19 +11,21 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     // }
     game_running = true;
 
-    Mix_HaltMusic();
+    musicManager.playMusic("Playing");
 
-    backgroundMusic = Mix_LoadMUS("../sounds/Playing.wav");
-    if (backgroundMusic == nullptr) {
-        std::cerr << "Erreur de chargement de la musique: " << Mix_GetError() << std::endl;
-        return false;
-    }
-    Mix_VolumeMusic(MIX_MAX_VOLUME / 4);
-    if (Mix_PlayMusic(backgroundMusic, -1) == -1) {
-        std::cerr << "Erreur de lecture de la musique: " << Mix_GetError() << std::endl;
-        return false;
-    }
-    Mix_PlayMusic(backgroundMusic, -1);
+    // Mix_HaltMusic();
+
+    // backgroundMusic = Mix_LoadMUS("../sounds/Playing.wav");
+    // if (backgroundMusic == nullptr) {
+    //     std::cerr << "Erreur de chargement de la musique: " << Mix_GetError() << std::endl;
+    //     return false;
+    // }
+    // Mix_VolumeMusic(MIX_MAX_VOLUME / 4);
+    // if (Mix_PlayMusic(backgroundMusic, -1) == -1) {
+    //     std::cerr << "Erreur de lecture de la musique: " << Mix_GetError() << std::endl;
+    //     return false;
+    // }
+    // Mix_PlayMusic(backgroundMusic, -1);
 
     std::vector<Kelp> kelps;
     std::vector<Rock> rocks;

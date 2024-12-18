@@ -85,6 +85,8 @@ class Menu {
 
         void changePage(std::string title);
 
+        std::string getCurrentPageName();
+
         void addButton(std::string page, int x, int y, int w, int h, std::string text, int size, std::function<void()> callback, bool isTextInput = false);
 
         void addText(std::string page, int x, int y, int w, int h, std::string text, int size);

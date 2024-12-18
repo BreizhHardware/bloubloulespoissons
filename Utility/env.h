@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "music.h"
 #include "event.h"
 
 class Player;
@@ -42,13 +43,10 @@ extern std::vector<Player> players_server;
 extern std::atomic<bool> isHost;
 extern EventHandler eventHandler;
 extern std::atomic<bool> soundMuted;
-extern Mix_Music* backgroundMusic;
-extern Mix_Music* menuMusic;
-extern int MUSIC_CHANNEL;
-extern int SOUND_CHANNEL;
 extern SDL_Texture* fishTextures[100];
 extern SDL_Texture* playerTexture;
 extern std::vector<Fish> school;
+extern MusicManager musicManager;
 extern std::atomic<bool> displayFPSFlag;
 
 bool initEnvironment(SDL_Renderer* renderer);

@@ -15,15 +15,15 @@ Shark::Shark(const int x, const int y, const float vx, const float vy, const int
         SDL_FreeSurface(sharkSurface);
     }
 
-    sharkSound = Mix_LoadWAV("../sounds/shark.wav");
-    if (sharkSound == nullptr) {
-        std::cerr << "Erreur de chargement du son du requin: " << Mix_GetError() << std::endl;
-    }
+    // sharkSound = Mix_LoadWAV("../sounds/shark.wav");
+    // if (sharkSound == nullptr) {
+    //     std::cerr << "Erreur de chargement du son du requin: " << Mix_GetError() << std::endl;
+    // }
 
-    approachingSound = Mix_LoadWAV("../sounds/Shark-approching.wav");
-    if (approachingSound == nullptr) {
-        std::cerr << "Erreur de chargement du son d'approche du requin: " << Mix_GetError() << std::endl;
-    }
+    // approachingSound = Mix_LoadWAV("../sounds/Shark-approching.wav");
+    // if (approachingSound == nullptr) {
+    //     std::cerr << "Erreur de chargement du son d'approche du requin: " << Mix_GetError() << std::endl;
+    // }
 
     lastSoundTime = std::chrono::steady_clock::now();
 }
@@ -72,11 +72,15 @@ void Shark::cycle() {
         if (isInView(player)) {
             checkNeighborhood(player, xpos_avg, ypos_avg, xvel_avg, yvel_avg, neighboring_player);
             checkCollision(player);
-            Mix_PlayChannel(SOUND_CHANNEL, approachingSound, 0);
+            //Mix_PlayChannel(SOUND_CHANNEL, approachingSound, 0);
+            musicManager.playMusic("Shark-approaching");
+            musicManager.pauseMusic("Playing");
         }
         if (!isInView(player)) {
             // Cut the approach sound
-            Mix_HaltChannel(SOUND_CHANNEL);
+            musicManager.stopMusic("Shark-approaching");
+            musicManager.resumeMusic("Playing");
+            // Mix_HaltChannel(SOUND_CHANNEL);
         }
     }
     if (neighboring_player > 0) {
@@ -101,9 +105,10 @@ void Shark::cycle() {
 
     auto now = std::chrono::steady_clock::now();
     if (std::chrono::duration_cast<std::chrono::seconds>(now - lastSoundTime).count() > 15) {
-        if (sharkSound != nullptr) {
-            Mix_PlayChannel(SOUND_CHANNEL, sharkSound, 0);
-        }
+        // if (sharkSound != nullptr) {
+        //     Mix_PlayChannel(SOUND_CHANNEL, sharkSound, 0);
+        // }
+        musicManager.playMusic("Shark");
         lastSoundTime = now;
     }
 
@@ -121,15 +126,15 @@ Shark::~Shark() {
         texture = nullptr;
     }
 
-    if (sharkSound) {
-        Mix_FreeChunk(sharkSound);
-        sharkSound = nullptr;
-    }
+    // if (sharkSound) {
+    //     Mix_FreeChunk(sharkSound);
+    //     sharkSound = nullptr;
+    // }
 
-    if (approachingSound) {
-        Mix_FreeChunk(approachingSound);
-        approachingSound = nullptr;
-    }
+    // if (approachingSound) {
+    //     Mix_FreeChunk(approachingSound);
+    //     approachingSound = nullptr;
+    // }
 }
 
 void Shark::updatePosition(int newX, int newY) {

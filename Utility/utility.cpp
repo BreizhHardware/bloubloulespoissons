@@ -92,11 +92,11 @@ bool initSDL() {
     Mix_AllocateChannels(16);
 
     // Charger la musique du menu
-    menuMusic = Mix_LoadMUS("../sounds/Menu.wav");
-    if (menuMusic == nullptr) {
-        std::cerr << "Erreur de chargement de la musique du menu: " << Mix_GetError() << std::endl;
-        return false;
-    }
+    // menuMusic = Mix_LoadMUS("../sounds/Menu.wav");
+    // if (menuMusic == nullptr) {
+    //     std::cerr << "Erreur de chargement de la musique du menu: " << Mix_GetError() << std::endl;
+    //     return false;
+    // }
 
     window = SDL_CreateWindow("BloubBloub les poissons",
                               SDL_WINDOWPOS_CENTERED,

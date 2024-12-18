@@ -103,23 +103,23 @@ void cleanup() {
         std::cerr << "Exception caught for DestroyWindow: " << e.what() << std::endl;
     }
 
-    try {
-        if (backgroundMusic != nullptr) {
-            Mix_FreeMusic(backgroundMusic);
-            backgroundMusic = nullptr;
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Exception caught for FreeMusic: " << e.what() << std::endl;
-    }
+    // try {
+    //     if (backgroundMusic != nullptr) {
+    //         Mix_FreeMusic(backgroundMusic);
+    //         backgroundMusic = nullptr;
+    //     }
+    // } catch (const std::exception& e) {
+    //     std::cerr << "Exception caught for FreeMusic: " << e.what() << std::endl;
+    // }
 
-    try {
-        if (menuMusic != nullptr) {
-            Mix_FreeMusic(menuMusic);
-            menuMusic = nullptr;
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Exception caught for FreeMusic (menuMusic): " << e.what() << std::endl;
-    }
+    // try {
+    //     if (menuMusic != nullptr) {
+    //         Mix_FreeMusic(menuMusic);
+    //         menuMusic = nullptr;
+    //     }
+    // } catch (const std::exception& e) {
+    //     std::cerr << "Exception caught for FreeMusic (menuMusic): " << e.what() << std::endl;
+    // }
 
     try {
         IMG_Quit();

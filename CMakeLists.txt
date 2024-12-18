@@ -41,6 +41,7 @@ add_executable(bloubloulespoissons main.cpp
         Utility/utility.h
         Utility/close.cpp
         Utility/close.h
+        Utility/music.h
         Game/LaunchGameSolo.cpp
         Game/LaunchGameSolo.h
         Game/LaunchGameMulti.cpp

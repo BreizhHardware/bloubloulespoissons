@@ -58,12 +58,11 @@ void onPlayerLost(Menu &menu){
     SDL_RenderClear(renderer);
     menu.drawLost(renderer);
     SDL_RenderPresent(renderer);
-    Mix_Chunk* deathSound = Mix_LoadWAV("../sounds/death.wav");
-    Mix_PlayChannel(-1, deathSound, 0);
+    musicManager.playMusic("death");
     std::this_thread::sleep_for(std::chrono::seconds(8));
-    Mix_FreeChunk(deathSound);
     menuRunning = true;
     menu.changePage("Main");
+    musicManager.playMusic("Menu");
     menu.show();
     resetAll();
 }
@@ -167,13 +166,21 @@ int main(int argc, char* args[]) {
 
     //menu.addButton((windowWidth/2) - 100, (windowHeight/2 + 25) + 50, 200, 50, "Multi", 1024);
 
-    menuMusic = Mix_LoadMUS("../sounds/Menu.wav");
-    if (menuMusic != nullptr) {
-        Mix_VolumeMusic(MIX_MAX_VOLUME / 4);
-        if (Mix_PlayMusic(menuMusic, -1) == -1) {
-            std::cerr << "Erreur de lecture de la musique du menu: " << Mix_GetError() << std::endl;
-        }
-    }
+    // menuMusic = Mix_LoadMUS("../sounds/Menu.wav");
+    // if (menuMusic != nullptr) {
+    //     Mix_VolumeMusic(MIX_MAX_VOLUME / 4);
+    //     if (Mix_PlayMusic(menuMusic, -1) == -1) {
+    //         std::cerr << "Erreur de lecture de la musique du menu: " << Mix_GetError() << std::endl;
+    //     }
+    // }
+
+    musicManager.addMusic("../sounds/Menu.wav", AudioType::MUSIC);
+    musicManager.addMusic("../sounds/Playing.wav", AudioType::MUSIC);
+    musicManager.addMusic("../sounds/death.wav", AudioType::SOUND_EFFECT);
+    musicManager.addMusic("../sounds/Shark-approching.wav", AudioType::SOUND_EFFECT);
+    musicManager.addMusic("../sounds/shark.wav", AudioType::SOUND_EFFECT);
+
+    musicManager.playMusic("Menu");
 
     while (running) {
             
