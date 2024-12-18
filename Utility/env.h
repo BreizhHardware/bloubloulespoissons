@@ -44,6 +44,8 @@ extern Mix_Music* backgroundMusic;
 extern Mix_Music* menuMusic;
 extern int MUSIC_CHANNEL;
 extern int SOUND_CHANNEL;
+extern SDL_Texture* fishTextures[100];
+extern SDL_Texture* playerTexture;
 
 bool initEnvironment(SDL_Renderer* renderer);
 std::vector<SDL_Texture*> initTexture(SDL_Renderer* renderer);
