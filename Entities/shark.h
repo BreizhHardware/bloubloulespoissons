@@ -10,7 +10,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 #include <chrono>
-#include "../network/networking.h"
+#include "../Network/networking.h"
 
 class Shark {
 private:

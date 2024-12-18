@@ -6,5 +6,6 @@
 - [x] Récupération des infos des champs de text pour le join
 - [X] Affichage de l'ip dans le champs d'host (fonctionnalité retiré)
 - [x] Requin adversaire
-- [ ] Choix des musiques pour le jeux
-- [ ] Pouvoir mute les musiques via la touche M
+- [x] Choix des musiques pour le jeux
+- [x] Pouvoir mute les musiques via la touche M
+- [ ] Refactorer le code pour le rendre plus lisible

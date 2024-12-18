@@ -3,6 +3,7 @@
 //
 
 #include "networking.h"
+
 std::unordered_map<int, std::pair<int, int>> playerPositions;
 std::unordered_map<int, std::chrono::time_point<std::chrono::steady_clock>> lastKeepAlive;
 

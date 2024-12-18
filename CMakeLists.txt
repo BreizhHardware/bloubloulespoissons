@@ -22,21 +22,29 @@ add_executable(bloubloulespoissons main.cpp
         decors.cpp
         camera.cpp
         camera.h
-        env.h
-        env.cpp
         Entities/player.h
         Entities/player.cpp
+        Utility/env.h
+        Utility/env.cpp
+        player.h
+        player.cpp
         menu.h
         menu.cpp
         network/networking.cpp
         network/networking.h
         network/networking_client.cpp
         network/networking_client.h
-        display.cpp
-        display.h
         Entities/shark.cpp
         Entities/shark.h
         Entities/fish.h
+        Utility/display.cpp
+        Utility/display.h
+        shark.cpp
+        shark.h
+        Utility/utility.cpp
+        Utility/utility.h
+        Utility/close.cpp
+        Utility/close.h
 )
 
 # Lier SDL2 et SDL2_image

@@ -16,244 +16,36 @@
 #include "fish.h"
 #include "decors.h"
 #include "camera.h"
-#include "display.h"
-#include "env.h"
+#include "Utility/display.h"
+#include "Utility/env.h"
+#include "Utility/utility.h"
 #include "player.h"
 #include "menu.h"
-#include "network/networking.h"
-#include "network/networking_client.h"
+#include "Network/networking.h"
+#include "Network/networking_client.h"
 #include "shark.h"
+#include "Utility/event.h"
+#include "Utility/close.h"
 
-#include "event.h"
 
 
 #include <system_error>
 
-std::mutex mtx;
 std::atomic<bool> menuRunning(true);
 
 std::mutex coutMutex;
-SDL_Texture* playerTexture = nullptr;
-SDL_Texture* fishTextures[100]; // Adjust the size as needed
 std::vector<Fish> school;
 std::vector<Player> players;
 std::vector<Player> players_server;
 
-struct ThreadInfo {
-    std::thread::id id;
-    std::string functionName;
-    bool isRunning;
-};
-
-std::vector<ThreadInfo> threadInfos;
-
-bool initSDL();
-void handleQuit();
-
 void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals,Shark& shark );
 
-void cleanup();
-void closeGame();
-void displayFPS(SDL_Renderer* renderer, TTF_Font* font, int fps);
-void displayPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int playerX, int playerY);
-void displayUnifiedPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int unifiedX, int unifiedY);
-void displayPlayerCount(SDL_Renderer* renderer, TTF_Font* font, int playerCount);
 void playerMovementThread(Player& player);
 void handleClientMessages(Player& player);
-void handleQuitThread();
 void HandleMenuClick(Menu& menu);
 void updateFishRange(std::vector<Fish>& school, int start, int end);
 int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons(int argc, char* args[]);
 int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mais_une_des_fonctions_principale_meme_primordiale_du_projet_denomme_bloubloulespoissons_mais_celle_ci_elle_lance_en_multijoueur(int argc, std::string args);
-void checkThreads();
-
-template <typename Function, typename... Args>
-std::thread createThread(std::string key, Function&& func, Args&&... args) {
-    try {
-        std::cout << "Creating thread: " << key << std::endl;
-        std::thread thread([key, func = std::forward<Function>(func), ...args = std::forward<Args>(args)]() mutable {
-            ThreadInfo info;
-            info.id = std::this_thread::get_id();
-            info.functionName = key;
-            info.isRunning = true;
-            {
-                std::lock_guard<std::mutex> lock(mtx);
-                threadInfos.push_back(info);
-            }
-            try {
-                func(std::forward<Args>(args)...);
-            } catch (const std::exception& e) {
-                std::cerr << "Exception in thread " << key << ": " << e.what() << std::endl;
-            } catch (...) {
-                std::cerr << "Unknown exception in thread " << key << std::endl;
-            }
-            {
-                std::lock_guard<std::mutex> lock(mtx);
-                for (auto& threadInfo : threadInfos) {
-                    if (threadInfo.id == std::this_thread::get_id()) {
-                        threadInfo.isRunning = false;
-                        break;
-                    }
-                }
-            }
-            std::cout << "ThreadID = " << info.id << " ThreadFunction = " << info.functionName << " finished" << std::endl;
-        });
-        return thread;
-    } catch (const std::system_error& e) {
-        std::cerr << "Failed to create thread: " << e.what() << std::endl;
-        throw;
-    }
-}
-
-void checkThreads() {
-    std::lock_guard<std::mutex> lock(mtx);
-    for (const auto& threadInfo : threadInfos) {
-        if (threadInfo.isRunning) {
-            std::cout << "Thread " << threadInfo.functionName << " (ID: " << threadInfo.id << ") is still running." << std::endl;
-        } else {
-            std::cout << "Thread " << threadInfo.functionName << " (ID: " << threadInfo.id << ") has stopped." << std::endl;
-        }
-    }
-}
-
-void displayFPS(SDL_Renderer* renderer, TTF_Font* font, int fps) {
-    std::string fpsText = "FPS: " + std::to_string(fps);
-    SDL_Color color = {0, 255, 0}; // Green
-    SDL_Surface* textSurface = TTF_RenderText_Solid(font, fpsText.c_str(), color);
-    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-    SDL_Rect textRect = {windowWidth - textSurface->w - 10, 10, textSurface->w, textSurface->h};
-    SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
-    SDL_FreeSurface(textSurface);
-    SDL_DestroyTexture(textTexture);
-}
-
-void displayPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int playerX, int playerY) {
-    Camera& camera = Camera::getInstance();
-    int cameraX = camera.getX();
-    int cameraY = camera.getY();
-
-    std::string coordText = "Camera: (" + std::to_string(cameraX) + ", " + std::to_string(cameraY) + ")";
-    std::string coordText2 = "Player: (" + std::to_string(playerX) + ", " + std::to_string(playerY) + ")";
-    SDL_Color textColor = {0, 255, 0};
-    SDL_Surface* textSurface = TTF_RenderText_Solid(font, coordText.c_str(), textColor);
-    SDL_Surface* textSurface2 = TTF_RenderText_Solid(font, coordText2.c_str(), textColor);
-    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-    SDL_Texture* textTexture2 = SDL_CreateTextureFromSurface(renderer, textSurface2);
-
-    SDL_Rect textRect = {10, 30, textSurface->w, textSurface->h};
-    SDL_Rect textRect2 = {10, 50, textSurface2->w, textSurface2->h};
-    SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
-    SDL_RenderCopy(renderer, textTexture2, nullptr, &textRect2);
-
-    SDL_FreeSurface(textSurface);
-    SDL_FreeSurface(textSurface2);
-    SDL_DestroyTexture(textTexture);
-    SDL_DestroyTexture(textTexture2);
-}
-
-void displayUnifiedPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int unifiedX, int unifiedY) {
-    std::string coordText = "Unified: (" + std::to_string(unifiedX) + ", " + std::to_string(unifiedY) + ")";
-    SDL_Color textColor = {0, 255, 0};
-    SDL_Surface* textSurface = TTF_RenderText_Solid(font, coordText.c_str(), textColor);
-    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-    SDL_Rect textRect = {10, 70, textSurface->w, textSurface->h};
-    SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
-    SDL_FreeSurface(textSurface);
-    SDL_DestroyTexture(textTexture);
-}
-
-void displayPlayerCount(SDL_Renderer* renderer, TTF_Font* font, int playerCount) {
-    std::string playerCountText = "Player count: " + std::to_string(playerCount);
-    SDL_Color color = {0, 255, 0}; // Green
-    SDL_Surface* textSurface = TTF_RenderText_Solid(font, playerCountText.c_str(), color);
-    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-    SDL_Rect textRect = {windowWidth - textSurface->w - 10, 30, textSurface->w, textSurface->h};
-    SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
-    SDL_FreeSurface(textSurface);
-    SDL_DestroyTexture(textTexture);
-}
-
-bool initSDL() {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
-        return false;
-    }
-    if (SDLNet_Init() < 0) {
-        std::cerr << "SDLNet could not initialize! SDLNet_Error: " << SDLNet_GetError() << std::endl;
-        return false;
-    }
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-        std::cerr << "SDL_mixer could not initialize! SDL_mixer Error: " << Mix_GetError() << std::endl;
-        return false;
-    }
-
-    Mix_AllocateChannels(16);
-
-    // Charger la musique du menu
-    menuMusic = Mix_LoadMUS("../sounds/Menu.wav");
-    if (menuMusic == nullptr) {
-        std::cerr << "Erreur de chargement de la musique du menu: " << Mix_GetError() << std::endl;
-        return false;
-    }
-
-    window = SDL_CreateWindow("BloubBloub les poissons",
-                              SDL_WINDOWPOS_CENTERED,
-                              SDL_WINDOWPOS_CENTERED,
-                              windowWidth, windowHeight,
-                              SDL_WINDOW_SHOWN);
-    if (window == nullptr) {
-        std::cerr << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-        return false;
-    }
-
-    SDL_Surface* iconSurface = IMG_Load("../img/logo.png");
-    if(iconSurface == nullptr) {
-        std::cerr << "Erreur de chargement de l'icône: " << IMG_GetError() << std::endl;
-    } else {
-        SDL_SetWindowIcon(window, iconSurface);
-        SDL_FreeSurface(iconSurface);
-    }
-
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (renderer == nullptr) {
-        std::cerr << "Erreur de création du renderer: " << SDL_GetError() << std::endl;
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return false;
-    }
-
-    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
-        std::cerr << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError() << std::endl;
-        return false;
-    }
-
-    if (TTF_Init() == -1) {
-        std::cerr << "SDL_ttf could not initialize! SDL_ttf Error: " << TTF_GetError() << std::endl;
-        return false;
-    }
-
-    if (!initEnvironment(renderer)) {
-        return false;
-    }
-
-    for (int i = 0; i < fishCount; ++i) {
-        std::string fishTexturePath = "../img/fish/fish" + std::to_string(i) + ".png";
-        SDL_Surface* fishSurface = IMG_Load(fishTexturePath.c_str());
-        if (fishSurface == nullptr) {
-            std::cerr << "Erreur de chargement de l'image du poisson: " << IMG_GetError() << std::endl;
-            return false;
-        }
-        fishTextures[i] = SDL_CreateTextureFromSurface(renderer, fishSurface);
-        if (fishTextures[i] == nullptr) {
-            std::cerr << "Erreur de création de la texture du poisson: " << SDL_GetError() << std::endl;
-            return false;
-        }
-        SDL_FreeSurface(fishSurface);
-    }
-
-    texturesVector = initTexture(renderer);
-    return true;
-}
 
 void playerMovementThread(Player& player) {
     try {
@@ -275,15 +67,6 @@ void handleClientMessages(Player& player) {
     }
     std::cout << "messageThread ended" << std::endl;
 }
-
-void handleQuitThread() {
-    std::cout << "handleQuitThread..." << std::endl;
-    while (game_running) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        handleQuit();
-    }
-    std::cout << "handleQuitThread" << std::endl;
-};
 
 void HandleMenuClick(Menu& menu){
     try {
@@ -767,39 +550,6 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     return 0;
 }
 
-
-void handleQuit() {
-    SDL_Event event;
-    const Uint8* keystate = SDL_GetKeyboardState(NULL);
-
-    while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT) {
-            if (isPlayingOnline && isHost) {
-                closeServer();
-            }
-            game_running = false;
-        }
-    }
-
-    if (keystate[SDL_SCANCODE_ESCAPE]) {
-        if (isPlayingOnline && isHost) {
-            closeServer();
-        }
-        game_running = false;
-    }
-
-    if (keystate[SDL_SCANCODE_M]) {
-        soundMuted = !soundMuted;
-        if (soundMuted) {
-            Mix_Volume(-1, 0);
-            Mix_VolumeMusic(0);
-        } else {
-            Mix_Volume(-1, MIX_MAX_VOLUME);
-            Mix_VolumeMusic(MIX_MAX_VOLUME);
-        }
-    }
-}
-
 void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals,Shark& shark) {
     static Uint32 lastTime = 0;
     static int frameCount = 0;
@@ -848,100 +598,5 @@ void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, c
     SDL_RenderPresent(renderer);
 }
 
-void cleanup() {
-    try {
-        if (font != nullptr) {
-            TTF_CloseFont(font);
-            font = nullptr;
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Exception caught for CloseFont: " << e.what() << std::endl;
-    }
 
-    try {
-        TTF_Quit();
-    } catch (const std::exception& e) {
-        std::cerr << "Exception caught for TTF_Quit: " << e.what() << std::endl;
-    }
-
-    try {
-        if (playerTexture != nullptr) {
-            SDL_DestroyTexture(playerTexture);
-            playerTexture = nullptr;
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Exception caught for DestroyTexture (playerTexture): " << e.what() << std::endl;
-    }
-
-    for (int i = 0; i < fishCount; ++i) {
-        try {
-            if (fishTextures[i] != nullptr) {
-                SDL_DestroyTexture(fishTextures[i]);
-                fishTextures[i] = nullptr;
-            }
-        } catch (const std::exception& e) {
-            std::cerr << "Exception caught for DestroyTexture (fishTextures[" << i << "]): " << e.what() << std::endl;
-        }
-    }
-
-    try {
-        if (renderer != nullptr) {
-            SDL_DestroyRenderer(renderer);
-            renderer = nullptr;
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Exception caught for DestroyRenderer: " << e.what() << std::endl;
-    }
-
-    try {
-        if (window != nullptr) {
-            SDL_DestroyWindow(window);
-            window = nullptr;
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Exception caught for DestroyWindow: " << e.what() << std::endl;
-    }
-
-    try {
-        if (backgroundMusic != nullptr) {
-            Mix_FreeMusic(backgroundMusic);
-            backgroundMusic = nullptr;
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Exception caught for FreeMusic: " << e.what() << std::endl;
-    }
-
-    try {
-        if (menuMusic != nullptr) {
-            Mix_FreeMusic(menuMusic);
-            menuMusic = nullptr;
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Exception caught for FreeMusic (menuMusic): " << e.what() << std::endl;
-    }
-
-    try {
-        IMG_Quit();
-    } catch (const std::exception& e) {
-        std::cerr << "Exception caught for IMG_Quit: " << e.what() << std::endl;
-    }
-
-    try {
-        SDLNet_Quit();
-    } catch (const std::exception& e) {
-        std::cerr << "Exception caught for SDLNet_Quit: " << e.what() << std::endl;
-    }
-
-    try {
-        Mix_CloseAudio();
-    } catch (const std::exception& e) {
-        std::cerr << "Exception caught for Mix_CloseAudio: " << e.what() << std::endl;
-    }
-
-    try {
-        SDL_Quit();
-    } catch (const std::exception& e) {
-        std::cerr << "Exception caught for SDL_Quit: " << e.what() << std::endl;
-    }
-}
 
