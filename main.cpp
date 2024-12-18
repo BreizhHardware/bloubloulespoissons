@@ -13,17 +13,17 @@
 #include <algorithm>
 #include <random>
 
-#include "fish.h"
+#include "Entities/fish.h"
 #include "decors.h"
 #include "camera.h"
 #include "Utility/display.h"
 #include "Utility/env.h"
 #include "Utility/utility.h"
-#include "player.h"
+#include "Entities/player.h"
 #include "menu.h"
 #include "Network/networking.h"
 #include "Network/networking_client.h"
-#include "shark.h"
+#include "Entities/shark.h"
 #include "Utility/event.h"
 #include "Utility/close.h"
 

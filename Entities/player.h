@@ -8,12 +8,12 @@
 #include <vector>
 #include <syncstream>
 #include <tuple>
-#include "Network/networking_client.h"
-#include "camera.h"
+#include "../Network/networking_client.h"
+#include "../camera.h"
 #include "fish.h"
 #include <syncstream>
 #include <tuple>
-#include "../network/networking_client.h"
+#include "../Network/networking_client.h"
 #include "../camera.h"
 
 

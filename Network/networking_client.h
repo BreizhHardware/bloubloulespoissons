@@ -10,7 +10,7 @@
 #include <thread>
 #include <chrono>
 #include "../Utility/env.h"
-#include "../player.h"
+#include "../Entities/player.h"
 
 class Player;
 

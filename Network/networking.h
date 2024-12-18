@@ -9,8 +9,8 @@
 #include <chrono>
 #include "../Utility/env.h"
 #include "networking_client.h"
-#include "../player.h"
-#include "../shark.h"
+#include "../Entities/player.h"
+#include "../Entities/shark.h"
 
 inline IPaddress ip;
 inline TCPsocket server;
