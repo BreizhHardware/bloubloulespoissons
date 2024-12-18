@@ -12,7 +12,7 @@
 #include <thread>
 #include <mutex>
 #include "env.h"
-#include "../network/networking.h"
+#include "../Network/networking.h"
 
 void cleanup();
 void handleQuit();

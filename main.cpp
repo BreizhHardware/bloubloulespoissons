@@ -21,11 +21,12 @@
 #include "Utility/utility.h"
 #include "player.h"
 #include "menu.h"
-#include "network/networking.h"
-#include "network/networking_client.h"
+#include "Network/networking.h"
+#include "Network/networking_client.h"
 #include "shark.h"
+#include "Utility/event.h"
+#include "Utility/close.h"
 
-#include "event.h"
 
 
 #include <system_error>

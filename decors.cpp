@@ -3,9 +3,6 @@
 //
 
 #include "decors.h"
-#include <iostream>
-
-#include "env.h"
 
 void Rock::draw(SDL_Renderer* renderer) const{
     Camera& camera = Camera::getInstance();
