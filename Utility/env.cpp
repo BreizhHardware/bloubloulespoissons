@@ -1,5 +1,5 @@
 #include "env.h"
-#include "../player.h"
+#include "../Entities/player.h"
 
 int windowWidth = 1500;
 int windowHeight = 800;
