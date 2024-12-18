@@ -39,11 +39,8 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
         int y = rand() % ENV_HEIGHT;
         double speedX = 0.1;
         double speedY = 0.1;
-        std::cout << fishCount << std::endl;
         int textureIndex = rand() % fishCount;
         int gender = rand() % 2 == 0 ? 1 : 0;
-
-        std::cout << "Creating fish " << i << " at (" << x << ", " << y << ") with texture " << textureIndex << " and gender " << gender << std::endl;
 
         school.emplace_back(x, y, speedX, speedY, school, i, 75, 75, renderer, gender, fishTextures[textureIndex]);
     }
