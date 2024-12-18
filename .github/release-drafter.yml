@@ -17,4 +17,10 @@ categories:
     labels:
       - 'refactor'
 change-template: '- ${{ change.title }} (#${{ change.number }})'
-version-resolver: 'next'
+version-resolver:
+  major: 'MAJOR'
+  minor: 'MINOR'
+  patch: 'PATCH'
+template: |
+  ## What's Changed
+  $CHANGES
