@@ -356,7 +356,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     }
     std::cout << "All threads killed" << std::endl;
     // running = false;
-    school.empty();
+    school.clear();
     players.clear();
     eventHandler.triggerEvent("playerLost");
     return 0;

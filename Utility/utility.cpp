@@ -4,6 +4,9 @@
 
 #include "utility.h"
 
+std::mutex mtx;
+std::vector<ThreadInfo> threadInfos;
+
 void checkThreads() {
     std::lock_guard<std::mutex> lock(mtx);
     for (const auto& threadInfo : threadInfos) {
