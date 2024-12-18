@@ -7,6 +7,10 @@
 #include <tuple>
 #include <vector>
 #include "fish.h"
+#include <syncstream>
+#include <tuple>
+#include "../network/networking_client.h"
+#include "../camera.h"
 
 
 enum playerData {
