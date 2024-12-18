@@ -479,7 +479,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             } catch (const std::system_error& e) {
                 std::cerr << "Exception caught 5: " << e.what() << std::endl;
             }
-            school.empty();
+            school.clear();
             players.clear();
             eventHandler.triggerEvent("playerLost");
         }
@@ -541,7 +541,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
             } catch (const std::system_error& e) {
                 std::cerr << "Exception caught 4: " << e.what() << std::endl;
             }
-            school.empty();
+            school.clear();
             players.clear();
             eventHandler.triggerEvent("playerLost");
         }

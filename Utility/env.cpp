@@ -1,6 +1,5 @@
 #include "env.h"
-
-#include <vector>
+#include "../player.h"
 
 int windowWidth = 1500;
 int windowHeight = 800;
@@ -37,8 +36,8 @@ void resetAll(){
     isPlayingOnline = false;
     messageThreadRunning = false;
     isHost = false;
-    players.empty();
-    players_server.empty();
+    players.clear();
+    players_server.clear();
 }
 
 
