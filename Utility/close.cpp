@@ -43,6 +43,10 @@ void handleQuit() {
             Mix_VolumeMusic(MIX_MAX_VOLUME);
         }
     }
+
+    if (keystate[SDL_SCANCODE_F2]) {
+        displayFPSFlag = !displayFPSFlag;
+    }
 }
 
 void cleanup() {

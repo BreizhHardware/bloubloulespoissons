@@ -49,6 +49,7 @@ extern int SOUND_CHANNEL;
 extern SDL_Texture* fishTextures[100];
 extern SDL_Texture* playerTexture;
 extern std::vector<Fish> school;
+extern std::atomic<bool> displayFPSFlag;
 
 bool initEnvironment(SDL_Renderer* renderer);
 std::vector<SDL_Texture*> initTexture(SDL_Renderer* renderer);

@@ -233,7 +233,9 @@ void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, c
 
     shark.draw(renderer);
 
-    displayFPS(renderer, font, fps);
+    if (displayFPSFlag) {
+        displayFPS(renderer, font, fps);
+    }
 
     SDL_RenderPresent(renderer);
 }
