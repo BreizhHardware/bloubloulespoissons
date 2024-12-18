@@ -26,8 +26,8 @@
 #include "Entities/shark.h"
 #include "Utility/event.h"
 #include "Utility/close.h"
-#include "Game/LaunchGameSolo.h"
-#include "Game/LaunchGameMulti.h"
+#include "Game/launchGameSolo.h"
+#include "Game/launchGameMulti.h"
 
 
 #include <system_error>
