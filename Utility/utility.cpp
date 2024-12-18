@@ -231,6 +231,10 @@ void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, c
         player.draw(renderer);
     }
 
+    if (isPlayingOnline) {
+        displayNearbyPlayers(renderer, font, players[0], players_server, 500);
+    }
+
     shark.draw(renderer);
 
     if (displayFPSFlag) {

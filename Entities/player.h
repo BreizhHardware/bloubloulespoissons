@@ -73,7 +73,7 @@ class Player {
         void handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth, int windowHeight);
         void drawEnergyBar(SDL_Renderer* renderer);
         bool checkCollision(SDL_Rect fishRect);
-        int getPlayerId();
+        int getPlayerId() const;
         void setPlayerPos(int x, int y);
         void handleClientMessages();
         void updatePosition(int x, int y);

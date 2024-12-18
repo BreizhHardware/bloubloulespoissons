@@ -26,5 +26,12 @@ void closeServer();
 void handleServerMessages();
 void sendSharkPosition(TCPsocket socket, int sharkId, int x, int y);
 std::string processReceivedData(const std::string& data);
+struct PlayerInfo {
+    int id;
+    int x;
+    int y;
+};
+std::vector<PlayerInfo> getAllPlayers();
+void sendPlayerListToNewClient(int clientSocket);
 
 #endif //NETWORKING_H

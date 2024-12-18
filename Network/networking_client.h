@@ -23,5 +23,6 @@ std::string receiveMessage(TCPsocket socket);
 void handleClientMessage(Player& player);
 void sendKeepAlive(TCPsocket serverSocket);
 void startKeepAlive(TCPsocket serverSocket);
-
+void receivePlayerListFromServer(int serverSocket);
+void addPlayerToGame(int playerId, int x, int y);
 #endif //NETWORKING_CLIENT_H

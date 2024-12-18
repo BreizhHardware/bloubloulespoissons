@@ -20,6 +20,7 @@
 #include "../Entities/player.h"
 #include "../Entities/shark.h"
 #include "../Game/decors.h"
+#include "../Utility/display.h"
 
 extern std::mutex mtx;
 

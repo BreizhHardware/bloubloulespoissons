@@ -3,6 +3,7 @@
 //
 
 #include "networking.h"
+#include "../Entities/player.h"
 
 std::unordered_map<int, std::pair<int, int>> playerPositions;
 std::unordered_map<int, std::chrono::time_point<std::chrono::steady_clock>> lastKeepAlive;
@@ -231,4 +232,26 @@ std::string processReceivedData(const std::string& data) {
         }
     }
     return filteredData;
+}
+
+std::vector<PlayerInfo> getAllPlayers() {
+    std::vector<PlayerInfo> playersInfo;
+    for (const auto& player : players_server) {
+        auto [x, y] = player.getPlayerPos();
+        playersInfo.push_back({player.getPlayerId(), x, y});
+    }
+    return playersInfo;
+}
+
+void sendPlayerListToNewClient(int clientSocket) {
+    std::vector<PlayerInfo> players = getAllPlayers();
+
+    int playerCount = players.size();
+    std::string message = "playerList;" + std::to_string(playerCount) + ";";
+    sendMessage(server, message);
+
+    for (const auto& player : players) {
+        std::string playerInfo = std::to_string(player.id) + "," + std::to_string(player.x) + "," + std::to_string(player.y) + ";";
+        sendMessage(server, playerInfo);
+    }
 }

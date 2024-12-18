@@ -145,3 +145,54 @@ void startKeepAlive(TCPsocket serverSocket) {
     }).detach();
 }
 
+void receivePlayerListFromServer(TCPsocket serverSocket) {
+    // Exemple de structure de données pour un joueur
+    struct PlayerInfo {
+        int id;
+        int x;
+        int y;
+    };
+
+    // Recevoir le message contenant la liste des joueurs
+    std::string message = receiveMessage(serverSocket);
+    if (message.empty()) {
+        std::cerr << "Failed to receive player list" << std::endl;
+        return;
+    }
+
+    std::istringstream iss(message);
+    std::string token;
+    std::getline(iss, token, ';'); // Lire "playerList"
+    if (token != "playerList") {
+        std::cerr << "Invalid message format" << std::endl;
+        return;
+    }
+
+    // Lire le nombre de joueurs
+    std::getline(iss, token, ';');
+    int playerCount = std::stoi(token);
+
+    // Lire les informations de chaque joueur
+    for (int i = 0; i < playerCount; ++i) {
+        std::getline(iss, token, ';');
+        int playerId, x, y;
+        sscanf(token.c_str(), "%d,%d,%d", &playerId, &x, &y);
+        // Mettre à jour l'état du client avec les informations du joueur
+        addPlayerToGame(playerId, x, y);
+    }
+}
+
+void addPlayerToGame(int playerId, int x, int y) {
+    // Vérifiez si le joueur existe déjà
+    auto it = std::find_if(players.begin(), players.end(), [playerId](const Player& player) {
+        return player.getPlayerId() == playerId;
+    });
+
+    if (it != players.end()) {
+        // Si le joueur existe déjà, mettez à jour sa position
+        it->updatePosition(x, y);
+    } else {
+        // Sinon, ajoutez un nouveau joueur
+        players.emplace_back(Player(x, y, 5, renderer, playerId));
+    }
+}

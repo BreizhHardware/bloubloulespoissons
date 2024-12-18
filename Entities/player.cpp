@@ -167,7 +167,7 @@ void Player::drawEnergyBar(SDL_Renderer* renderer) {
     SDL_RenderFillRect(renderer, &energyBarForeground);
 }
 
-int Player::getPlayerId() {
+int Player::getPlayerId() const {
     return playerId;
 }
 
