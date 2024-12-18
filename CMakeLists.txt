@@ -19,15 +19,15 @@ include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} ${SDL2_TTF_I
 add_executable(bloubloulespoissons main.cpp
         Entities/fish.cpp
         Entities/fish.h
-        decors.cpp
-        camera.cpp
-        camera.h
+        Game/decors.cpp
+        Game/camera.cpp
+        Game/camera.h
         Entities/player.h
         Entities/player.cpp
         Utility/env.h
         Utility/env.cpp
-        menu.h
-        menu.cpp
+        Game/menu.h
+        Game/menu.cpp
         Network/networking.cpp
         Network/networking.h
         Network/networking_client.cpp
@@ -41,6 +41,10 @@ add_executable(bloubloulespoissons main.cpp
         Utility/utility.h
         Utility/close.cpp
         Utility/close.h
+        Game/LaunchGameSolo.cpp
+        Game/LaunchGameSolo.h
+        Game/LaunchGameMulti.cpp
+        Game/LaunchGameMulti.h
 )
 
 # Lier SDL2 et SDL2_image

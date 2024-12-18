@@ -9,12 +9,11 @@
 #include <syncstream>
 #include <tuple>
 #include "../Network/networking_client.h"
-#include "../camera.h"
+#include "../Game/camera.h"
 #include "fish.h"
 #include <syncstream>
 #include <tuple>
 #include "../Network/networking_client.h"
-#include "../camera.h"
 
 
 enum playerData {

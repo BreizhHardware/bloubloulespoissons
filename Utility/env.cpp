@@ -1,5 +1,6 @@
 #include "env.h"
 #include "../Entities/player.h"
+#include "../Entities/fish.h"
 
 int windowWidth = 1500;
 int windowHeight = 800;
@@ -29,6 +30,7 @@ int MUSIC_CHANNEL = 0;
 int SOUND_CHANNEL = 1;
 SDL_Texture* playerTexture = nullptr;
 SDL_Texture* fishTextures[100];
+std::vector<Fish> school;
 
 
 void resetAll(){

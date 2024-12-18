@@ -11,7 +11,7 @@
 #include <vector>
 #include <iostream>
 #include "camera.h"
-#include "Utility/env.h"
+#include "../Utility/env.h"
 
 class Rock {
 public:

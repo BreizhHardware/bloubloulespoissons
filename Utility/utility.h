@@ -15,7 +15,11 @@
 #include <iostream>
 #include <string>
 #include "env.h"
-#include "../camera.h"
+#include "../Game/camera.h"
+#include "../Entities/fish.h"
+#include "../Entities/player.h"
+#include "../Entities/shark.h"
+#include "../Game/decors.h"
 
 extern std::mutex mtx;
 
@@ -68,4 +72,9 @@ std::thread createThread(std::string key, Function&& func, Args&&... args) {
         throw;
     }
 }
+void updateFishRange(std::vector<Fish>& school, int start, int end);
+void playerMovementThread(Player& player);
+void updateShark(Shark &shark);
+void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals,Shark& shark );
+void handleClientMessages(Player& player);
 #endif //UTILITY_H

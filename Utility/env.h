@@ -16,6 +16,8 @@
 
 class Player;
 
+class Fish;
+
 extern int windowWidth;
 extern int windowHeight;
 extern int playerBaseX;
@@ -46,6 +48,7 @@ extern int MUSIC_CHANNEL;
 extern int SOUND_CHANNEL;
 extern SDL_Texture* fishTextures[100];
 extern SDL_Texture* playerTexture;
+extern std::vector<Fish> school;
 
 bool initEnvironment(SDL_Renderer* renderer);
 std::vector<SDL_Texture*> initTexture(SDL_Renderer* renderer);

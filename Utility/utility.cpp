@@ -156,3 +156,92 @@ bool initSDL() {
     texturesVector = initTexture(renderer);
     return true;
 }
+
+void updateFishRange(std::vector<Fish>& school, int start, int end){
+    while (game_running) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            Fish::insertionSort(school);
+        }
+        for (int i = start; i < end; ++i) {
+            school[i].cycle(i);
+        }
+    }
+}
+
+void playerMovementThread(Player& player) {
+    try {
+        std::cout << "Starting playerMovementThread for player " << player.getPlayerId() << std::endl;
+        while (game_running) {
+            player.handlePlayerMovement(ENV_WIDTH, ENV_HEIGHT, windowWidth, windowHeight);
+            std::this_thread::sleep_for(std::chrono::milliseconds(16)); // 60 FPS
+        }
+        std::cout << "Exiting playerMovementThread for player " << player.getPlayerId() << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Exception in playerMovementThread: " << e.what() << std::endl;
+    }
+}
+
+void updateShark(Shark &shark) {
+    while (game_running) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        shark.cycle();
+    }
+}
+
+void renderScene(std::vector<Player>& players, const std::vector<Kelp>& kelps, const std::vector<Rock>& rocks, const std::vector<Coral>& corals,Shark& shark) {
+    static Uint32 lastTime = 0;
+    static int frameCount = 0;
+    static int fps = 0;
+    //std::cout << "renderScene for " << players.size() << " players" << std::endl;
+
+    const Uint32 currentTime = SDL_GetTicks64();
+    frameCount++;
+    if (currentTime - lastTime >= 1000) {
+        fps = frameCount;
+        frameCount = 0;
+        lastTime = currentTime;
+    }
+
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
+
+    Camera& camera = Camera::getInstance();
+    SDL_Rect backgroundRect = { -camera.getX(), -camera.getY(), ENV_WIDTH, ENV_HEIGHT };
+    SDL_RenderCopy(renderer, backgroundTexture, nullptr, &backgroundRect);
+
+    for (const auto& kelp : kelps) {
+        kelp.draw(renderer);
+    }
+
+    for (const auto& rock : rocks) {
+        rock.draw(renderer);
+    }
+
+    for (const auto& coral : corals) {
+        coral.draw(renderer);
+    }
+
+    for (Fish& fish : school) {
+        fish.draw(renderer);
+    }
+
+    for (auto& player : players) {
+        player.draw(renderer);
+    }
+
+    shark.draw(renderer);
+
+    displayFPS(renderer, font, fps);
+
+    SDL_RenderPresent(renderer);
+}
+
+void handleClientMessages(Player& player) {
+    std::cout << "messageThread started..." << std::endl;
+    while (messageThreadRunning) {
+        player.handleClientMessages();
+    }
+    std::cout << "messageThread ended" << std::endl;
+}
