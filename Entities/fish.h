@@ -6,8 +6,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "camera.h"
-#include "env.h"
+#include "../Game/camera.h"
+#include "../Utility/env.h"
 
 class Fish {
 private:

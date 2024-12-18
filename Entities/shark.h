@@ -10,6 +10,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 #include <chrono>
+#include "../Network/networking.h"
 
 class Shark {
 private:
@@ -30,8 +31,8 @@ private:
     int width, height;
     std::vector<Player> &players_list;
 
-    Mix_Chunk* sharkSound;
-    Mix_Chunk* approachingSound;
+    // Mix_Chunk* sharkSound;
+    // Mix_Chunk* approachingSound;
     std::chrono::steady_clock::time_point lastSoundTime;
     std::chrono::steady_clock::time_point lastSendTime;
 

@@ -1,0 +1,20 @@
+name-template: 'Release ${{ nextReleaseVersion }}'
+tag-template: 'v${{ nextReleaseVersion }}'
+categories:
+  - title: '🚀 Features'
+    labels:
+      - 'feat'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'fix'
+  - title: '🛠 Maintenance'
+    labels:
+      - 'chore'
+  - title: '📚 Documentation'
+    labels:
+      - 'docs'
+  - title: '🧪 Refactor'
+    labels:
+      - 'refactor'
+change-template: '- ${{ change.title }} (#${{ change.number }})'
+version-resolver: 'next'

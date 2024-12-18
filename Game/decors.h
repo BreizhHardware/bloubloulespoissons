@@ -9,7 +9,9 @@
 #include <ctime>
 #include <cstdlib>
 #include <vector>
+#include <iostream>
 #include "camera.h"
+#include "../Utility/env.h"
 
 class Rock {
 public:

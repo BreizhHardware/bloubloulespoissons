@@ -7,10 +7,10 @@
 #include <thread>
 #include <unordered_map>
 #include <chrono>
-#include "../env.h"
+#include "../Utility/env.h"
 #include "networking_client.h"
-#include "../player.h"
-#include "../shark.h"
+#include "../Entities/player.h"
+#include "../Entities/shark.h"
 
 inline IPaddress ip;
 inline TCPsocket server;
@@ -26,5 +26,12 @@ void closeServer();
 void handleServerMessages();
 void sendSharkPosition(TCPsocket socket, int sharkId, int x, int y);
 std::string processReceivedData(const std::string& data);
+struct PlayerInfo {
+    int id;
+    int x;
+    int y;
+};
+std::vector<PlayerInfo> getAllPlayers();
+void sendPlayerListToNewClient(int clientSocket);
 
 #endif //NETWORKING_H

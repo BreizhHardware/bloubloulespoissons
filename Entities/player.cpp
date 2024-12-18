@@ -1,10 +1,5 @@
 #include "player.h"
 
-#include <syncstream>
-#include <tuple>
-#include "network/networking_client.h"
-#include "camera.h"
-
 void Player::updatePlayerPos(int x, int y) {
     this->x = x;
     this->y = y;
@@ -172,7 +167,7 @@ void Player::drawEnergyBar(SDL_Renderer* renderer) {
     SDL_RenderFillRect(renderer, &energyBarForeground);
 }
 
-int Player::getPlayerId() {
+int Player::getPlayerId() const {
     return playerId;
 }
 

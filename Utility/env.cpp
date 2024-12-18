@@ -1,6 +1,6 @@
 #include "env.h"
-
-#include <vector>
+#include "../Entities/player.h"
+#include "../Entities/fish.h"
 
 int windowWidth = 1500;
 int windowHeight = 800;
@@ -24,10 +24,11 @@ std::atomic<bool> messageThreadRunning(false);
 std::atomic<bool> isHost(false);
 EventHandler eventHandler;
 std::atomic<bool> soundMuted(false);
-Mix_Music* backgroundMusic = nullptr;
-Mix_Music* menuMusic = nullptr;
-int MUSIC_CHANNEL = 0;
-int SOUND_CHANNEL = 1;
+SDL_Texture* playerTexture = nullptr;
+SDL_Texture* fishTextures[100];
+std::vector<Fish> school;
+MusicManager musicManager;
+std::atomic<bool> displayFPSFlag(true);
 
 
 void resetAll(){
@@ -35,8 +36,8 @@ void resetAll(){
     isPlayingOnline = false;
     messageThreadRunning = false;
     isHost = false;
-    players.empty();
-    players_server.empty();
+    players.clear();
+    players_server.clear();
 }
 
 

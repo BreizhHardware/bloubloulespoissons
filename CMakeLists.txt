@@ -6,8 +6,6 @@ set(CMAKE_CXX_STANDARD 23)
 # Ajouter le chemin de la bibliothèque SDL2
 if (WIN32)
     set(CMAKE_PREFIX_PATH "C:/SDL2")
-else()
-    set(CMAKE_PREFIX_PATH "/usr/local/lib/cmake/SDL2")
 endif()
 
 find_package(SDL2 REQUIRED)
@@ -18,23 +16,36 @@ find_package(SDL2_mixer REQUIRED)
 
 include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS} ${SDL2_NET_INCLUDE_DIRS})
 
-add_executable(bloubloulespoissons main.cpp fish.cpp decors.cpp
-        camera.cpp
-        camera.h
-        env.h
-        env.cpp
-        player.h
-        player.cpp
-        menu.h
-        menu.cpp
-        network/networking.cpp
-        network/networking.h
-        network/networking_client.cpp
-        network/networking_client.h
-        display.cpp
-        display.h
-        shark.cpp
-        shark.h
+add_executable(bloubloulespoissons main.cpp
+        Entities/fish.cpp
+        Entities/fish.h
+        Game/decors.cpp
+        Game/camera.cpp
+        Game/camera.h
+        Entities/player.h
+        Entities/player.cpp
+        Utility/env.h
+        Utility/env.cpp
+        Game/menu.h
+        Game/menu.cpp
+        Network/networking.cpp
+        Network/networking.h
+        Network/networking_client.cpp
+        Network/networking_client.h
+        Entities/shark.cpp
+        Entities/shark.h
+        Entities/fish.h
+        Utility/display.cpp
+        Utility/display.h
+        Utility/utility.cpp
+        Utility/utility.h
+        Utility/close.cpp
+        Utility/close.h
+        Utility/music.h
+        Game/launchGameSolo.cpp
+        Game/launchGameSolo.h
+        Game/launchGameMulti.cpp
+        Game/launchGameMulti.h
 )
 
 # Lier SDL2 et SDL2_image

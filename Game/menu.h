@@ -1,5 +1,5 @@
 #include <iostream>
-#include "env.h"
+#include "../Utility/env.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
@@ -84,6 +84,8 @@ class Menu {
         void draw(SDL_Renderer* renderer);
 
         void changePage(std::string title);
+
+        std::string getCurrentPageName();
 
         void addButton(std::string page, int x, int y, int w, int h, std::string text, int size, std::function<void()> callback, bool isTextInput = false);
 

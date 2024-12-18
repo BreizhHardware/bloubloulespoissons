@@ -78,6 +78,13 @@ void drawRoundedRect(SDL_Renderer* renderer, SDL_Rect rect, int radius, SDL_Colo
 }
 
 
+std::string Menu::getCurrentPageName() {
+    if (currentPage == -1) {
+        return "";
+    }
+
+    return pages[currentPage].title;
+}
 
 void Menu::draw(SDL_Renderer* renderer) {
     SDL_RenderClear(renderer);

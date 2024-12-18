@@ -67,7 +67,14 @@ jobs:
           name: Release ${{ steps.generate_release_tag.outputs.next_release_tag }}
           tag_name: ${{ steps.generate_release_tag.outputs.next_release_tag }}
           files: build/bloubloulespoissons
-          generate_release_notes: true
-          token: ${{secrets.GH_TOKEN}}
+          generate_release_notes: false
+          token: ${{ secrets.GH_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Draft Release Notes
+        uses: release-drafter/release-drafter@v5
+        with:
+          config-name: release-drafter.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

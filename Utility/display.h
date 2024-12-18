@@ -9,7 +9,7 @@
 #include <vector>
 #include <cmath>
 #include <string>
-#include "player.h"
+#include "../Entities/player.h"
 
 double calculateDistance(int x1, int y1, int x2, int y2);
 void displayNearbyPlayers(SDL_Renderer* renderer, TTF_Font* font, Player& currentPlayer, std::vector<Player>& players, double threshold);
