@@ -17,7 +17,7 @@
 #include "env.h"
 #include "../camera.h"
 
-std::mutex mtx;
+extern std::mutex mtx;
 
 void displayFPS(SDL_Renderer* renderer, TTF_Font* font, int fps);
 void displayPlayerCoord(SDL_Renderer* renderer, TTF_Font* font, int playerX, int playerY);
@@ -30,7 +30,7 @@ struct ThreadInfo {
     std::string functionName;
     bool isRunning;
 };
-std::vector<ThreadInfo> threadInfos;
+extern std::vector<ThreadInfo> threadInfos;
 template <typename Function, typename... Args>
 std::thread createThread(std::string key, Function&& func, Args&&... args) {
     try {

@@ -29,6 +29,7 @@ Mix_Music* menuMusic = nullptr;
 int MUSIC_CHANNEL = 0;
 int SOUND_CHANNEL = 1;
 SDL_Texture* playerTexture = nullptr;
+SDL_Texture* fishTextures[100];
 
 
 void resetAll(){
