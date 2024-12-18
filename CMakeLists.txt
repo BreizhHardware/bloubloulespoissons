@@ -42,10 +42,10 @@ add_executable(bloubloulespoissons main.cpp
         Utility/close.cpp
         Utility/close.h
         Utility/music.h
-        Game/LaunchGameSolo.cpp
-        Game/LaunchGameSolo.h
-        Game/LaunchGameMulti.cpp
-        Game/LaunchGameMulti.h
+        Game/launchGameSolo.cpp
+        Game/launchGameSolo.h
+        Game/launchGameMulti.cpp
+        Game/launchGameMulti.h
 )
 
 # Lier SDL2 et SDL2_image
