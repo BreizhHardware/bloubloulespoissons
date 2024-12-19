@@ -56,7 +56,7 @@ int pas_la_fontion_main_enfin_ce_nest_pas_la_fontion_principale_du_programme_mai
     //std::thread quit_thread = createThread("Quit thread", handleQuitThread);
 
       // Offline
-    players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 5, renderer, 0));
+    players.emplace_back(Player(windowWidth / 2, windowHeight / 2, 3, renderer, 0));
     std::thread player_thread = createThread("Player thread", playerMovementThread, std::ref(players[0]));
 
 
