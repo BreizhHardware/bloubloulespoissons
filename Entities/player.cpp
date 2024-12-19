@@ -55,11 +55,12 @@ void Player::handlePlayerMovement(int ENV_WIDTH, int ENV_HEIGHT, int windowWidth
     int tempY = this->y;
     int speed = this->playerSpeed;
     bool isSprinting = false;
+    /*
     if (keystate[SDL_SCANCODE_LSHIFT]) {
         speed = this->playerSpeed * 2;
         isSprinting = true;
     }
-
+*/
     bool moved = false;
     if (this->energy != 0) {
         if (isPlayingOnline) {
