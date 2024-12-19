@@ -25,17 +25,17 @@ void Player::draw(SDL_Renderer* renderer) {
         case 0:
             this->currentSprite = PLAYER_SPRITE_1;
             break;
-        case 5:
+        case 50:
             this->currentSprite = PLAYER_SPRITE_2;
             break;
-        case 8:
+        case 150:
             this->currentSprite = PLAYER_SPRITE_3;
             break;
         default:
             break;
     }
 
-    if (this->ticks >= 8) {
+    if (this->ticks >= 150) {
         this->ticks = 0;
     } else {
         this->ticks++;
