@@ -6,7 +6,6 @@ Le jeu est codé en C++ avec la librairie SDL2.
 # 🌱 Branches en développement
 - `main` : La branche principale du projet
 - `WII-U` : La branche pour la version Wii-U du jeu
-- `SDL3-2.0` : La branche pour la version SDL3 du jeu
 
 # 🚀 Installation et configuration
 ## Prérequis
@@ -19,15 +18,6 @@ Le jeu est codé en C++ avec la librairie SDL2.
 - [Git](https://git-scm.com/downloads)
 - [GCC](https://gcc.gnu.org/)
 - [Make](https://www.gnu.org/software/make/)
-
-## Lancement avec la binaire
-1. Téléchargez la dernière version de l'application
-```bash
-https://github.com/BreizhHardware/bloubloulespoissons/releases
-```
-2. Executez le fichier .exe
-
-3. Jouez
 
 ## Compilation et lancement
 1. Clonez le dépôt
